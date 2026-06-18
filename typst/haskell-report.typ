@@ -1,3 +1,7 @@
+#set document(
+  title: [Haskell 2010 Language Report]
+)
+
 #let chapter-count = counter("chapter counter")
 #show heading.where(level: 2): it => chapter-count.step() + it
 #set heading(numbering: (..nums) => {
@@ -13,20 +17,18 @@
 #show heading.where(level: 1): it => if it.body == [Contents] { it } else {
   set align(center + horizon)
   set text(36pt)
-  pagebreak(weak: true) + it
+  pagebreak(weak: true) + [Part #it]
 }
 
 #show heading.where(level: 2): set text(22pt)
-#show heading.where(level: 2): it => pagebreak(weak: true) + it
+#show heading.where(level: 2): it => pagebreak(weak: true) + [Chapter #it]
 
 #set par(
   justify: true,
 )
 
-#outline(target: selector.or(heading.where(level: 1), heading.where(level: 2)))
-
-
-
+#title()
+#outline()
 
 = The Haskell 2010 Language
 
@@ -58,4 +60,62 @@
 == Compiler Pragmas <chapter:compiler-pragmas>
 
 = The Haskell 2010 Libraries
+
+== Control.Monad <chapter:control.monad>
+
+== Data.Array
+
+== Data.Bits
+
+== Data.Char
+
+== Data.Complex
+
+== Data.Int
+
+== Data.Ix
+
+== Data.List
+
+== Data.Maybe
+
+== Data.Ratio
+
+== Data.Word
+
+== Foreign
+
+== Foreign.C
+
+== Foreign.C.Error
+
+== Foreign.C.String
+
+== Foreign.C.Types
+
+== Foreign.ForeignPtr
+
+== Foreign.Marshal
+
+== Foreign.Marshal.Alloc
+
+== Foreign.Marshal.Array
+
+== Foreign.Marshal.Utils
+
+== Foreign.Ptr
+
+== Foreign.StablePtr
+
+== Foreign.Storable
+
+== Numeric
+
+== System.Environment
+
+== System.Exit
+
+== System.IO
+
+== System.IO.Error
 
