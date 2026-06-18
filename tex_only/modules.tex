@@ -1,0 +1,822 @@
+%
+% $Header: /home/cvs/root/haskell-report/report/modules.verb,v 1.20 2003/01/13 13:08:56 simonpj Exp $
+%
+%**<title>The Haskell 98 Report: Modules</title>
+%*section 5
+%**~header
+\chapter{Modules} 
+\label{modules} 
+\index{module}
+
+A module defines a collection of values, datatypes, type synonyms,
+classes, etc.~(see Chapter~\ref{declarations}), in an environment created
+by a set of {\em imports} (resources brought into scope from other modules).
+It {\em exports} some of these resources, making them available to
+other modules.  
+We use the term {\em entity}\index{entity} to refer to
+a value, type, or class defined in, imported into, or perhaps
+exported from a module.
+
+A \Haskell{} {\em program} is a collection of modules, one of
+which, by convention, must be called \mbox{\tt Main}\indexmodule{Main} and must
+export the value \mbox{\tt main}\indextt{main}.  The {\em value} of the program
+is the value of the identifier \mbox{\tt main} in module \mbox{\tt Main},
+which must be a computation of type $\mbox{\tt IO}~\tau$ for some type $\tau$
+(see Chapter~\ref{io}).  When the program is executed, the computation
+\mbox{\tt main} is performed, and its result (of type $\tau$) is discarded.
+
+Modules may reference other modules via explicit
+\mbox{\tt import} declarations, each giving the name of a module to be
+imported and specifying its entities to be imported.
+Modules may be mutually recursive.
+
+Modules are used for name-space control, and are not first class values.
+A multi-module Haskell program can be converted into a single-module
+program by giving each entity a unique name, changing all occurrences
+to refer to the appropriate unique name, and then concatenating all the module
+bodies\footnote{There are two minor exceptions to this statement.
+First, \mbox{\tt default} declarations scope over a single module (Section~\ref{default-decls}).
+Second, Rule 2 of the monomorphism restriction (Section~\ref{sect:monomorphism-restriction})
+is affected by module boundaries.
+}.  
+For example, here is a three-module program:
+\bprog
+{\small\begin{verbatim}
+  module Main where
+    import A
+    import B
+    main = A.f >> B.f
+
+  module A where
+    f = ...
+
+  module B where
+    f = ...
+\end{verbatim}}
+\eprog
+It is equivalent to the following single-module program:
+\bprog
+{\small\begin{verbatim}
+  module Main where
+    main = af >> bf
+
+    af = ...
+
+    bf = ...
+\end{verbatim}}
+\eprog
+Because they are allowed to be mutually recursive,
+modules allow a program to be partitioned freely without regard to
+dependencies.
+
+\begin{haskellprime}
+A module name (lexeme \mbox{$\it modid$}) is a sequence of one or more
+identifiers beginning with capital letters, separated by dots, with no
+intervening spaces.  For example, \mbox{\tt Data.Bool}, \mbox{\tt Main} and
+\mbox{\tt Foreign.Marshal.Alloc} are all valid module names.
+
+\begin{flushleft}\it\begin{tabbing}
+\hspace{0.6in}\=\hspace{3.1in}\=\kill
+$\it modid$\>\makebox[3.5em]{$\rightarrow$}$\it \hprime{\{conid\ \makebox{\tt .}\}}\ conid$\>\makebox[3em]{}$\it (\tr{modules})$
+\end{tabbing}\end{flushleft}
+\indexsyn{modid}%
+
+Module names can be thought of as being arranged in a hierarchy in
+which appending a new component creates a child of the original module
+name.  For example, the module \mbox{\tt Control.Monad.ST} is a child of the
+\mbox{\tt Control.Monad} sub-hierarchy.  This is purely a convention, however,
+and not part of the language definition; in this report a \mbox{$\it modid$} is
+treated as a single identifier occupying a flat namespace.
+\end{haskellprime}
+
+There is one distinguished module, \mbox{\tt Prelude}, which is imported into
+all modules by default (see Section~\ref{standard-prelude}), plus a
+set of standard library modules that may be imported as required
+(see Part~\ref{libraries}).
+
+\section{Module Structure} 
+\label{module-implementations}
+
+A module defines a mutually
+recursive scope containing declarations for value bindings, data
+types, type synonyms, classes, etc. (see Chapter~\ref{declarations}).
+
+\begin{flushleft}\it\begin{tabbing}
+\hspace{0.6in}\=\hspace{3.1in}\=\kill
+$\it module$\>\makebox[3.5em]{$\rightarrow$}$\it \makebox{\tt module}\ modid\ [exports]\ \makebox{\tt where}\ body$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it body$\\ 
+$\it body$\>\makebox[3.5em]{$\rightarrow$}$\it \makebox{\tt {\char'173}}\ impdecls\ \makebox{\tt ;}\ topdecls\ \makebox{\tt {\char'175}}$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it \makebox{\tt {\char'173}}\ impdecls\ \makebox{\tt {\char'175}}$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it \makebox{\tt {\char'173}}\ topdecls\ \makebox{\tt {\char'175}}$\\ 
+$\it $\\ 
+$\it impdecls$\>\makebox[3.5em]{$\rightarrow$}$\it impdecl_1\ \makebox{\tt ;}\ \ldots \ \makebox{\tt ;}\ impdecl_n$\>\makebox[3em]{}$\it (n\geq 1)$\\ 
+$\it topdecls$\>\makebox[3.5em]{$\rightarrow$}$\it topdecl_1\ \makebox{\tt ;}\ \ldots \ \makebox{\tt ;}\ topdecl_n$\>\makebox[3em]{}$\it (n\geq 1)$
+\end{tabbing}\end{flushleft}
+
+\indexsyn{module}%
+\indexsyn{body}%
+\indexsyn{impdecls}%
+\indexsyn{topdecls}%
+
+A module 
+begins with a header: the keyword
+\mbox{\tt module}, the module name, and a list of entities (enclosed in round
+parentheses) to be exported.  The header is followed by a possibly-empty
+list of \mbox{\tt import} declarations (\mbox{$\it impdecls$}, Section~\ref{import}) that specify modules to be imported,
+optionally restricting the imported bindings.  
+This is followed by a possibly-empty list of top-level declarations (\mbox{$\it topdecls$}, Chapter~\ref{declarations}).
+
+An abbreviated form of module, consisting only 
+of\index{abbreviated module}
+the module body, is permitted.  If this is used, the header is assumed to be
+`\mbox{\tt module\ Main(main)\ where}'.
+If the first lexeme in the
+abbreviated module is not a \mbox{\tt {\char'173}}, then the layout rule applies
+for the top level of the module.
+
+\section{Export Lists}
+\label{export}
+\index{export list}
+
+\begin{flushleft}\it\begin{tabbing}
+\hspace{0.6in}\=\hspace{3.1in}\=\kill
+$\it exports$\>\makebox[3.5em]{$\rightarrow$}$\it \makebox{\tt (}\ export_1\ \makebox{\tt ,}\ \ldots \ \makebox{\tt ,}\ export_n\ [\ \makebox{\tt ,}\ ]\ \makebox{\tt )}$\>\makebox[3em]{}$\it (n\geq 0)$\\ 
+$\it $\\ 
+$\it export$\>\makebox[3.5em]{$\rightarrow$}$\it qvar$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it qtycon\ [\makebox{\tt (..)}\ |\ \makebox{\tt (}\ cname_1\ \makebox{\tt ,}\ \ldots \ \makebox{\tt ,}\ cname_n\ \makebox{\tt )}]$\>\makebox[3em]{}$\it (n\geq 0)$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it qtycls\ [\makebox{\tt (..)}\ |\ \makebox{\tt (}\ var_1\ \makebox{\tt ,}\ \ldots \ \makebox{\tt ,}\ var_n\ \makebox{\tt )}]$\>\makebox[3em]{}$\it (n\geq 0)$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it \makebox{\tt module}\ modid$\\ 
+$\it $\\ 
+$\it cname$\>\makebox[3.5em]{$\rightarrow$}$\it var\ |\ con$
+\end{tabbing}\end{flushleft}
+\indexsyn{exports}%
+\indexsyn{export}%
+
+An {\em export list} identifies the entities to be exported by a
+module declaration.  A module implementation may only export an entity
+that it declares, or that it imports from some other module.  If the
+export list is omitted, all values, types and classes defined in the
+module are exported, {\em but not those that are imported}.
+
+Entities in an export list may be named as follows:
+\begin{enumerate}
+\item
+A value, field name, or class method, whether declared in
+the module body or imported,
+may be named by giving the name of the value as a \mbox{$\it qvarid$}, which must be in scope.
+Operators should be enclosed in parentheses to turn them into
+\mbox{$\it qvarid$}s.  
+
+\item
+An algebraic datatype \mbox{$\it T$}
+\index{algebraic datatype}
+declared by a \mbox{\tt data} or \mbox{\tt newtype} declaration may be named in one of
+three ways: 
+\begin{itemize}
+\item
+The form \mbox{$\it T$} names the type {\em but not the constructors or field names}.
+The ability to export a type without its constructors allows the
+construction of abstract datatypes (see Section~\ref{abstract-types}).
+\item
+The form $T\mbox{\tt (}c_1\mbox{\tt ,}\ldots\mbox{\tt ,}c_n\mbox{\tt )}$, 
+names the type and some or all of its constructors and field names.  
+% Restriction removed March 02:
+% The subordinate names $c_i$ must not contain duplicates.  
+\item
+The abbreviated form \mbox{$\it T\makebox{\tt (..)}$} names the type 
+and all its constructors and field names that are currently in scope
+(whether qualified or not).
+\end{itemize}
+In all cases, the (possibly-qualified) type constructor \mbox{$\it T$} must be in scope. 
+The constructor and field names $c_i$ in the second form are unqualified;
+one of these subordinate names is legal if and only if (a) it names a constructor
+or field of \mbox{$\it T$}, and (b) the constructor or field
+is in scope in the module body {\em regardless of whether it is in scope
+under a qualified or unqualified name}. For example, the following is 
+legal
+\bprog
+{\small\begin{verbatim}
+  module A( Mb.Maybe( Nothing, Just ) ) where
+    import qualified Data.Maybe as Mb
+\end{verbatim}}
+\eprog
+Data constructors cannot be named in export lists except as subordinate names, because
+they cannot otherwise be distinguished from type constructors.
+
+\item
+A type synonym \mbox{$\it T$} declared by a
+\mbox{\tt type} declaration may be named by the form \mbox{$\it T$}, where \mbox{$\it T$} is in scope.
+\index{type synonym}
+
+\item
+\index{class declaration}
+A class $C$ with operations $f_1,\ldots,f_n$
+declared in a \mbox{\tt class} declaration may be named in one of three ways:
+\begin{itemize}
+\item
+The form \mbox{$\it C$} names the class {\em but not the class methods}.
+\item
+The form $C\mbox{\tt (}f_1\mbox{\tt ,}\ldots\mbox{\tt ,}f_n\mbox{\tt )}$, names the class and some or all
+of its methods.  
+% Restriction removed March 02:
+% The subordinate names $f_i$ must not contain duplicates.
+\item
+The abbreviated form $C\mbox{\tt (..)}$ names the class and all its methods
+that are in scope (whether qualified or not).
+\end{itemize}
+In all cases, \mbox{$\it C$} must be in scope.  In the second form,
+one of the (unqualified) subordinate names $f_i$ is legal if and only if (a) it names a
+class method of \mbox{$\it C$}, and (b) the class method 
+is in scope in the module body regardless of whether it is in scope
+under a qualified or unqualified name.
+
+\item
+The form ``\mbox{\tt module\ M}'' names the set of all entities that are in
+scope with both an unqualified name ``\mbox{\tt e}'' and a qualified name
+``\mbox{\tt M.e}''.
+This set may be empty.
+For example:
+\bprog
+{\small\begin{verbatim}
+  module Queue( module Stack, enqueue, dequeue ) where
+      import Stack
+      ...
+\end{verbatim}}
+\eprog
+Here the module \mbox{\tt Queue} uses the module name \mbox{\tt Stack} in its export
+list to abbreviate all the entities imported from \mbox{\tt Stack}.  
+
+A module can name its own local definitions in its export
+list using its own name in the ``\mbox{\tt module\ M}'' syntax, because a local
+declaration brings into scope both a qualified and unqualified name (Section~\ref{qualifiers}). 
+For example:
+\bprog
+{\small\begin{verbatim}
+  module Mod1( module Mod1, module Mod2 ) where
+  import Mod2
+  import Mod3
+\end{verbatim}}
+\eprog
+Here module \mbox{\tt Mod1} exports all local definitions as well as those
+imported from \mbox{\tt Mod2} but not those imported from \mbox{\tt Mod3}.
+
+It is an error to use \mbox{\tt module\ M} in an export list unless \mbox{\tt M} is 
+the module bearing the export list, or \mbox{\tt M} is imported by at 
+least one import declaration (qualified or unqualified).
+\end{enumerate}
+Exports lists are cumulative: the set of entities exported by an export
+list is the union of the entities exported by the individual items of the list.
+
+It makes no difference to an importing module how an entity was 
+exported.  For example, a field name \mbox{\tt f} from data type \mbox{\tt T} may be exported individually
+(\mbox{\tt f}, item (1) above); or as an explicitly-named member of its data type (\mbox{\tt T(f)}, item (2));
+or as an implicitly-named member (\mbox{\tt T(..)}, item(2)); or by exporting an entire
+module (\mbox{\tt module\ M}, item (5)).  
+
+The {\em unqualified} names of the entities exported by a module must all be distinct
+(within their respective namespace).  For example
+\bprog
+{\small\begin{verbatim}
+  module A ( C.f, C.g, g, module B ) where   -- an invalid module
+  import B(f)
+  import qualified C(f,g)
+  g = f True
+\end{verbatim}}
+\eprog
+There are no name clashes within module \mbox{\tt A} itself, 
+but there are name clashes in the export list between \mbox{\tt C.g} and \mbox{\tt g}
+(assuming \mbox{\tt C.g} and \mbox{\tt g} are different entities -- remember, modules
+can import each other recursively), and between \mbox{\tt module\ B} and \mbox{\tt C.f}
+(assuming \mbox{\tt B.f} and \mbox{\tt C.f} are different entities).
+
+\section{Import Declarations}
+\label{import}
+\index{import declaration}
+
+\begin{flushleft}\it\begin{tabbing}
+\hspace{0.6in}\=\hspace{3.1in}\=\kill
+$\it impdecl$\>\makebox[3.5em]{$\rightarrow$}$\it \makebox{\tt import}\ [\makebox{\tt qualified}]\ modid\ [\makebox{\tt as}\ modid]\ [impspec]$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it $\>\makebox[3em]{}$\it (empty\ declaration)$\\ 
+$\it impspec$\>\makebox[3.5em]{$\rightarrow$}$\it \makebox{\tt (}\ import_1\ \makebox{\tt ,}\ \ldots \ \makebox{\tt ,}\ import_n\ [\ \makebox{\tt ,}\ ]\ \makebox{\tt )}$\>\makebox[3em]{}$\it (n\geq 0)$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it \makebox{\tt hiding}\ \makebox{\tt (}\ import_1\ \makebox{\tt ,}\ \ldots \ \makebox{\tt ,}\ import_n\ [\ \makebox{\tt ,}\ ]\ \makebox{\tt )}$\>\makebox[3em]{}$\it (n\geq 0)$\\ 
+$\it $\\ 
+$\it import$\>\makebox[3.5em]{$\rightarrow$}$\it var$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it tycon\ [\ \makebox{\tt (..)}\ |\ \makebox{\tt (}\ cname_1\ \makebox{\tt ,}\ \ldots \ \makebox{\tt ,}\ cname_n\ \makebox{\tt )}]$\>\makebox[3em]{}$\it (n\geq 0)$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it tycls\ [\makebox{\tt (..)}\ |\ \makebox{\tt (}\ var_1\ \makebox{\tt ,}\ \ldots \ \makebox{\tt ,}\ var_n\ \makebox{\tt )}]$\>\makebox[3em]{}$\it (n\geq 0)$\\ 
+$\it cname$\>\makebox[3.5em]{$\rightarrow$}$\it var\ |\ con$
+\end{tabbing}\end{flushleft}
+%             var
+%          |  tycon
+%          |  tycon \mbox{\tt (..)}
+%          |  tycon \mbox{\tt (} con_1 \mbox{\tt ,} ... \mbox{\tt ,} con_n\mbox{\tt )} & (n>=1)
+%          |  tycls \mbox{\tt (..)}
+%          |  tycls \mbox{\tt (} var_1 \mbox{\tt ,} ... \mbox{\tt ,} var_n\mbox{\tt )} & (n>=0)
+\indexsyn{impdecl}%
+\indexsyn{impspec}%
+\indexsyn{import}%
+\indexsyn{cname}%
+
+The entities exported by a module may be brought into scope in
+another module with
+an \mbox{\tt import}
+declaration at the beginning
+of the module.  
+The \mbox{\tt import} declaration names the module to be
+imported
+and optionally specifies the entities to be imported.
+A single module may be imported by more than one \mbox{\tt import} declaration.  
+Imported names serve as top level declarations: they scope over
+the entire body of the module but may  be shadowed by local
+non-top-level bindings.  
+
+The effect of multiple \mbox{\tt import} declarations is strictly
+cumulative: an entity is in scope if it is imported by any of the \mbox{\tt import}
+declarations in a module.  The ordering of import declarations is irrelevant.
+
+Lexically, the terminal symbols ``\mbox{\tt as}'', ``\mbox{\tt qualified}'' and
+``\mbox{\tt hiding}'' are each a \mbox{$\it varid$} rather than a \mbox{$\it reservedid$}.  They have
+special significance only in the context of an \mbox{\tt import} declaration;
+they may also be used as variables.
+
+\subsection{What is imported}
+\label{whatisimported}
+
+Exactly which entities are to be imported can be specified in one
+of the following three ways:\nopagebreak[4]
+\begin{enumerate}
+\item
+The imported entities can be specified explicitly
+by listing them in parentheses.
+Items in the list have the same form as those in export lists, except
+qualifiers are not permitted and
+the `\mbox{\tt module} \mbox{$\it modid$}' entity is not permitted.  When the \mbox{\tt (..)} form
+of import is used for a type or class, the \mbox{\tt (..)} refers to all of the
+constructors, methods, or field names exported from the module.
+
+The list must name only
+entities exported by the imported module.
+The list may be empty, in which case nothing except the instances is
+imported.
+
+\item
+Entities can be excluded by 
+using the form \mbox{\tt hiding(}\mbox{$\it import_1\ \makebox{\tt ,}\ \ldots \ \makebox{\tt ,}\ import_n$}
+\mbox{\tt )},\index{hiding} which
+specifies that all entities exported by the named module should
+be imported except for those named in the list.  Data constructors may be
+named directly in hiding lists without being prefixed by the
+associated type.  Thus, in
+\bprog
+{\small\begin{verbatim}
+  import M hiding (C)
+\end{verbatim}}
+\eprog
+any constructor, class, or type named \mbox{\tt C} is excluded.  In contrast,
+using \mbox{\tt C} in an import list names only a class or type.  
+
+It is an error to hide an entity that is not, in fact, exported by
+the imported module.
+
+\item
+Finally, if \mbox{$\it impspec$} is omitted then 
+all the entities exported by the specified module are imported.
+\end{enumerate}
+
+\subsection{Qualified import}
+\index{qualified name}
+
+For each entity imported under the rules of Section~\ref{whatisimported},
+the top-level environment is extended.  If the import declaration used
+the \mbox{\tt qualified} keyword, only the {\em qualified name} of the entity is
+brought into scope.  If the \mbox{\tt qualified} keyword is omitted, then {\em both} the
+qualified {\em and} unqualified name of the entity is brought into scope.
+Section~\ref{qualifiers} describes qualified names in more detail.
+
+The qualifier on the imported name is either the name of the imported module,
+or the local alias given in the \mbox{\tt as} clause (Section~\ref{as-clause}) 
+on the \mbox{\tt import} statement.
+Hence, {\em the qualifier is not necessarily the name of the module in which the
+entity was originally declared}.
+
+The ability to exclude the unqualified names allows full programmer control of
+the unqualified namespace: a locally defined entity can share the same
+name as a qualified import:
+\par
+{\small
+\bprog
+{\small\begin{verbatim}
+  module Ring where
+  import qualified Prelude    -- All Prelude names must be qualified
+  import Data.List( nub )
+
+  l1 + l2 = l1 Prelude.++ l2  -- This + differs from the one in the Prelude
+  l1 * l2 = nub (l1 + l2)     -- This * differs from the one in the Prelude
+
+  succ = (Prelude.+ 1)
+\end{verbatim}}
+\eprog
+}
+
+\subsection{Local aliases}
+\label{as-clause}
+
+Imported modules may be assigned a local alias in the importing module
+using the \mbox{\tt as} clause.
+For example, in
+\bprog
+{\small\begin{verbatim}
+  import qualified VeryLongModuleName as C
+\end{verbatim}}
+\eprog
+entities must be referenced using `\mbox{\tt C.}' as a qualifier instead of
+`\mbox{\tt VeryLongModuleName.}'.  This also allows a different module to be substituted
+for \mbox{\tt VeryLongModuleName} without changing the qualifiers used for the imported module.
+It is legal for more than one module in scope to 
+use the same qualifier, provided that all names can still be resolved unambiguously.
+For example:
+\bprog
+{\small\begin{verbatim}
+  module M where
+    import qualified Foo as A
+    import qualified Baz as A
+    x = A.f
+\end{verbatim}}
+\eprog
+This module is legal provided only that \mbox{\tt Foo} and \mbox{\tt Baz} do not both export \mbox{\tt f}.
+
+An \mbox{\tt as} clause may also be used on an un-\mbox{\tt qualified} \mbox{\tt import} statement:
+\bprog
+{\small\begin{verbatim}
+  import Foo as A(f)
+\end{verbatim}}
+\eprog
+This declaration brings into scope \mbox{\tt f} and \mbox{\tt A.f}.
+
+
+\subsection{Examples}
+
+To clarify the above import rules, suppose the module \mbox{\tt A} exports \mbox{\tt x} and \mbox{\tt y}.
+Then this table shows what names are brought into scope by the specified import statement:
+\begin{center}
+\begin{tabular}{|ll|}
+\hline
+Import declaration & Names brought into scope \\
+\hline
+  \mbox{\tt import\ A}                    & \mbox{\tt x}, \mbox{\tt y}, \mbox{\tt A.x}, \mbox{\tt A.y} \\
+  \mbox{\tt import\ A()}                  & (nothing)     \\
+  \mbox{\tt import\ A(x)}                 & \mbox{\tt x}, \mbox{\tt A.x} \\
+  \mbox{\tt import\ qualified\ A}          & \mbox{\tt A.x}, \mbox{\tt A.y} \\
+  \mbox{\tt import\ qualified\ A()}        & (nothing) \\
+  \mbox{\tt import\ qualified\ A(x)}       & \mbox{\tt A.x} \\
+  \mbox{\tt import\ A\ hiding\ ()}          & \mbox{\tt x}, \mbox{\tt y}, \mbox{\tt A.x}, \mbox{\tt A.y} \\
+  \mbox{\tt import\ A\ hiding\ (x)}         & \mbox{\tt y}, \mbox{\tt A.y} \\
+  \mbox{\tt import\ qualified\ A\ hiding\ ()}        & \mbox{\tt A.x}, \mbox{\tt A.y} \\
+  \mbox{\tt import\ qualified\ A\ hiding\ (x)}       & \mbox{\tt A.y} \\
+  \mbox{\tt import\ A\ as\ B}               & \mbox{\tt x}, \mbox{\tt y}, \mbox{\tt B.x}, \mbox{\tt B.y} \\
+  \mbox{\tt import\ A\ as\ B(x)}            & \mbox{\tt x}, \mbox{\tt B.x} \\
+  \mbox{\tt import\ qualified\ A\ as\ B}     & \mbox{\tt B.x}, \mbox{\tt B.y} \\
+\hline
+\end{tabular}
+\end{center}
+In all cases, all instance declarations in scope in module \mbox{\tt A} are imported
+(Section~\ref{import-instances}).
+
+\section{Importing and Exporting Instance Declarations}
+\label{import-instances}
+\index{instance declaration!importing and exporting}
+
+Instance declarations cannot be explicitly named on import or export
+lists.  All instances in scope within a module are {\em always}
+exported and any import brings {\em all} instances in from the
+imported module.  Thus, an
+instance declaration is in scope if and only if a chain of \mbox{\tt import}
+declarations leads to the module containing the instance declaration.
+
+For example, \mbox{\tt import\ M()} does not bring
+any new names in scope from module \mbox{\tt M}, but does bring in any instances
+visible in \mbox{\tt M}.  A module whose only purpose is to provide instance
+declarations can have an empty export list.  For example
+\bprog
+{\small\begin{verbatim}
+  module MyInstances() where
+    instance Show (a -> b) where
+      show fn = "<<function>>"
+    instance Show (IO a) where
+      show io = "<<IO action>>"
+\end{verbatim}}
+\eprog
+
+\section{Name Clashes and Closure}
+
+\subsection{Qualified names}\index{qualified name}
+\label{qualifiers}
+
+A {\em qualified name} is written as \mbox{$\it modid$}\mbox{\tt .}\mbox{$\it name$} (Section~\ref{ids}).
+A qualified name is brought into scope:
+\begin{itemize}
+\item {\em By a top level declaration.}
+A top-level declaration brings into scope both the unqualified {\em and}
+the qualified name of the entity being defined.  Thus:
+\bprog
+{\small\begin{verbatim}
+  module M where
+    f x = ...
+    g x = M.f x x
+\end{verbatim}}
+\eprog
+is legal.  The {\em defining} occurrence must mention the {\em unqualified} name; therefore, it is
+illegal to write
+\bprog
+{\small\begin{verbatim}
+  module M where
+    M.f x = ...                 -- ILLEGAL
+    g x = let M.y = x+1 in ...  -- ILLEGAL
+\end{verbatim}}
+\eprog
+\item {\em By an \mbox{\tt import} declaration.}  An \mbox{\tt import} declaration, whether \mbox{\tt qualified} or not,
+always brings into scope the qualified name of the imported entity (Section~\ref{import}).
+This allows a qualified
+import to be replaced with an unqualified one without forcing changes
+in the references to the imported names.  
+\end{itemize}
+
+
+\subsection{Name clashes}
+
+If a module contains a bound occurrence of a name, such as \mbox{\tt f} or \mbox{\tt A.f},
+it must be possible unambiguously to resolve which entity is thereby referred to;
+that is, there must be only one binding for \mbox{\tt f} or \mbox{\tt A.f} respectively.
+
+It is {\em not} an error for there to exist names that cannot be so 
+resolved, provided that the program does not mention those names.  For example:
+\bprog
+{\small\begin{verbatim}
+  module A where
+    import B
+    import C
+    tup = (b, c, d, x)
+  
+  module B( d, b, x, y ) where
+    import D
+    x = ...
+    y = ...
+    b = ...
+  
+  module C( d, c, x, y ) where
+    import D
+    x = ...
+    y = ...
+    c = ...
+
+  module D( d ) where
+    d = ...
+\end{verbatim}}
+\eprog
+Consider the definition of \mbox{\tt tup}.  
+\begin{itemize}
+\item The references to \mbox{\tt b} and \mbox{\tt c}
+can be unambiguously resolved to \mbox{\tt b} declared in \mbox{\tt B}, and \mbox{\tt c} declared in
+\mbox{\tt C} respectively.  
+\item The reference to \mbox{\tt d} is unambiguously resolved to
+\mbox{\tt d} declared in \mbox{\tt D}.  In this case the same entity is brought into scope by two routes
+(the import of \mbox{\tt B} and the import of \mbox{\tt C}), and can be referred to in \mbox{\tt A} by the names
+\mbox{\tt d}, \mbox{\tt B.d}, and \mbox{\tt C.d}.
+\item The reference to \mbox{\tt x} is ambiguous: it could mean \mbox{\tt x} declared in \mbox{\tt B}, or \mbox{\tt x} 
+declared in \mbox{\tt C}.  The ambiguity could be fixed by replacing the reference to \mbox{\tt x} by
+\mbox{\tt B.x} or \mbox{\tt C.x}.
+\item There is no reference to \mbox{\tt y}, so it is not erroneous that distinct entities called
+\mbox{\tt y} are exported by both \mbox{\tt B} and \mbox{\tt C}.  An error is only reported if \mbox{\tt y} is actually mentioned.
+\end{itemize}
+
+The name occurring in a type signature or fixity declarations is
+always unqualified, and unambiguously refers to another declaration in
+the same declaration list (except that the fixity declaration for a
+class method can occur at top level --- Section~\ref{fixity}). For example,
+the following module is legal:
+\bprog
+{\small\begin{verbatim}
+  module F where
+
+    sin :: Float -> Float
+    sin x = (x::Float)
+
+    f x = Prelude.sin (F.sin x)
+\end{verbatim}}
+\eprog
+The local declaration for \mbox{\tt sin} is
+legal, even though the Prelude function \mbox{\tt sin} is implicitly in
+scope. The references to \mbox{\tt Prelude.sin} and \mbox{\tt F.sin} must both be qualified
+to make it unambiguous which \mbox{\tt sin} is meant. However, the unqualified
+name \mbox{$\it \makebox{\tt sin}$} in the type signature in the first line of \mbox{\tt F} unambiguously
+refers to the local declaration for \mbox{\tt sin}.
+
+\subsection{Closure}
+\label{closure}
+\index{closure}
+
+Every module in a \Haskell{} program must be {\em closed}.  That is,
+every name explicitly mentioned by the source code
+must be either defined locally or imported from another module.
+However, entities that the compiler requires for type checking or other
+compile time analysis need not be imported if they are not mentioned
+by name.  The \Haskell{} compilation system is responsible for finding
+any information needed for compilation without the help of the
+programmer.  That is, the import of a variable \mbox{\tt x} does not
+require that the datatypes and classes in the signature of \mbox{\tt x} be
+brought into the module along with \mbox{\tt x} unless these entities are
+referenced by name in the user program.  The \Haskell{}
+system silently imports any information that must accompany an
+entity for type checking or any other purposes.  Such entities need
+not even be explicitly exported: the following program is valid even though
+\mbox{\tt T} does not escape \mbox{\tt M1}:
+\bprog
+{\small\begin{verbatim}
+  module M1(x) where
+    data T = T
+    x = T
+  
+  module M2 where
+    import M1(x)
+    y = x
+\end{verbatim}}
+\eprog
+In this example, there is no way to supply an explicit type signature
+for \mbox{\tt y} since \mbox{\tt T} is not in scope.
+Whether or not \mbox{\tt T} is explicitly exported, module \mbox{\tt M2} knows
+enough about \mbox{\tt T} to correctly type check the program.
+
+The type of an exported entity is unaffected by non-exported type
+synonyms.  For example, in
+\bprog
+{\small\begin{verbatim}
+  module M(x) where
+    type T = Int
+    x :: T
+    x = 1
+\end{verbatim}}
+\eprog
+the type of \mbox{\tt x} is both \mbox{\tt T} and \mbox{\tt Int}; these are interchangeable even
+when \mbox{\tt T} is not in scope.  That is, the definition of \mbox{\tt T} is available
+to any module that encounters it whether or not the name \mbox{\tt T} is
+in scope.  The only reason to export \mbox{\tt T} is to allow other modules to
+refer it by name; the type checker finds the definition of \mbox{\tt T} if
+needed whether or not it is exported.
+
+\section{Standard Prelude}
+\label{standard-prelude}
+\index{standard prelude}
+\index{libraries}
+Many of the features of \Haskell{} are defined in \Haskell{}
+itself as a library of standard datatypes, classes, and
+functions, called the ``Standard Prelude.''  In
+\Haskell{}, the Prelude is contained in the
+module \mbox{\tt Prelude}.\indexmodule{Prelude} There are also
+many predefined library modules, which provide less frequently used
+functions and types.  For example, complex numbers, arrays, 
+and most of the input/output are all part of the standard
+libraries.    These are 
+defined in Part~\ref{libraries}.
+Separating
+libraries from the Prelude has the advantage of reducing the size and
+complexity of the Prelude, allowing it to be more easily assimilated,
+and increasing the space of useful names available to the programmer.
+
+Prelude and library modules differ from other modules in that
+their semantics (but not their implementation) are a fixed part of the
+\Haskell{} language definition.
+This means, for example, that a compiler may optimize calls to
+functions in the Prelude without consulting the source code
+of the Prelude.
+
+\subsection{The \texorpdfstring{\mbox{\tt Prelude}}{Prelude} Module}
+\indexmodule{Prelude}
+\index{Prelude!implicit import of}
+
+The \mbox{\tt Prelude} module is imported automatically into all modules as if
+by the statement `\mbox{\tt import\ Prelude}', if and only if it is not imported
+with an explicit \mbox{\tt import} declaration. This provision for explicit
+import allows entities defined in the Prelude to be selectively imported,
+just like those from any other module.
+
+The semantics of the entities in \mbox{\tt Prelude} is specified by a reference
+implementation of \mbox{\tt Prelude} written in \Haskell{}, given in
+Chapter~\ref{stdprelude}.  Some datatypes (such as \mbox{\tt Int}) and
+functions (such as \mbox{\tt Int} addition) cannot be specified directly in
+\Haskell{}.  Since the treatment of such entities depends on the
+implementation, they are not formally defined in Chapter~\ref{stdprelude}.
+The implementation of
+\mbox{\tt Prelude} is also incomplete in its treatment of tuples: there should
+be an infinite family of tuples and their instance declarations, but the
+implementation only gives a scheme.
+
+Chapter~\ref{stdprelude} defines the module \mbox{\tt Prelude} using
+several other modules: \mbox{\tt PreludeList}, \mbox{\tt PreludeIO}, and so on.
+These modules are {\em not} part of Haskell, and they cannot be imported
+separately.  They are simply 
+there to help explain the structure of the \mbox{\tt Prelude} module; they
+should be considered part of its implementation, not part of the language
+definition.
+ 
+\subsection{Shadowing Prelude Names}
+\label{std-prel-shadowing}
+
+The rules about the Prelude have been cast so that it is
+possible to use Prelude names for nonstandard purposes; however,
+every module that does so must have an \mbox{\tt import} declaration
+that makes this nonstandard usage explicit.  For example:
+\bprog
+{\small\begin{verbatim}
+  module A( null, nonNull ) where
+    import Prelude hiding( null ) 
+    null, nonNull :: Int -> Bool
+    null    x = x == 0
+    nonNull x = not (null x)
+\end{verbatim}}
+\eprog
+Module \mbox{\tt A} redefines \mbox{\tt null}, and contains an unqualified reference to \mbox{\tt null}
+on the right hand side of \mbox{\tt nonNull}. The latter would be ambiguous
+without the \mbox{\tt hiding(null)} on the \mbox{\tt import\ Prelude} statement. Every
+module that imports \mbox{\tt A} unqualified, and then makes an unqualified
+reference to \mbox{\tt null} must also resolve the ambiguous use of \mbox{\tt null} just as
+\mbox{\tt A} does. Thus there is little danger of accidentally shadowing Prelude
+names.
+
+It is possible to construct and use a different module to serve in
+place of the Prelude.  Other than the fact that it is implicitly
+imported, the Prelude is an ordinary \Haskell{} module; it is special
+only in that some objects in the Prelude are referenced by special
+syntactic constructs.  Redefining names used by the Prelude does not
+affect the meaning of these special constructs.  For example, in
+\bprog
+{\small\begin{verbatim}
+  module B where
+    import Prelude()
+    import MyPrelude
+    f x = (x,x)
+    g x = (,) x x
+    h x = [x] ++ []
+\end{verbatim}}
+\eprog
+the explicit \mbox{\tt import\ Prelude()} declaration prevents the automatic
+import of \mbox{\tt Prelude}, while the declaration \mbox{\tt import\ MyPrelude} brings the
+non-standard prelude into scope.  
+The special syntax for tuples (such as \mbox{\tt (x,x)} and \mbox{\tt (,)}) and lists
+(such as \mbox{\tt [x]} and \mbox{\tt []}) continues to refer to the tuples and lists
+defined by the standard \mbox{\tt Prelude};
+there is no way to redefine the meaning of \mbox{\tt [x]}, for example, in terms of a
+different implementation of lists.
+On the other hand, the use of \mbox{\tt ++} is not special syntax, so it refers
+to \mbox{\tt ++} imported from \mbox{\tt MyPrelude}.
+
+It is not possible, however, to hide \mbox{\tt instance} declarations in the
+\mbox{\tt Prelude}.  For example, one cannot define a new instance for \mbox{\tt Show\ Char}.
+
+\section{Separate Compilation}
+\index{separate compilation}
+Depending on the \Haskell{} implementation used, separate compilation
+of mutually recursive modules may require that imported modules contain
+additional information so that they may be referenced before they are
+compiled.  Explicit type signatures for all exported values may be
+necessary to deal with mutual recursion.  The
+precise details of separate compilation are not defined by this
+report. 
+
+\section{Abstract Datatypes}
+\label{abstract-types}
+
+\index{abstract datatype}
+The ability to export a datatype without its constructors
+allows the construction of abstract datatypes (ADTs).  For example,
+an ADT for stacks could be defined as:
+\bprog
+{\small\begin{verbatim}
+  module Stack( StkType, push, pop, empty ) where
+    data StkType a = EmptyStk | Stk a (StkType a)
+    push x s = Stk x s
+    pop (Stk _ s) = s
+    empty = EmptyStk
+\end{verbatim}}
+\eprog
+Modules importing \mbox{\tt Stack} cannot construct values of type \mbox{\tt StkType}
+because they do not have access to the constructors of the type.
+Instead, they must use \mbox{\tt push}, \mbox{\tt pop}, and \mbox{\tt empty} to construct such values.
+
+It is also possible to build an ADT on top of an existing type by
+using a \mbox{\tt newtype} declaration.  For example, stacks can be defined
+with lists: 
+\bprog
+{\small\begin{verbatim}
+  module Stack( StkType, push, pop, empty ) where
+    newtype StkType a = Stk [a]
+    push x (Stk s) = Stk (x:s)
+    pop (Stk (_:s)) = Stk s
+    empty = Stk []
+\end{verbatim}}
+\eprogNoSkip
+
+
+%**~footer
+
+% Local Variables: 
+% mode: latex
+% End:

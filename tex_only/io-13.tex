@@ -1,0 +1,296 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%
+%%   Haskell 98 Monadic I/O Definition
+%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%**<title>The Haskell 98 Report: Basic Input/Output</title>
+%*section 7
+%**~header
+
+\chapter{Basic Input/Output}
+\index{basic input/output}
+\label{io}
+
+The I/O system in \Haskell{} is purely functional, yet has all of the
+expressive power found in conventional programming languages.  To
+achieve this, \Haskell{} uses a \mbox{$\it monad$} to integrate I/O operations into
+a purely functional context.
+
+The I/O monad used by \Haskell{} mediates between the \mbox{$\it values$} natural to
+a functional language and the \mbox{$\it actions$} that characterize I/O
+operations and imperative programming in general.  The order of
+evaluation of expressions in \Haskell{} is constrained only by data
+dependencies; an implementation has a great deal of freedom
+in choosing this order.  Actions, however, must be ordered in a
+well-defined manner for program execution -- and I/O in particular --
+to be meaningful.  \Haskell{}'s I/O monad provides the user with a way to
+specify the sequential chaining of actions, and an implementation is
+obliged to preserve this order.
+
+\index{monad}
+The term \mbox{$\it monad$} comes from a branch of mathematics known as {\em
+category theory}.  From the perspective of a \Haskell{} programmer,
+however, it is best to think of a monad as an {\em abstract datatype}.
+In the case of the I/O monad, the abstract values are the \mbox{$\it actions$}
+mentioned above.  Some operations are primitive actions,
+corresponding to conventional I/O operations.  Special operations
+(methods in the class \mbox{\tt Monad}, see Section~\ref{monad-class})
+sequentially compose actions,
+corresponding to sequencing operators (such as the semicolon) in imperative
+languages.
+
+\section{Standard I/O Functions}
+\label{standard-io-functions}
+Although \Haskell{} provides fairly sophisticated I/O facilities, as
+defined in the \mbox{\tt IO} library, it is possible to write many
+\Haskell{} programs using only the few simple functions that are
+exported from the Prelude, and which are described in this section.
+
+All I/O functions defined here are character oriented.  The treatment
+of the newline character will vary on different systems.  For example,
+two characters of input, return and linefeed, may read as a single
+newline character.  These functions cannot be used portably for binary
+I/O.
+
+In the following, recall that \mbox{\tt String} is a synonym for \mbox{\tt [Char]} (Section~\ref{characters}).
+
+\paragraph*{Output Functions}
+These functions write to the standard output device (this is normally
+the user's terminal). 
+\bprog
+{\small\begin{verbatim}
+  putChar  :: Char -> IO ()
+  putStr   :: String -> IO ()
+  putStrLn :: String -> IO ()  -- adds a newline
+  print    :: Show a => a -> IO ()
+\end{verbatim}}
+\eprog
+\indextt{putChar}
+\indextt{putStr}
+\indextt{putStrLn}
+\indextt{print}
+The \mbox{\tt print} function outputs a value of any printable type to the
+standard output device.
+Printable types are those that are instances of class \mbox{\tt Show}; \mbox{\tt print}
+converts values to strings for output using the \mbox{\tt show} operation and
+adds a newline.
+
+
+For example, a program to print the first 20 integers and their
+powers of 2 could be written as:
+\bprog
+{\small\begin{verbatim}
+main = print ([(n, 2^n) | n <- [0..19]])
+\end{verbatim}}
+\eprog
+
+\paragraph*{Input Functions}
+These functions read input from the standard input device (normally
+the user's terminal).
+\bprog
+{\small\begin{verbatim}
+  getChar     :: IO Char
+  getLine     :: IO String
+  getContents :: IO String
+  interact    :: (String -> String) -> IO ()
+  readIO      :: Read a => String -> IO a
+  readLn      :: Read a => IO a
+\end{verbatim}}
+\eprog
+\indextt{interact}%
+\indextt{readIO}%
+\indextt{readLn}%
+\indextt{getChar}%
+\indextt{getLine}%
+\indextt{getContents}%
+The \mbox{\tt getChar} operation raises an exception (Section~\ref{io-exceptions}) on end-of-file; a 
+predicate \mbox{\tt isEOFError} that identifies this exception is defined in the \mbox{\tt IO} library.
+The \mbox{\tt getLine} operation raises an exception under the same circumstances as \mbox{\tt hGetLine}, 
+defined the \mbox{\tt IO} library.
+
+The \mbox{\tt getContents} operation returns all user input as a single
+string, which is read lazily as it is needed.  The \mbox{\tt interact}
+function takes a function of type 
+\mbox{\tt String->String} as its argument.  The entire input from the standard
+input device is passed to this function
+as its argument, and the resulting string is output on the
+standard output device.
+
+Typically, the \mbox{\tt read} operation from class \mbox{\tt Read} is used
+to convert the string to a value.  The \mbox{\tt readIO} function is similar to \mbox{\tt read}
+except that it signals parse failure to the I/O monad instead of
+terminating the program.  The \mbox{\tt readLn} function combines \mbox{\tt getLine} and
+\mbox{\tt readIO}.
+
+% Removed after extended debate on the Haskell mailing list.
+% By default, these input functions echo to standard output.  
+
+% Functions in the I/O library provide full control over echoing.
+% Lies, all lies
+
+The following program simply removes all non-ASCII characters from its
+standard input and echoes the result on its standard output.  (The
+\mbox{\tt isAscii} function is defined in a library.)
+\bprog
+{\small\begin{verbatim}
+main = interact (filter isAscii)
+\end{verbatim}}
+\eprog
+\paragraph*{Files}
+These functions operate on files of characters.  Files are named by
+strings using some implementation-specific method to resolve strings as
+file names.
+
+The \mbox{\tt writeFile} and \mbox{\tt appendFile} functions write or append the string,
+their second argument, to the file, their first argument.
+The \mbox{\tt readFile} function reads a file and
+returns the contents of the file as a string.  The file is read
+lazily, on demand, as with \mbox{\tt getContents}.
+\bprog
+{\small\begin{verbatim}
+  type FilePath =  String
+  
+  writeFile  :: FilePath -> String -> IO ()
+  appendFile :: FilePath -> String -> IO ()
+  readFile   :: FilePath           -> IO String
+\end{verbatim}}
+\eprog
+\indextt{writeFile}%
+\indextt{readFile}%
+\indextt{appendFile}%
+\indexsynonym{FilePath}%
+Note that \mbox{\tt writeFile} and \mbox{\tt appendFile} write a literal string
+to a file.  To write a value of any printable type, as with \mbox{\tt print}, use the
+\mbox{\tt show} function to convert the value to a string first.
+\bprog
+{\small\begin{verbatim}
+main = appendFile "squares" (show [(x,x*x) | x <- [0,0.1..2]])
+\end{verbatim}}
+\eprog
+
+\section{Sequencing I/O Operations}
+\indextt{>>}
+\indextt{>>=}
+The type constructor \mbox{\tt IO} is an instance of the \mbox{\tt Monad} class.
+The two monadic binding functions, methods in the \mbox{\tt Monad} class, are
+used to compose a series of I/O
+operations.  The \mbox{\tt >>}
+function is used where the result of the first operation is
+uninteresting, for example when it is \mbox{\tt ()}.  The \mbox{\tt >>=} operation
+passes the result of the first operation as an argument to the second
+operation.  
+\bprog
+{\small\begin{verbatim}
+  (>>=) :: IO a -> (a -> IO b) -> IO b 
+  (>>)  :: IO a -> IO b        -> IO b
+\end{verbatim}}
+\eprog
+For example,
+\bprog
+{\small\begin{verbatim}
+main = readFile "input-file"                       >>= \ s ->
+       writeFile "output-file" (filter isAscii s)  >>
+       putStr "Filtering successful\n"
+\end{verbatim}}
+\eprog
+is similar to the previous example using \mbox{\tt interact}, but takes its input
+from \mbox{\tt "input-file"} and writes its output to \mbox{\tt "output-file"}.  A message
+is printed on the standard output before the program completes.
+
+\index{do expression}
+The \mbox{\tt do} notation allows programming in a more imperative syntactic
+style.  A slightly more elaborate version of the previous example
+would be:
+\bprog
+{\small\begin{verbatim}
+main = do
+        putStr "Input file: "
+        ifile <- getLine
+        putStr "Output file: "
+        ofile <- getLine
+        s <- readFile ifile
+        writeFile ofile (filter isAscii s) 
+        putStr "Filtering successful\n"
+\end{verbatim}}
+\eprog
+
+The \mbox{\tt return} function is used to define the result of an I/O
+operation.  For example, \mbox{\tt getLine} is defined in terms of \mbox{\tt getChar},
+using \mbox{\tt return} to define the result:
+\bprog
+{\small\begin{verbatim}
+getLine :: IO String
+getLine = do c <- getChar
+             if c == '\n' then return ""
+                          else do s <- getLine
+                                  return (c:s)
+\end{verbatim}}
+\eprog
+
+\section{Exception Handling in the I/O Monad}
+\index{exception handling}
+\label{io-exceptions}
+
+The I/O monad includes a simple exception handling system.  Any I/O
+operation may raise an exception instead of returning a result.
+
+Exceptions in the I/O monad are represented by values of 
+type \mbox{\tt IOError}.  This is an abstract type: its constructors are hidden
+from the user.  The \mbox{\tt IO} library defines functions that construct and
+examine \mbox{\tt IOError} values.  The only Prelude function that creates an
+\mbox{\tt IOError} value is \mbox{\tt userError}.  User error values include a string
+describing the error.
+\bprog
+{\small\begin{verbatim}
+  userError :: String -> IOError
+\end{verbatim}}
+\eprog
+\indextt{userError}%
+Exceptions are raised and caught using the following functions:
+\bprog
+{\small\begin{verbatim}
+  ioError :: IOError -> IO a
+  catch   :: IO a    -> (IOError -> IO a) -> IO a 
+\end{verbatim}}
+\eprog
+\indextt{ioError}%
+\indextt{catch}%
+The \mbox{\tt ioError} function raises an exception;
+the \mbox{\tt catch} function establishes a handler that receives any
+exception raised in the action protected by \mbox{\tt catch}.  An exception is
+caught by the most recent handler established by \mbox{\tt catch}.  These
+handlers are not selective: all exceptions are caught.  Exception
+propagation must be explicitly provided in a handler by re-raising any
+unwanted exceptions.  For example, in
+\bprog
+{\small\begin{verbatim}
+f = catch g (\e -> if IO.isEOFError e then return [] else ioError e)
+\end{verbatim}}
+\eprog
+the function \mbox{\tt f} returns \mbox{\tt []} when an end-of-file exception occurs
+in \mbox{\tt g}; otherwise, the exception is propagated to the next
+outer handler.  The \mbox{\tt isEOFError} function is part of \mbox{\tt IO} library.
+
+When an exception propagates outside the main program, the \Haskell{}
+system prints the associated \mbox{\tt IOError} value and exits the program.
+
+The \mbox{\tt fail} method of the \mbox{\tt IO} instance of the \mbox{\tt Monad} class (Section~\ref{monad-class}) raises a
+\mbox{\tt userError}, thus:
+\bprog
+{\small\begin{verbatim}
+  instance Monad IO where 
+    ...bindings for return, (>>=), (>>)
+
+    fail s = ioError (userError s)
+\end{verbatim}}
+\eprog
+\indextt{fail}%
+The exceptions raised by the I/O functions in the Prelude are defined
+in Chapter~\ref{module:System.IO.Error}.
+
+%**~footer
+
+
+
+

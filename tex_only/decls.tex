@@ -1,0 +1,2225 @@
+%
+% $Header: /home/cvs/root/haskell-report/report/decls.verb,v 1.19 2003/01/13 13:08:55 simonpj Exp $
+%
+%**<title>The Haskell 98 Report: Declarations</title>
+%*section 4
+%**~header
+\chapter{Declarations and Bindings}
+\index{declaration}
+\index{binding}
+\label{declarations}
+
+In this chapter, we describe the syntax and informal semantics of \Haskell{}
+{\em declarations}.
+% including their translations into
+% the \Haskell{} kernel where appropriate.
+% (see Chapter~\ref{formal-semantics} for a complete formal semantics).
+
+\begin{flushleft}\it\begin{tabbing}
+\hspace{0.6in}\=\hspace{3.1in}\=\kill
+$\it module$\>\makebox[3.5em]{$\rightarrow$}$\it \makebox{\tt module}\ modid\ [exports]\ \makebox{\tt where}\ body$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it body$\\ 
+$\it body$\>\makebox[3.5em]{$\rightarrow$}$\it \makebox{\tt {\char'173}}\ impdecls\ \makebox{\tt ;}\ topdecls\ \makebox{\tt {\char'175}}$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it \makebox{\tt {\char'173}}\ impdecls\ \makebox{\tt {\char'175}}$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it \makebox{\tt {\char'173}}\ topdecls\ \makebox{\tt {\char'175}}$\\ 
+$\it $\\ 
+$\it topdecls$\>\makebox[3.5em]{$\rightarrow$}$\it topdecl_1\ \makebox{\tt ;}\ \ldots \ \makebox{\tt ;}\ topdecl_n$\>\makebox[3em]{}$\it (n\geq 1)$\\ 
+$\it topdecl$\>\makebox[3.5em]{$\rightarrow$}$\it \makebox{\tt type}\ simpletype\ \makebox{\tt =}\ type$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it \makebox{\tt data}\ [context\ \makebox{\tt =>}]\ simpletype\ \hprime{[}\makebox{\tt =}\ constrs\hprime{]}\ [deriving]$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it \makebox{\tt newtype}\ [context\ \makebox{\tt =>}]\ simpletype\ \makebox{\tt =}\ newconstr\ [deriving]$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it \makebox{\tt class}\ [scontext\ \makebox{\tt =>}]\ tycls\ tyvar\ [\makebox{\tt where}\ cdecls]$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it \makebox{\tt instance}\ [scontext\ \makebox{\tt =>}]\ qtycls\ inst\ [\makebox{\tt where}\ idecls]$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it \makebox{\tt default}\ \makebox{\tt (}type_1\ \makebox{\tt ,}\ \ldots \ \makebox{\tt ,}\ type_n\makebox{\tt )}$\>\makebox[3em]{}$\it \qquad\ (n\geq 0)$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it \makebox{\tt foreign}\ fdecl$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it decl$\\ 
+$\it $\\ 
+$\it decls$\>\makebox[3.5em]{$\rightarrow$}$\it \makebox{\tt {\char'173}}\ decl_1\ \makebox{\tt ;}\ \ldots \ \makebox{\tt ;}\ decl_n\ \makebox{\tt {\char'175}}$\>\makebox[3em]{}$\it (n\geq 0)$\\ 
+$\it decl$\>\makebox[3.5em]{$\rightarrow$}$\it gendecl$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it (funlhs\ |\ \hprime{pat})\ rhs$\\ 
+$\it $\\ 
+$\it cdecls$\>\makebox[3.5em]{$\rightarrow$}$\it \makebox{\tt {\char'173}}\ cdecl_1\ \makebox{\tt ;}\ \ldots \ \makebox{\tt ;}\ cdecl_n\ \makebox{\tt {\char'175}}$\>\makebox[3em]{}$\it (n\geq 0)$\\ 
+$\it cdecl$\>\makebox[3.5em]{$\rightarrow$}$\it gendecl$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it (funlhs\ |\ var)\ rhs$\\ 
+$\it $\\ 
+$\it idecls$\>\makebox[3.5em]{$\rightarrow$}$\it \makebox{\tt {\char'173}}\ idecl_1\ \makebox{\tt ;}\ \ldots \ \makebox{\tt ;}\ idecl_n\ \makebox{\tt {\char'175}}$\>\makebox[3em]{}$\it (n\geq 0)$\\ 
+$\it idecl$\>\makebox[3.5em]{$\rightarrow$}$\it (funlhs\ |\ var)\ rhs$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it $\>\makebox[3em]{}$\it (\tr{empty})$\\ 
+$\it $\\ 
+$\it gendecl$\>\makebox[3.5em]{$\rightarrow$}$\it vars\ \makebox{\tt ::}\ [context\ \makebox{\tt =>}]\ type$\>\makebox[3em]{}$\it (\tr{type\ signature})$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it fixity\ [integer]\ ops$\>\makebox[3em]{}$\it (\tr{fixity\ declaration})$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it $\>\makebox[3em]{}$\it (\tr{empty\ declaration})$\\ 
+$\it $\\ 
+$\it ops$\>\makebox[3.5em]{$\rightarrow$}$\it op_1\ \makebox{\tt ,}\ \ldots \ \makebox{\tt ,}\ op_n$\>\makebox[3em]{}$\it (n\geq 1)$\\ 
+$\it vars$\>\makebox[3.5em]{$\rightarrow$}$\it var_1\ \makebox{\tt ,}\ \ldots \ \makebox{\tt ,}\ var_n$\>\makebox[3em]{}$\it (n\geq 1)$\\ 
+$\it fixity$\>\makebox[3.5em]{$\rightarrow$}$\it \makebox{\tt infixl}\ |\ \makebox{\tt infixr}\ |\ \makebox{\tt infix}$
+\end{tabbing}\end{flushleft}
+\indexsyn{vars}%
+\indexsyn{fixity}%
+\indexsyn{ops}%
+\indexsyn{topdecls}%
+\indexsyn{topdecl}%
+\indexsyn{gendecl}%
+\indexsyn{decls}%
+\indexsyn{decl}%
+\indexsyn{cdecls}%
+\indexsyn{cdecl}%
+\indexsyn{idecls}%
+\indexsyn{idecl}%
+\indexsyn{fdecl}%
+
+The declarations in the syntactic category \mbox{$\it topdecls$} are only allowed
+at the top level of a \Haskell{} module (see
+Chapter~\ref{modules}), whereas \mbox{$\it decls$} may be used either at the top level or
+in nested scopes (i.e.~those within a \mbox{\tt let} or \mbox{\tt where} construct).
+
+For exposition, we divide the declarations into
+three groups: user-defined datatypes, consisting of \mbox{\tt type}, \mbox{\tt newtype},
+and \mbox{\tt data} 
+declarations (Section~\ref{user-defined-datatypes}); type classes and
+overloading, consisting of \mbox{\tt class}, \mbox{\tt instance}, and \mbox{\tt default}
+declarations (Section~\ref{overloading}); and nested declarations,
+consisting of value bindings, type signatures, and fixity declarations
+(Section~\ref{nested}).
+
+%The \mbox{\tt module} declaration, along with \mbox{\tt import} and
+%infix declarations, is described in Section~\ref{modules}.
+
+\Haskell{} has several primitive datatypes that are ``hard-wired''
+(such as integers and floating-point numbers), but most ``built-in''
+datatypes are defined with normal \Haskell{} code, using normal \mbox{\tt type}
+and \mbox{\tt data} declarations. % (see Section~\ref{user-defined-datatypes}).
+These ``built-in'' datatypes are described in detail in
+Section~\ref{basic-types}.
+
+\section{Overview of Types and Classes}
+\label{types-overview}
+
+\Haskell{} uses a traditional
+Hindley-Milner\index{Hindley-Milner type system}
+polymorphic type system to provide a static type semantics
+\cite{damas-milner82,hindley69}, but the type system has been extended with
+{\em type classes} (or just {\em
+classes}\index{class}) that provide 
+a structured way to introduce {\em overloaded} functions.\index{type
+class} \index{constructor class} \index{overloaded functions}
+
+A \mbox{\tt class} declaration (Section~\ref{class-decls}) introduces a new
+{\em type class} and the overloaded operations that must be
+supported by any type that is an instance of that class.  An
+\mbox{\tt instance} declaration (Section~\ref{instance-decls}) declares that a
+type is an {\em instance} of a class and includes
+the definitions of the overloaded operations---called {\em
+class methods}---instantiated on the named type.
+\index{class method}
+
+For example, suppose we wish to overload the operations \mbox{\tt (+)} and
+\mbox{\tt negate} on types \mbox{\tt Int} and \mbox{\tt Float}.  We introduce a new
+type class called \mbox{\tt Num}:\nopagebreak[4]
+\par
+{\small
+\bprog
+{\small\begin{verbatim}
+  class Num a  where          -- simplified class declaration for Num
+    (+)    :: a -> a -> a     -- (Num is defined in the Prelude)
+    negate :: a -> a
+\end{verbatim}}
+\eprog
+}
+This declaration may be read ``a type \mbox{\tt a} is an instance of the class
+\mbox{\tt Num} if there are class methods \mbox{\tt (+)} and \mbox{\tt negate}, of the
+given types, defined on it.''
+
+We may then declare \mbox{\tt Int} and \mbox{\tt Float} to be instances of this class:
+\bprog
+{\small\begin{verbatim}
+  instance Num Int  where     -- simplified instance of Num Int
+    x + y       =  addInt x y
+    negate x    =  negateInt x
+  
+  instance Num Float  where   -- simplified instance of Num Float
+    x + y       =  addFloat x y
+    negate x    =  negateFloat x
+\end{verbatim}}
+\eprog
+where \mbox{\tt addInt}, \mbox{\tt negateInt}, \mbox{\tt addFloat}, and \mbox{\tt negateFloat} are assumed
+in this case to be primitive functions, but in general could be any
+user-defined function.  The first declaration above may be read
+``\mbox{\tt Int} is an instance of the class \mbox{\tt Num} as witnessed by these
+definitions (i.e.~class methods)\index{class method} for \mbox{\tt (+)} and \mbox{\tt negate}.''
+
+More examples of type classes can be found in
+the papers by Jones \cite{jones:cclasses} or Wadler and Blott
+\cite{wadler:classes}. 
+The term `type class' was used to describe the original \Haskell{} 1.0
+type system; `constructor class' was used to describe an extension to
+the original type classes.  There is no longer any reason to use two
+different terms: in this report, `type class' includes both the
+original \Haskell{} type classes and the constructor classes
+introduced by Jones.
+
+\subsection{Kinds}
+
+To ensure that they are valid, type expressions are classified
+into different {\em kinds}, \index{kind} which take one of two possible
+forms:\nopagebreak[4]
+\begin{itemize}
+
+\item The symbol $\ast$ represents the kind of all nullary type
+constructors.
+
+\item If $\kappa_1$ and $\kappa_2$ are kinds, then $\kappa_1\rightarrow\kappa_2$
+is the kind of types that take a type of kind $\kappa_1$ and return
+a type of kind $\kappa_2$.
+\end{itemize}
+Kind inference checks the validity of type expressions 
+in a similar way that type inference checks the validity of value expressions.  
+However, unlike types, kinds are entirely
+implicit and are not a visible part of the language.  Kind inference is discussed
+in Section~\ref{kindinference}.
+
+\subsection{Syntax of Types}
+\label{type-syntax}
+\index{type}
+\label{types}
+
+\begin{flushleft}\it\begin{tabbing}
+\hspace{0.6in}\=\hspace{3.1in}\=\kill
+$\it type$\>\makebox[3.5em]{$\rightarrow$}$\it btype\ [\makebox{\tt ->}\ type]$\>\makebox[3em]{}$\it (\tr{function\ type})$\\ 
+$\it $\\ 
+$\it btype$\>\makebox[3.5em]{$\rightarrow$}$\it [btype]\ atype$\>\makebox[3em]{}$\it (\tr{type\ application})$\\ 
+$\it $\\ 
+$\it atype$\>\makebox[3.5em]{$\rightarrow$}$\it gtycon$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it tyvar$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it \makebox{\tt (}\ type_1\ \makebox{\tt ,}\ \ldots \ \makebox{\tt ,}\ type_k\ \makebox{\tt )}$\>\makebox[3em]{}$\it (\tr{tuple\ type},\ k\geq 2)$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it \makebox{\tt [}\ type\ \makebox{\tt ]}$\>\makebox[3em]{}$\it (\tr{list\ type})$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it \makebox{\tt (}\ type\ \makebox{\tt )}$\>\makebox[3em]{}$\it (\tr{parenthesised\ constructor})$\\ 
+$\it $\\ 
+$\it gtycon$\>\makebox[3.5em]{$\rightarrow$}$\it qtycon$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it \makebox{\tt ()}$\>\makebox[3em]{}$\it (\tr{unit\ type})$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it \makebox{\tt []}$\>\makebox[3em]{}$\it (\tr{list\ constructor})$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it \makebox{\tt (->)}$\>\makebox[3em]{}$\it (\tr{function\ constructor})$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it \makebox{\tt (,}\{\makebox{\tt ,}\}\makebox{\tt )}$\>\makebox[3em]{}$\it (\tr{tupling\ constructors})$
+\end{tabbing}\end{flushleft}
+\indexsyn{type}%
+\indexsyn{atype}%
+\indexsyn{btype}%
+\indexsyn{gtycon}%
+
+\noindent
+The syntax for \Haskell{} type expressions
+\index{type expression}
+\index{constructor expression}
+is given above.  Just as data values are built using data
+constructors, type values are built from \mbox{$\it type\ constructors$}.  As with
+data constructors, the names of type constructors start with uppercase
+letters.
+Unlike data constructors, infix type constructors are not allowed (other than \mbox{\tt (->)}).
+
+The main forms of type expression are as follows:\nopagebreak[4]
+\begin{enumerate}
+
+\item Type variables, written as identifiers beginning with
+      a lowercase letter.  The kind of a variable is determined implicitly
+      by the context in which it appears.
+
+\item Type constructors.  Most type constructors are written as an identifier
+      beginning with an uppercase letter.  For example:\nopagebreak[4]
+      \begin{itemize}
+      \item \mbox{\tt Char}, \mbox{\tt Int}, \mbox{\tt Integer}, \mbox{\tt Float}, \mbox{\tt Double} and \mbox{\tt Bool} are
+            type constants with kind $\ast$.
+      \item \mbox{\tt Maybe} and \mbox{\tt IO} are unary type
+            constructors, and treated as types with
+            kind $\ast\rightarrow\ast$.
+      \item The declarations \mbox{\tt data\ T\ ...} or \mbox{\tt newtype\ T\ ...} add the type
+            constructor \mbox{\tt T} to
+            the type vocabulary.  The kind of \mbox{\tt T} is determined by
+            kind inference.
+      \end{itemize}
+      Special syntax is provided for certain built-in type constructors:\nopagebreak[4]
+      \begin{itemize}
+      \item The {\em trivial type}\index{trivial type} is written as \mbox{\tt ()} and
+            has kind $\ast$.
+            It denotes the ``nullary tuple'' type, and has exactly one value,
+            also written \mbox{\tt ()} (see Sections~\ref{unit-expression}
+            and~\ref{basic-trivial}).
+      \item The {\em function type} is written as \mbox{\tt (->)} and has\index{function type}
+            kind $\ast\rightarrow\ast\rightarrow\ast$.
+      \item The {\em list type}  is written as \mbox{\tt []} and has kind
+            $\ast\rightarrow\ast$.\index{list}
+      \item The {\em tuple types} are written as \mbox{\tt (,)},\index{tuple}
+            \mbox{\tt (,,)}, and so on.  Their kinds are
+            $\ast\rightarrow\ast\rightarrow\ast$,
+            $\ast\rightarrow\ast\rightarrow\ast\rightarrow\ast$,  and
+            so on.
+      \end{itemize}
+      Use of the \mbox{\tt (->)} and \mbox{\tt []} constants is described in more detail below.
+
+\item Type application.  If $t_1$ is a type of kind
+      $\kappa_1\rightarrow\kappa_2$ and $t_2$ is a type of kind $\kappa_1$,
+      then $t_1~t_2$ is a type expression of kind $\kappa_2$.
+
+\item A {\em parenthesized type}, having form \mbox{$\it \makebox{\tt (}t\makebox{\tt )}$}, is identical
+      to the type \mbox{$\it t$}.
+
+\end{enumerate}
+For example, the type expression \mbox{\tt IO\ a} can be understood as the application
+of a constant, \mbox{\tt IO}, to the variable \mbox{\tt a}.  Since the \mbox{\tt IO} type
+constructor has kind 
+$\ast\rightarrow\ast$, it follows that both the variable \mbox{\tt a} and the whole
+expression, \mbox{\tt IO\ a}, must have kind $\ast$.
+In general, a process of {\em kind inference}\index{kind}\index{kind inference}
+(see Section~\ref{kindinference})
+is needed to determine appropriate kinds for user-defined datatypes, type
+synonyms, and classes.
+
+Special syntax is provided to allow certain type expressions to be written
+in a more traditional style:\nopagebreak[4]
+\begin{enumerate}
+
+\item A {\em function type}\index{function type} has the form
+\mbox{$\it t_1\ \makebox{\tt ->}\ t_2$}, which is equivalent to the type
+\mbox{$\it \makebox{\tt (->)}\ t_1\ t_2$}.  Function arrows associate to the right.
+For example, \mbox{\tt Int\ ->\ Int\ ->\ Float} means \mbox{\tt Int\ ->\ (Int\ ->\ Float)}.
+
+\item A {\em tuple type}\index{tuple type} has the form 
+\mbox{$\it \makebox{\tt (}t_1\makebox{\tt ,}\ \ldots \ \makebox{\tt ,}\ t_k\makebox{\tt )}$} where \mbox{$\it k\geq 2$}, which is equivalent to
+the type \mbox{$\it \makebox{\tt (,}$\ldots$\makebox{\tt ,)}\ t_1\ \ldots \ t_k$} where there are
+$k-1$ commas between the parenthesis.  It denotes the
+type of \mbox{$\it k$}-tuples with the first component of type \mbox{$\it t_1$}, the second
+component of type \mbox{$\it t_2$}, and so on (see Sections~\ref{tuples}
+and \ref{basic-tuples}).
+
+\item A {\em list type}\index{list type} has the form \mbox{$\it \makebox{\tt [}t\makebox{\tt ]}$},
+which is equivalent to the type \mbox{$\it \makebox{\tt []}\ t$}.
+It denotes the type of lists with elements of type \mbox{$\it t$} (see
+Sections~\ref{lists} and \ref{basic-lists}).
+
+\end{enumerate}
+These special syntactic forms always denote the built-in type constructors
+for functions, tuples, and lists, regardless of what is in scope.
+In a similar way, the prefix type constructors \mbox{\tt (->)}, \mbox{\tt []}, \mbox{\tt ()}, \mbox{\tt (,)}, 
+and so on, always denote the built-in type constructors; they 
+cannot be qualified, nor mentioned in import or export lists (Chapter~\ref{modules}).
+(Hence the special production, ``gtycon'', above.)
+
+Although the list and tuple types have special syntax, their semantics 
+is the same as the equivalent user-defined algebraic data types.
+
+Notice that expressions and types have a consistent syntax.
+If \mbox{$\it t_i$} is the type of
+expression or pattern \mbox{$\it e_i$}, then the expressions \mbox{$\it \makebox{\tt ({\char'134}}\ e_1\ \makebox{\tt ->}\ e_2\makebox{\tt )}$},
+\mbox{$\it \makebox{\tt [}e_1\makebox{\tt ]}$}, and \mbox{$\it \makebox{\tt (}e_1,e_2\makebox{\tt )}$} have the types \mbox{$\it \makebox{\tt (}t_1\ \makebox{\tt ->}\ t_2\makebox{\tt )}$},
+\mbox{$\it \makebox{\tt [}t_1\makebox{\tt ]}$}, and \mbox{$\it \makebox{\tt (}t_1,t_2\makebox{\tt )}$}, respectively.
+
+\index{quantification}
+With one exception (that of the distinguished type variable
+in a class declaration (Section~\ref{class-decls})), the
+type variables in a \Haskell{} type expression
+are all assumed to be universally quantified; there is no explicit
+syntax for universal quantification~\cite{damas-milner82}.
+% \cite{damas-milner82,reynolds90}.
+For example, the type expression
+\mbox{\tt a\ ->\ a} denotes the type \mbox{$\it \forall\ a.~a\ \rightarrow\ a$}.
+For clarity, however, we often write quantification explicitly
+when discussing the types of \Haskell{} programs.  When we write an
+explicitly quantified type, the scope of the \mbox{$\it \forall$} extends as far
+to the right as possible; for example, \mbox{$\it \forall\ a.~a\ \rightarrow\ a$} means
+\mbox{$\it \forall\ a.~(a\ \rightarrow\ a)$}.
+
+%Every type variable appearing in a signature
+%is universally quantified over that signature.  This last
+%constraint implies that signatures such as:
+%\bprog
+%@
+%       \ x -> ([x] :: [a])
+%@
+%\eprog
+%are not valid, because this declares \mbox{\tt [x]} to be of type 
+%\mbox{$\it \forall\ a.\makebox{\tt [}a\makebox{\tt ]}$}.  In contrast, this {\em is} a valid signature:
+%\mbox{\tt ({\char'134}\ x\ ->\ [x])\ ::\ a\ ->\ [a]}; it declares that \mbox{\tt ({\char'134}\ x\ ->\ [x])} has type
+%\mbox{$\it \forall\ a.a\ \makebox{\tt ->}\ \makebox{\tt [}a\makebox{\tt ]}$}.
+
+\subsection{Syntax of Class Assertions and Contexts}
+\index{class assertion}
+\index{context}
+\label{classes&contexts}
+
+\begin{flushleft}\it\begin{tabbing}
+\hspace{0.6in}\=\hspace{3.1in}\=\kill
+$\it context$\>\makebox[3.5em]{$\rightarrow$}$\it class$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it \makebox{\tt (}\ class_1\ \makebox{\tt ,}\ \ldots \ \makebox{\tt ,}\ class_n\ \makebox{\tt )}$\>\makebox[3em]{}$\it (n\geq 0)$\\ 
+$\it class$\>\makebox[3.5em]{$\rightarrow$}$\it qtycls\ tyvar$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it qtycls\ \makebox{\tt (}\ tyvar\ atype_1\ \ldots \ atype_n\ \makebox{\tt )}$\>\makebox[3em]{}$\it (n\geq 1)$\\ 
+$\it qtycls$\>\makebox[3.5em]{$\rightarrow$}$\it [\ modid\ \makebox{\tt .}\ ]\ tycls$\\ 
+$\it tycls$\>\makebox[3.5em]{$\rightarrow$}$\it conid$\\ 
+$\it tyvar$\>\makebox[3.5em]{$\rightarrow$}$\it varid$
+\end{tabbing}\end{flushleft}
+\indexsyn{context}%
+\indexsyn{class}%
+\indexsyn{simpleclass}%
+\indexsyn{tycls}%
+\indexsyn{tyvar}%
+
+A {\em class assertion} has form \mbox{$\it qtycls\ tyvar$}, and
+indicates the membership of the type \mbox{$\it tyvar$} in the class
+\mbox{$\it qtycls$}.  A class identifier begins with an uppercase
+letter.
+A {\em context} consists of zero or more class assertions,
+and has the general form
+\[
+\mbox{$\it \makebox{\tt (}\ C_1\ u_1,\ \ldots ,\ C_n\ u_n\ \makebox{\tt )}$}
+\]
+where \mbox{$\it C_1,\ \ldots ,\ C_n$} are class identifiers, and each of the \mbox{$\it u_1,\ \ldots ,\ u_n$} is
+either a type variable, or the application of type variable to one or more types.
+The outer parentheses may be omitted when \mbox{$\it n=1$}.  In
+general, we use \mbox{$\it cx$} to denote a context and we write \mbox{$\it cx\ \makebox{\tt =>}\ t$} to
+indicate the type \mbox{$\it t$} restricted by the context \mbox{$\it cx$}.
+The context \mbox{$\it cx$} must only contain type variables referenced in \mbox{$\it t$}.
+For convenience,
+we write \mbox{$\it cx\ \makebox{\tt =>}\ t$} even if the context \mbox{$\it cx$} is empty, although in this
+case the concrete syntax contains no \mbox{\tt =>}.
+
+\subsection{Semantics of Types and Classes}
+\label{type-semantics}
+
+In this section, we provide informal details of the type system.
+% the formal semantics is described in Chapter~\ref{static-semantics}
+(Wadler and Blott \cite{wadler:classes} and Jones
+\cite{jones:cclasses} discuss type
+and constructor classes, respectively, in more detail.)
+
+%A type is a {\em monotype\/}\index{monotype} if it contains no type
+%variables, and is {\em monomorphic\/}
+%\index{monomorphic type}
+%if it contains type variables
+%but is not polymorphic (in Milner's original terminology,
+%it is monomorphic if it contains no generic type variables).
+
+The \Haskell{} type system attributes a {\em type} to each
+\index{type}
+expression in the program.  In general, a type is of the form
+\mbox{$\it \forall\ \overline{u}.~cx\ \Rightarrow\ t$},
+where \mbox{$\it \overline{u}$} is a set of type variables \mbox{$\it u_1,\ \ldots ,\ u_n$}.
+In any such type, any of the universally-quantified type variables \mbox{$\it u_i$}
+that are free in \mbox{$\it cx$} must also be free in \mbox{$\it t$}.
+Furthermore, the context \mbox{$\it cx$} must be of the form given above in
+Section~\ref{classes&contexts}.  For example, here are some
+valid types:
+\bprog
+{\small\begin{verbatim}
+  Eq a => a -> a
+  (Eq a, Show a, Eq b) => [a] -> [b] -> String
+  (Eq (f a), Functor f) => (a -> b) -> f a -> f b -> Bool
+\end{verbatim}}
+\eprog
+In the third type, the constraint \mbox{\tt Eq\ (f\ a)} cannot be made
+simpler because \mbox{\tt f} is universally quantified.
+
+The type of an expression \mbox{$\it e$} depends 
+on a {\em type environment}\index{type environment} that gives types 
+for the free variables in \mbox{$\it e$}, and a
+{\em class environment}\index{class environment} that 
+declares which types are instances of which classes (a type becomes
+an instance of a class only via the presence of an
+\mbox{\tt instance} declaration or a \mbox{\tt deriving} clause).
+
+Types are related by a generalization preorder
+\index{generalization preorder}
+(specified below);
+the most general type, up to the equivalence induced by the generalization preorder,
+that can be assigned to a particular
+expression (in a given environment) is called its {\em
+principal type}.
+\index{principal type}
+\Haskell{}'s extended Hindley-Milner type system can infer the principal
+type of all expressions, including the proper use of overloaded
+class methods (although certain ambiguous overloadings could arise, as
+described in Section~\ref{default-decls}).  Therefore, explicit typings (called
+{\em type signatures})
+\index{type signature}
+are usually optional (see
+Sections~\ref{expression-type-sigs} and~\ref{type-signatures}).
+
+The type \mbox{$\it \forall\ \overline{u}.~cx_1\ \Rightarrow\ t_1$} is
+{\em more general than} the 
+type \mbox{$\it \forall\ \overline{w}.~cx_2\ \Rightarrow\ t_2$} if and only if there is 
+a substitution \mbox{$\it S$} whose domain is \mbox{$\it \overline{u}$} such that:
+\begin{itemize}
+\item \mbox{$\it t_2$} is identical to \mbox{$\it S(t_1)$}.
+\item Whenever \mbox{$\it cx_2$} holds in the class environment, \mbox{$\it S(cx_1)$} also holds.
+\end{itemize}
+
+A value of type
+\mbox{$\it \forall\ \overline{u}.~cx\ \Rightarrow\ t$},
+may be instantiated at types \mbox{$\it \overline{s}$} if and only if
+the context \mbox{$\it cx[\overline{s}/\overline{u}]$} holds.
+For example, consider the function \mbox{\tt double}:
+\bprog
+{\small\begin{verbatim}
+  double x = x + x
+\end{verbatim}}
+\eprog
+The most general type of \mbox{\tt double} is
+\mbox{$\it \forall\ a.~\makebox{\tt Num}~a\ \Rightarrow\ a\ \rightarrow\ a$}.
+\mbox{\tt double} may be applied to values of type \mbox{\tt Int} (instantiating \mbox{$\it a$} to
+\mbox{\tt Int}), since \mbox{\tt Num\ Int} holds, because \mbox{\tt Int} is an instance of the class \mbox{\tt Num}.
+However, \mbox{\tt double} may not normally be applied to values
+of type \mbox{\tt Char}, because \mbox{\tt Char} is not normally an instance of class \mbox{\tt Num}.  The
+user may choose to declare such an instance, in which case \mbox{\tt double} may
+indeed be applied to a \mbox{\tt Char}.
+
+
+\section{User-Defined Datatypes}
+\index{datatype}
+\label{user-defined-datatypes}
+
+In this section, we describe algebraic datatypes (\mbox{\tt data}
+declarations), renamed datatypes (\mbox{\tt newtype} declarations), and type
+synonyms (\mbox{\tt type} declarations).  These declarations may only appear at
+the top level of a module.
+
+\subsection{Algebraic Datatype Declarations}
+\index{algebraic datatype}
+\label{datatype-decls}
+
+\begin{flushleft}\it\begin{tabbing}
+\hspace{0.6in}\=\hspace{3.1in}\=\kill
+$\it topdecl$\>\makebox[3.5em]{$\rightarrow$}$\it \makebox{\tt data}\ [context\ \makebox{\tt =>}]\ simpletype\ \hprime{[}\makebox{\tt =}\ constrs\hprime{]}\ [deriving]$\\ 
+$\it $\\ 
+$\it simpletype$\>\makebox[3.5em]{$\rightarrow$}$\it tycon\ tyvar_1\ \ldots \ tyvar_k$\>\makebox[3em]{}$\it (k\geq 0)$\\ 
+$\it $\\ 
+$\it constrs$\>\makebox[3.5em]{$\rightarrow$}$\it constr_1\ \makebox{\tt |}\ \ldots \ \makebox{\tt |}\ constr_n$\>\makebox[3em]{}$\it (n\geq 1)$\\ 
+$\it constr$\>\makebox[3.5em]{$\rightarrow$}$\it con\ [\makebox{\tt !}]\ atype_1\ \ldots \ [\makebox{\tt !}]\ atype_k$\>\makebox[3em]{}$\it (\tr{arity}\ con\ =\ k,\ k\geq 0)$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it (btype\ |\ \makebox{\tt !}\ atype)\ conop\ (btype\ |\ \makebox{\tt !}\ atype)$\>\makebox[3em]{}$\it (\tr{infix}\ conop)$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it con\ \makebox{\tt {\char'173}}\ fielddecl_1\ \makebox{\tt ,}\ \ldots \ \makebox{\tt ,}\ fielddecl_n\ \makebox{\tt {\char'175}}$\>\makebox[3em]{}$\it (n\geq 0)$\\ 
+$\it fielddecl$\>\makebox[3.5em]{$\rightarrow$}$\it vars\ \makebox{\tt ::}\ (type\ |\ \makebox{\tt !}\ atype)$\\ 
+$\it $\\ 
+$\it deriving$\>\makebox[3.5em]{$\rightarrow$}$\it \makebox{\tt deriving}\ (dclass\ |\ \makebox{\tt (}dclass_1\makebox{\tt ,}\ \ldots \ \makebox{\tt ,}\ dclass_n\makebox{\tt )})$\>\makebox[3em]{}$\it (n\geq 0)$\\ 
+$\it dclass$\>\makebox[3.5em]{$\rightarrow$}$\it qtycls$
+\end{tabbing}\end{flushleft}
+\index{topdecl@{\em topdecl} (\mbox{\tt data})}%
+\indexsyn{simpletype}%
+\indexsyn{constrs}%
+\indexsyn{constr}%
+\indexsyn{fielddecl}%
+\indexsyn{deriving}%
+\indexsyn{dclass}%
+\index{data declaration@{\tt data} declaration}
+The precedence\index{precedence} for \mbox{$\it constr$} is the same as that for
+expressions---normal constructor application has higher precedence
+than infix constructor application (thus \mbox{\tt a\ :\ Foo\ a} parses as 
+\mbox{\tt a\ :\ (Foo\ a)}).
+
+An algebraic datatype declaration has the form:
+\[
+\mbox{$\it \makebox{\tt data}\ cx\ \makebox{\tt =>}\ T\ u_1\ \ldots \ u_k\ \makebox{\tt =}\ K_1\ t_{11}\ \ldots \ t_{1k_1}\ \makebox{\tt |}\ \cdots\ \makebox{\tt |}\ K_n\ t_{n1}\ \ldots \ t_{nk_n}$}
+\]
+where \mbox{$\it cx$} is a context.
+%\index{context!in data declaration@in {\tt data} declaration}
+This declaration
+introduces a new {\em type constructor} \mbox{$\it T$} with \hprime{zero} or more constituent {\em data
+constructors} \mbox{$\it K_1,\ \ldots ,\ K_n$}.
+\index{data constructor}\index{type constructor}
+In this Report, the unqualified term ``constructor'' always means ``data constructor''.
+
+The types of the data constructors are given by:
+\[
+\mbox{$\it K_i\ ::\ \forall\ u_1\ \ldots \ u_k.~\ cx_i\ \Rightarrow\ t_{i1}\ \rightarrow\ \cdots\ \rightarrow\ t_{ik_i}\ \rightarrow\ (T\ u_1\ \ldots \ u_k)$}
+\]
+where \mbox{$\it cx_i$} is the largest subset of \mbox{$\it cx$} that constrains only those type
+variables free in the types \mbox{$\it t_{i1},\ \ldots ,\ t_{ik_i}$}.
+The type variables \mbox{$\it u_1$} through \mbox{$\it u_k$} must be distinct and may appear
+in \mbox{$\it cx$} and the \mbox{$\it t_{ij}$}; it is a static error
+for any other type variable to appear in \mbox{$\it cx$} or on the right-hand-side.
+The new type constant \mbox{$\it T$} has a kind of the form
+$\kappa_1\rightarrow\ldots\rightarrow\kappa_k\rightarrow\ast$
+where the kinds \mbox{$\it \kappa_i$} of the argument variables \mbox{$\it u_i$} are
+determined by kind inference
+as described in Section~\ref{kindinference}\index{kind}\index{kind inference}.
+This means that \mbox{$\it T$} may be used in type expressions with anywhere
+between \mbox{$\it 0$} and \mbox{$\it k$} arguments.
+
+For example, the declaration
+\bprog
+{\small\begin{verbatim}
+  data Eq a => Set a = NilSet | ConsSet a (Set a)
+\end{verbatim}}
+\eprog
+introduces a type constructor \mbox{\tt Set} of kind $\ast\rightarrow\ast$, and constructors \mbox{\tt NilSet} and
+\mbox{\tt ConsSet} with types
+\[\ba{ll}
+\mbox{\tt NilSet}  & \mbox{$\it ::\ \forall\ a.~\ \makebox{\tt Set}~\ a$} \\
+\mbox{\tt ConsSet} & \mbox{$\it ::\ \forall\ a.~\ \makebox{\tt Eq}~\ a\ \Rightarrow\ a\ \rightarrow\ \makebox{\tt Set}~\ a\ \rightarrow\ \makebox{\tt Set}~\ a$}
+\ea\]
+In the example given, the overloaded
+type for \mbox{\tt ConsSet} ensures that \mbox{\tt ConsSet} can only be applied to values whose
+type is an instance of the class \mbox{\tt Eq}.  
+Pattern matching against \mbox{\tt ConsSet} also gives rise to an \mbox{\tt Eq\ a} constraint. 
+For example: 
+\bprog
+{\small\begin{verbatim}
+  f (ConsSet a s) = a
+\end{verbatim}}
+\eprog
+the function \mbox{\tt f} has inferred type \mbox{\tt Eq\ a\ =>\ Set\ a\ ->\ a}.
+The context in the \mbox{\tt data} declaration has no other effect whatsoever.
+
+The visibility of a datatype's constructors (i.e.~the ``abstractness''
+\index{abstract datatype}
+of the datatype) outside of the module in which the datatype is
+defined is controlled by the form of the datatype's name in the export
+list as described in Section~\ref{abstract-types}.
+
+The optional \mbox{$\it \makebox{\tt deriving}$} part of a \mbox{\tt data} declaration has to do
+with {\em derived instances}, and is described in
+Section~\ref{derived-decls}.
+
+\paragraph{Labelled Fields}
+\label{field-labels}
+\index{field label}
+A data constructor of arity \mbox{$\it k$} creates an object with \mbox{$\it k$} components.
+These components are normally accessed positionally as arguments to the
+constructor in expressions or patterns.  For large datatypes it is
+useful to assign \mbox{$\it field\ labels$} to the components of a data object.
+This allows a specific field to be referenced independently of its
+location within the constructor.
+
+A constructor definition in a \mbox{\tt data} declaration may assign labels to the
+fields of the constructor, using the record syntax (\mbox{\tt C\ {\char'173}\ ...\ {\char'175}}).
+Constructors using field labels may be freely mixed with constructors
+without them. 
+A constructor with associated field labels may still be used as an
+ordinary constructor; features using labels are
+simply a shorthand for operations using an underlying positional
+constructor.  The arguments to the positional constructor occur in the
+same order as the labeled fields.  For example, the declaration
+\bprog
+{\small\begin{verbatim}
+  data C = F { f1,f2 :: Int, f3 :: Bool }
+\end{verbatim}}
+\eprog
+defines a type and constructor identical to the one produced by
+\bprog
+{\small\begin{verbatim}
+  data C = F Int Int Bool
+\end{verbatim}}
+\eprog
+Operations using field labels are described in Section~\ref{field-ops}.
+A \mbox{\tt data} declaration may use the same field label in multiple
+constructors as long as the typing of the field is the same in all
+cases after type synonym expansion.  A label cannot be shared by
+more than one type in scope.  Field names share the top level namespace
+with ordinary variables and class methods and must not conflict with
+other top level names in scope.
+
+The pattern \mbox{\tt F\ {\char'173}{\char'175}} matches any value built with constructor \mbox{\tt F}, 
+{\em whether or not \mbox{\tt F} was declared with record syntax}. 
+
+\paragraph{Strictness Flags}
+\label{strictness-flags}
+\index{strictness flag}
+Whenever a data constructor is applied, each argument to the
+constructor is evaluated if and only if the corresponding type in the
+algebraic datatype declaration has a strictness flag, denoted by
+an exclamation point, ``\mbox{\tt !}''.
+\index{"!@{\tt  {\char'041}}}
+Lexically, ``\mbox{\tt !}'' is an ordinary varsym not a \mbox{$\it reservedop$}; 
+it has special significance only in the context of the argument types of 
+a data declaration.
+
+
+\outline{
+\paragraph*{Translation:}
+A declaration of the form
+\[
+\mbox{$\it \makebox{\tt data}\ cx\ \makebox{\tt =>}\ T\ u_1\ \ldots \ u_k\ \makebox{\tt =}\ \ldots \ \makebox{\tt |}\ K\ s_{1}\ \ldots \ s_{n}\ \makebox{\tt |}\ \ldots $}
+\]
+where each \mbox{$\it s_i$} is either of the form \mbox{\tt !}\mbox{$\it t_i$} or \mbox{$\it t_i$}, replaces
+every occurrence of \mbox{$\it K$} in an expression by 
+\[
+\mbox{$\it \makebox{\tt ({\char'134}\ }x_1\ \ldots \ x_n\ \makebox{\tt ->}\ (\ ((K\ op_1\ x_1)\ op_2\ x_2)\ \ldots \ )\ op_n\ x_n)$}
+\]
+where \mbox{$\it op_i$} is the non-strict apply function \mbox{\tt {\char'44}} if \mbox{$\it s_i$} is of the form \mbox{$\it t_i$},
+and \mbox{$\it op_i$} is the strict apply function \mbox{\tt {\char'44}!} (see
+Section~\ref{strict-eval}) if \mbox{$\it s_i$} is of the form \mbox{$\it \makebox{\tt !}\ t_i$}.  Pattern
+matching on \mbox{$\it K$} is not affected by strictness flags.
+}
+
+
+\subsection{Type Synonym Declarations}
+\index{type synonym}
+\label{type-synonym-decls}
+
+\begin{flushleft}\it\begin{tabbing}
+\hspace{0.6in}\=\hspace{3.1in}\=\kill
+$\it topdecl$\>\makebox[3.5em]{$\rightarrow$}$\it \makebox{\tt type}\ simpletype\ \makebox{\tt =}\ type$\\ 
+$\it simpletype$\>\makebox[3.5em]{$\rightarrow$}$\it tycon\ tyvar_1\ \ldots \ tyvar_k$\>\makebox[3em]{}$\it (k\geq 0)$
+\end{tabbing}\end{flushleft}
+\index{topdecl@{\em topdecl} (\mbox{\tt type})}%
+\indexsyn{simpletype}%
+A type synonym declaration introduces a new type that
+is equivalent to an old type.  It has the form
+\[
+\mbox{$\it \makebox{\tt type}\ T\ u_1\ \ldots \ u_k\ \makebox{\tt =}\ t$}
+\]
+which introduces a new type constructor, \mbox{$\it T$}.  The type \mbox{$\it (T\ t_1\ \ldots \\
+\it t_k)$} is equivalent to the type \mbox{$\it t[t_1/u_1,\ \ldots ,\ t_k/u_k]$}.  The type
+variables \mbox{$\it u_1$} through \mbox{$\it u_k$} must be distinct and are scoped only
+over \mbox{$\it t$}; it is a static error for any other type variable to appear
+in \mbox{$\it t$}.  The kind of the new type constructor \mbox{$\it T$} is of the form
+$\kappa_1\rightarrow\ldots\rightarrow\kappa_k\rightarrow\kappa$ where
+the kinds \mbox{$\it \kappa_i$} of the arguments \mbox{$\it u_i$} and \mbox{$\it \kappa$} of the right hand
+side \mbox{$\it t$} are determined by kind inference as described in
+Section~\ref{kindinference}\index{kind}\index{kind inference}.
+For example, the following definition can be used to provide an alternative
+way of writing the list type constructor: 
+\bprog
+{\small\begin{verbatim}
+  type List = []
+\end{verbatim}}
+\eprog
+Type constructor symbols \mbox{$\it T$} introduced by type synonym declarations cannot
+be partially applied; it is a static error to use \mbox{$\it T$} without the full number
+of arguments.
+
+Although recursive and mutually recursive datatypes are allowed,
+\index{recursive datatype}
+\index{type synonym!recursive}
+this is not so for type synonyms, {\em unless an algebraic datatype
+intervenes}.  For example,
+\bprog
+{\small\begin{verbatim}
+  type Rec a   =  [Circ a]
+  data Circ a  =  Tag [Rec a]
+\end{verbatim}}
+\eprog
+is allowed, whereas
+\bprog
+{\small\begin{verbatim}
+  type Rec a   =  [Circ a]        -- invalid
+  type Circ a  =  [Rec a]         -- invalid
+\end{verbatim}}
+\eprog
+is not. Similarly, \mbox{\tt type\ Rec\ a\ =\ [Rec\ a]} is not allowed.
+
+Type synonyms are a convenient, but strictly syntactic, mechanism to make type
+signatures more readable.  A synonym and its definition are completely
+interchangeable, except in the instance type of an \mbox{\tt instance} declaration (Section~\ref{instance-decls}).
+
+\subsection{Datatype Renamings}
+\index{newtype declaration@{\tt newtype} declaration}
+\label{datatype-renaming}
+
+\begin{flushleft}\it\begin{tabbing}
+\hspace{0.6in}\=\hspace{3.1in}\=\kill
+$\it topdecl$\>\makebox[3.5em]{$\rightarrow$}$\it \makebox{\tt newtype}\ [context\ \makebox{\tt =>}]\ simpletype\ \makebox{\tt =}\ newconstr\ [deriving]$\\ 
+$\it newconstr$\>\makebox[3.5em]{$\rightarrow$}$\it con\ atype$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it con\ \makebox{\tt {\char'173}}\ var\ \makebox{\tt ::}\ type\ \makebox{\tt {\char'175}}$\\ 
+$\it simpletype$\>\makebox[3.5em]{$\rightarrow$}$\it tycon\ tyvar_1\ \ldots \ tyvar_k$\>\makebox[3em]{}$\it (k\geq 0)$
+\end{tabbing}\end{flushleft}
+\index{topdecl@{\em topdecl} (\mbox{\tt newtype})}%
+\indexsyn{simpletype}%
+\indexsyn{newconstr}%
+
+\noindent \noindent A declaration of the form
+\[
+\mbox{$\it \makebox{\tt newtype}\ cx\ \makebox{\tt =>}\ T\ u_1\ \ldots \ u_k\ \makebox{\tt =}\ N\ t$}
+\]
+introduces a new type whose
+representation is the same as an existing type.  The type \mbox{$\it \makebox{\tt (}T\ u_1\\
+\it \ldots \ u_k\makebox{\tt )}$} renames the datatype \mbox{$\it t$}.
+It differs from a type synonym in
+that it creates a distinct type that must be explicitly coerced to or
+from the original type.  Also, unlike type synonyms, \mbox{\tt newtype} may be
+used to define recursive types.
+The constructor \mbox{$\it N$} in an expression 
+coerces a value from type \mbox{$\it t$} to type \mbox{$\it \makebox{\tt (}T\ u_1\ \ldots \ u_k\makebox{\tt )}$}.
+Using \mbox{$\it N$} in a pattern coerces a value from type \mbox{$\it \makebox{\tt (}T\ u_1\ \ldots \ u_k\makebox{\tt )}$}
+to type \mbox{$\it t$}.  These coercions may be implemented without
+execution time overhead; \mbox{\tt newtype} does not change the underlying
+representation of an object.
+
+New instances (see Section \ref{instance-decls}) can be defined for a
+type defined by \mbox{\tt newtype} but may not be defined for a type synonym.  A type
+created by \mbox{\tt newtype} differs from an algebraic datatype in that the
+representation of an
+algebraic datatype has an extra level of indirection.  This difference
+may make access to the representation less efficient.  The difference is
+reflected in different rules for pattern matching (see
+Section~\ref{pattern-matching}).  Unlike algebraic datatypes, the
+newtype constructor \mbox{$\it N$} is {\em unlifted}, so that \mbox{$\it N\ \bot$}
+is the same as \mbox{$\it \bot$}.
+
+The following examples clarify the differences between \mbox{\tt data} (algebraic
+datatypes), \mbox{\tt type} (type synonyms), and \mbox{\tt newtype} (renaming types.)
+Given the declarations 
+\bprog
+{\small\begin{verbatim}
+  data D1 = D1 Int
+  data D2 = D2 !Int
+  type S = Int
+  newtype N = N Int
+  d1 (D1 i) = 42
+  d2 (D2 i) = 42
+  s i = 42
+  n (N i) = 42
+\end{verbatim}}
+\eprog
+the expressions \mbox{$\it \makebox{\tt (d1}\ \bot\makebox{\tt )}$}, \mbox{$\it \makebox{\tt (d2}\ \bot\makebox{\tt )}$} and 
+\mbox{$\it \makebox{\tt (d2\ (D2}\ \bot\makebox{\tt ))}$} are all
+equivalent to \mbox{$\it \bot$}, whereas \mbox{$\it \makebox{\tt (n}\ \bot\makebox{\tt )}$}, \mbox{$\it \makebox{\tt (n\ (N}\ \bot\makebox{\tt ))}$},
+\mbox{$\it \makebox{\tt (d1\ (D1}\ \bot\makebox{\tt ))}$} and \mbox{$\it \makebox{\tt (s}\ \bot\makebox{\tt )}$}
+are all equivalent to \mbox{\tt 42}.  In particular, \mbox{$\it \makebox{\tt (N}\ \bot\makebox{\tt )}$} is equivalent to
+\mbox{$\it \bot$} while \mbox{$\it \makebox{\tt (D1}\ \bot\makebox{\tt )}$} is not equivalent to \mbox{$\it \bot$}.
+
+The optional deriving part of a \mbox{\tt newtype} declaration is treated in
+the same way as the deriving component of a \mbox{\tt data} declaration; see
+Section~\ref{derived-decls}.
+
+A \mbox{\tt newtype} declaration may use field-naming syntax, though of course
+there may only be one field.  Thus:
+\bprog
+{\small\begin{verbatim}
+  newtype Age = Age { unAge :: Int }
+\end{verbatim}}
+\eprog
+brings into scope both a constructor and a de-constructor:
+\bprog
+{\small\begin{verbatim}
+  Age   :: Int -> Age
+  unAge :: Age -> Int
+\end{verbatim}}
+\eprog
+
+\section{Type Classes and Overloading}
+\index{class}
+\index{overloading}
+\label{overloading}
+\label{classes}
+
+\subsection{Class Declarations}
+\index{class declaration}
+%\index{class declaration@{\tt class} declaration}
+\label{class-decls}
+
+\begin{flushleft}\it\begin{tabbing}
+\hspace{0.6in}\=\hspace{3.1in}\=\kill
+$\it topdecl$\>\makebox[3.5em]{$\rightarrow$}$\it \makebox{\tt class}\ [scontext\ \makebox{\tt =>}]\ tycls\ tyvar\ [\makebox{\tt where}\ cdecls]$\\ 
+$\it scontext$\>\makebox[3.5em]{$\rightarrow$}$\it simpleclass$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it \makebox{\tt (}\ simpleclass_1\ \makebox{\tt ,}\ \ldots \ \makebox{\tt ,}\ simpleclass_n\ \makebox{\tt )}$\>\makebox[3em]{}$\it (n\geq 0)$\\ 
+$\it simpleclass$\>\makebox[3.5em]{$\rightarrow$}$\it qtycls\ tyvar$\\ 
+$\it cdecls$\>\makebox[3.5em]{$\rightarrow$}$\it \makebox{\tt {\char'173}}\ cdecl_1\ \makebox{\tt ;}\ \ldots \ \makebox{\tt ;}\ cdecl_n\ \makebox{\tt {\char'175}}$\>\makebox[3em]{}$\it (n\geq 0)$\\ 
+$\it cdecl$\>\makebox[3.5em]{$\rightarrow$}$\it gendecl$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it (funlhs\ |\ var)\ rhs$
+\end{tabbing}\end{flushleft}
+\index{topdecl@{\em topdecl} (\mbox{\tt class})}%
+\indexsyn{gendecl}%
+\indexsyn{cdecls}%
+\indexsyn{cdecl}%
+\index{declaration!within a {\tt class} declaration}
+
+\noindent
+A {\em class declaration} introduces a new class and the operations
+({\em class methods}) on it.
+A class declaration has the general form:
+\[\ba{rl}
+\mbox{$\it \makebox{\tt class}\ cx\ \makebox{\tt =>}\ C\ u\ \makebox{\tt where}\ cdecls$}
+% \mbox{$\it \makebox{\tt {\char'173}}$}&\mbox{$\it \ldots \makebox{\tt ;}\ v_i\ \makebox{\tt ::}\ cx_i\ \makebox{\tt =>}\ t_i\ \makebox{\tt ;}\ \ldots \makebox{\tt ;}$}\\
+%                               &\mbox{$\it \ldots \makebox{\tt ;}\ \makebox{\tt infix}\ n\ v_i\makebox{\tt ;}\ \ldots \makebox{\tt ;}$}\\
+%                               &\mbox{$\it valdef_1\ \makebox{\tt ;}\ \ldots \ \makebox{\tt ;}\ valdef_m\ \makebox{\tt {\char'175}}$}
+\ea\]
+This introduces a new class name \mbox{$\it C$}; the type variable \mbox{$\it u$} is
+scoped only over the class method signatures in the class body.
+The context \mbox{$\it cx$} specifies the superclasses\index{superclass} of \mbox{$\it C$}, as
+described below; the only type variable that may be referred to in \mbox{$\it cx$}
+is \mbox{$\it u$}.
+
+The superclass relation must not be cyclic; i.e.~it must form a
+directed acyclic graph.\index{superclass}
+
+The \mbox{$\it cdecls$} part of a \mbox{\tt class} declaration contains three kinds
+of declarations:
+\begin{itemize}
+\item
+The class declaration introduces new {\em class methods}
+\index{class method}
+\mbox{$\it v_i$}, whose scope extends outside the \mbox{\tt class} declaration.
+The class methods of a class declaration are precisely the \mbox{$\it v_i$} for
+which there is an explicit type signature
+\[
+\mbox{$\it v_i\ \makebox{\tt ::}\ cx_i\ \makebox{\tt =>}\ t_i$}
+\]
+in \mbox{$\it cdecls$}.  
+Class methods share the top level namespace with variable
+bindings and field names; they must not conflict with other top level
+bindings in scope. 
+That is, a class method can 
+not have the same name as a top level definition, a field name, or
+another class method.
+
+The type of the top-level class method \mbox{$\it v_i$} is:
+\[
+v_i :: \forall u,\overline{w}.~(C u, cx_i) \Rightarrow t_i
+\]
+The \mbox{$\it t_i$} must mention \mbox{$\it u$}; it may mention type variables
+\mbox{$\it \overline{w}$} other than \mbox{$\it u$}, in which case the type of \mbox{$\it v_i$} is
+polymorphic in both \mbox{$\it u$} and \mbox{$\it \overline{w}\/$}.
+The \mbox{$\it cx_i$} may constrain only \mbox{$\it \overline{w}$}; in particular,
+the \mbox{$\it cx_i$} may not constrain \mbox{$\it u$}.
+For example:
+\bprog
+{\small\begin{verbatim}
+  class Foo a where
+    op :: Num b => a -> b -> a
+\end{verbatim}}
+\eprog
+Here the type of \mbox{\tt op} is
+\mbox{$\it \forall\ a,\ b.~(\makebox{\tt Foo}~a,~\makebox{\tt Num}~b)~\ \Rightarrow\ a\ \rightarrow\ b\ \rightarrow\ a$}.
+
+\item
+The \mbox{$\it cdecls$} may also contain a {\em fixity declaration} for any of the class methods 
+(but for no other values).
+\index{fixity declaration}
+However, since class methods declare top-level values, the fixity declaration for a class
+method may alternatively appear at top level, outside the class declaration.
+
+\item
+Lastly, the \mbox{$\it cdecls$} may contain a
+{\em default class method}
+\index{default class method}
+for any of the \mbox{$\it v_i$}.  The default class method for \mbox{$\it v_i$} is used if no binding for it
+is given in a particular \mbox{\tt instance} declaration (see
+Section~\ref{instance-decls}).
+The default method declaration is a normal value definition, except that the
+left hand side may only be a variable or function definition.  For example:
+\bprog
+{\small\begin{verbatim}
+  class Foo a where
+    op1, op2 :: a -> a
+    (op1, op2) = ...
+\end{verbatim}}
+\eprog
+is not permitted, because the left hand side of the default declaration is a
+pattern.
+\end{itemize}
+Other than these cases, no other declarations are permitted in \mbox{$\it cdecls$}.
+
+%Figure~\ref{standard-classes} shows some standard \Haskell{} classes,
+%including the use of superclasses.
+%; note the class inclusion diagram on the right.
+%For example, \mbox{\tt Eq} is a superclass of \mbox{\tt Ord}, and thus in
+%any context \mbox{\tt Ord\ a} is equivalent to \mbox{\tt (Eq\ a,\ Ord\ a)}.  Figures~\ref{data-class},
+%\ref{prelude-bool} and \ref{numeric-inclusions} show the remaining
+%standard \Haskell{} classes.
+
+A \mbox{\tt class}
+declaration with no \mbox{\tt where} part
+\index{class declaration!with an empty \mbox{\tt where} part}
+may be useful for combining a
+collection of classes into a larger one that inherits all of the
+class methods in the original ones.  For example:
+\bprog
+{\small\begin{verbatim}
+  class  (Read a, Show a) => Textual a
+\end{verbatim}}
+\eprog
+In such a case, if a type is an instance of all
+superclasses,\index{superclass} it is 
+not {\em automatically} an instance of the subclass, even though the
+subclass has no immediate class methods.  The \mbox{\tt instance} declaration must be
+given explicitly with no \mbox{\tt where} part.
+\index{instance declaration!with an empty \mbox{\tt where} part}
+
+\subsection{Instance Declarations}
+\label{instance-decls}
+\index{instance declaration}
+
+\begin{flushleft}\it\begin{tabbing}
+\hspace{0.6in}\=\hspace{3.1in}\=\kill
+$\it topdecl$\>\makebox[3.5em]{$\rightarrow$}$\it \makebox{\tt instance}\ [scontext\ \makebox{\tt =>}]\ qtycls\ inst\ [\makebox{\tt where}\ idecls]$\\ 
+$\it inst$\>\makebox[3.5em]{$\rightarrow$}$\it gtycon$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it \makebox{\tt (}\ gtycon\ tyvar_1\ \ldots \ tyvar_k\ \makebox{\tt )}$\>\makebox[3em]{}$\it (k\geq 0,\ tyvars\ {\rm\ distinct})$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it \makebox{\tt (}\ tyvar_1\ \makebox{\tt ,}\ \ldots \ \makebox{\tt ,}\ tyvar_k\ \makebox{\tt )}$\>\makebox[3em]{}$\it (k\geq 2,\ tyvars\ {\rm\ distinct})$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it \makebox{\tt [}\ tyvar\ \makebox{\tt ]}$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it \makebox{\tt (}\ tyvar_1\ \makebox{\tt ->}\ tyvar_2\ \makebox{\tt )}$\>\makebox[3em]{}$\it (tyvar_1\ {\rm\ and}\ tyvar_2\ {\rm\ distinct})$\\ 
+$\it idecls$\>\makebox[3.5em]{$\rightarrow$}$\it \makebox{\tt {\char'173}}\ idecl_1\ \makebox{\tt ;}\ \ldots \ \makebox{\tt ;}\ idecl_n\ \makebox{\tt {\char'175}}$\>\makebox[3em]{}$\it (n\geq 0)$\\ 
+$\it idecl$\>\makebox[3.5em]{$\rightarrow$}$\it (funlhs\ |\ var)\ rhs$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it $\>\makebox[3em]{}$\it (empty)$
+\end{tabbing}\end{flushleft}
+\index{topdecl@{\em topdecl} (\mbox{\tt instance})}
+\indexsyn{inst}%
+\indexsyn{valdefs}%
+\indexsyn{gtycon}%
+\indexsyn{idecl}%
+\indexsyn{idecls}%
+%\index{instance declaration@{\tt instance} declaration}
+\index{declaration!within an {\tt instance} declaration}
+%\ToDo{tycls left off above}
+An {\em instance declaration} introduces an instance of a class.  Let
+\[ \mbox{$\it \makebox{\tt class}\ cx\ \makebox{\tt =>}\ C\ u\ \makebox{\tt where}\ \makebox{\tt {\char'173}}\ cbody\ \makebox{\tt {\char'175}}$} \]
+be a \mbox{\tt class} declaration.  The general form of the corresponding
+instance declaration is:
+\[ \mbox{$\it \makebox{\tt instance}\ cx'\ \makebox{\tt =>}\ C\ (T\ u_1\ \ldots \ u_k)\ \makebox{\tt where}\ \makebox{\tt {\char'173}}\ d\ \makebox{\tt {\char'175}}$} \]
+where \mbox{$\it k\geq0$}.
+The type \mbox{$\it (T\ u_1\ \ldots \ u_k)$} must take the form of
+a type constructor \mbox{$\it T$} applied to simple type variables \mbox{$\it u_1,\ \ldots \ u_k$};
+furthermore, \mbox{$\it T$} must not be a type synonym\index{type synonym}, 
+and the \mbox{$\it u_i$} must all be distinct.
+
+This prohibits instance declarations
+such as:
+\bprog
+{\small\begin{verbatim}
+  instance C (a,a) where ...
+  instance C (Int,a) where ...
+  instance C [[a]] where ...
+\end{verbatim}}
+\eprog
+The declarations \mbox{$\it d$} may contain bindings only for the class
+methods\index{class method} of \mbox{$\it C$}.  It is illegal to give a 
+binding for a class method that is not in scope, but the name under
+which it is in scope is immaterial; in particular, it may be a qualified
+name.  (This rule is identical to that used for subordinate names in
+export lists --- Section~\ref{export}.)
+For example, this is legal, even though \mbox{\tt range} is in scope only
+with the qualified name \mbox{\tt Data.Ix.range}.
+\bprog
+{\small\begin{verbatim}
+  module A where
+    import qualified Data.Ix
+
+    instance Data.Ix.Ix T where
+      range = ...
+\end{verbatim}}
+\eprog
+The declarations may not contain any type
+signatures or fixity declarations,\index{type signature}\index{fixity declaration}
+since these have already been given in the \mbox{\tt class}
+declaration.  As in the case of default class methods
+\index{default class method}%
+(Section~\ref{class-decls}), the method declarations must take the form of
+a variable or function definition.
+
+% However, unlike other declarations, the name of the bound
+% variable may be qualified.  So this is legal:
+% \bprog
+% 
+%  module A where
+%    import qualified B( Foo(op) )
+%    instance B.Foo Int where
+%      B.op = ...
+%
+%\eprog
+% Here, module \mbox{\tt A} imports class \mbox{\tt Foo} from module \mbox{\tt B}, and then gives an 
+%instance declaration for \mbox{\tt Foo}.  Since \mbox{\tt B} is imported \mbox{\tt qualified}, the name
+%of the class method, \mbox{\tt op}, is not in scope; so the definition must define \mbox{\tt B.op}.
+% Hence the need for the \mbox{$\it qfunlhs$} and \mbox{$\it qvar$} left hand sides in \mbox{$\it idecl$}.
+
+If no binding is given for some class method then the
+corresponding default class method
+\index{default class method}
+in the \mbox{\tt class} declaration is used (if
+present); if such a default does
+not exist then the class method of this instance
+is bound to \mbox{\tt undefined} 
+and no compile-time error results.
+
+An \mbox{\tt instance} declaration that makes the type \mbox{$\it T$} to be an instance
+of class \mbox{$\it C$} is called a {\em C-T instance declaration}
+\index{instance declaration} and is
+subject to these static restrictions:
+%\index{instance declaration!with respect to modules}
+\begin{itemize}
+
+\item A type may not be declared as an instance of a
+particular class more than once in the program.
+
+\item The class and type must have the same kind; 
+this can be determined using kind inference as described
+in Section~\ref{kindinference}\index{kind}\index{kind inference}.
+
+\item 
+Assume that the type variables in the instance type \mbox{$\it (T\ u_1\ \ldots \ u_k)$}
+satisfy the constraints in the instance context \mbox{$\it cx'$}.  Under this
+assumption, the following two conditions must also be satisfied:
+\begin{enumerate}
+\item
+The constraints expressed by the superclass context \mbox{$\it cx[(T\ u1\ \ldots \ uk)/u]$}
+        of \mbox{$\it C$} must be satisfied.  In other words, \mbox{$\it T$} must be an instance
+        of each of \mbox{$\it C$}'s superclasses and the contexts of all
+        superclass instances must be implied by \mbox{$\it cx'$}.
+\item
+Any constraints on the type variables in the instance type
+      that are required for the class method declarations in \mbox{$\it d$} to be
+      well-typed must also be satisfied.
+\end{enumerate}
+
+% \mbox{$\it T$} must be an instance of each of \mbox{$\it C$}'s superclasses.  More precisely,
+% under the assumption that the constraints expressed by the
+% instance context \mbox{$\it cx'$} are satisfied, the constraints expressed by the
+% superclass context \mbox{$\it cx[(T\ u1\ \ldots \ uk)/u]$} must also be satisfied.
+% 
+% Furthermore, under the same assumption, any constraints arising from the
+% class method declarations in \mbox{$\it d$} must also be satisfied.  
+
+In fact, except in pathological cases 
+it is possible to infer from the instance declaration the
+most general instance context \mbox{$\it cx'$} satisfying the above two constraints, 
+but it is nevertheless mandatory
+to write an explicit instance context.
+\end{itemize}
+The following example illustrates the restrictions imposed by superclass instances:
+\bprog
+{\small\begin{verbatim}
+  class Foo a => Bar a where ...
+  
+  instance (Eq a, Show a) => Foo [a] where ...
+  
+  instance Num a => Bar [a] where ...
+\end{verbatim}}
+\eprog
+This example is valid Haskell.  Since \mbox{\tt Foo} is a superclass of \mbox{\tt Bar},
+the second instance declaration is only valid if \mbox{\tt [a]} is an
+instance of \mbox{\tt Foo} under the assumption \mbox{\tt Num\ a}.  
+The first instance declaration does indeed say that \mbox{\tt [a]} is an instance
+of \mbox{\tt Foo} under this assumption, because \mbox{\tt Eq} and \mbox{\tt Show} are superclasses
+of \mbox{\tt Num}.
+
+If the two instance declarations instead read like this:
+\bprog
+{\small\begin{verbatim}
+  instance Num a => Foo [a] where ...
+  
+  instance (Eq a, Show a) => Bar [a] where ...
+\end{verbatim}}
+\eprog
+then the program would be invalid.  The second instance declaration is
+valid only if \mbox{\tt [a]} is an instance of \mbox{\tt Foo} under the assumptions
+\mbox{\tt (Eq\ a,\ Show\ a)}.  But this does not hold, since \mbox{\tt [a]} is only an
+instance of \mbox{\tt Foo} under the stronger assumption \mbox{\tt Num\ a}.
+
+Further examples of 
+\mbox{\tt instance} declarations may be found in Chapter~\ref{stdprelude}.
+
+\subsection{Derived Instances}
+\index{derived instance}
+\label{derived-decls}
+
+As mentioned in Section~\ref{datatype-decls}, \mbox{\tt data} and \mbox{\tt newtype}
+declarations 
+contain an optional \mbox{\tt deriving} form.  If the form is included, then
+{\em derived instance declarations} are automatically generated for
+the datatype in each of the named classes.
+These instances are subject to the same restrictions as user-defined
+instances.  When deriving a class \mbox{$\it C$} for a type \mbox{$\it T$}, instances for
+all superclasses of \mbox{$\it C$} must exist for \mbox{$\it T$}, either via an explicit
+\mbox{\tt instance} declaration or by including the superclass in the
+\mbox{\tt deriving} clause.
+
+Derived instances provide convenient commonly-used operations for
+user-de\-fined da\-ta\-types.  For example, derived instances for datatypes
+in the class \mbox{\tt Eq} define the operations \mbox{\tt ==} and \mbox{\tt /=}, freeing the
+programmer from the need to define them.
+%and taking advantage of
+%\Haskell{}'s class mechanism to overload these operations.
+
+The only classes in the Prelude for
+which derived instances are allowed are
+\mbox{\tt Eq}\indexdi{Eq},
+\mbox{\tt Ord}\indexdi{Ord},
+\mbox{\tt Enum}\indexdi{Enum},
+\mbox{\tt Bounded}\indexdi{Bounded},
+\mbox{\tt Show}\indexdi{Show},
+and \mbox{\tt Read}\indexdi{Read},
+all mentioned in Figure~\ref{standard-classes}.
+The
+precise details of how the derived instances are generated for each of
+these classes are provided in Chapter~\ref{derived-appendix}, including
+a specification of when such derived instances are possible. 
+%(which is important for the following discussion).
+Classes defined by the standard libraries may also be derivable.
+
+A static error results if it is not possible to derive an \mbox{\tt instance}
+declaration over a class named in a \mbox{\tt deriving} form.  For example,
+not all datatypes can properly support class methods in
+\mbox{\tt Enum}.\indexclass{Enum}  It is 
+also a static error to give an explicit \mbox{\tt instance} declaration for
+a class that is also derived.
+%These rules also apply to the superclasses
+%of the class in question.
+
+If the \mbox{\tt deriving} form is omitted from a \mbox{\tt data} or \mbox{\tt newtype}
+declaration, then {\em no} instance declarations
+are derived for 
+that datatype; that is, omitting a \mbox{\tt deriving} form is equivalent to
+including an empty deriving form: \mbox{\tt deriving\ ()}.
+
+% OLD:
+%On the other hand, if the \mbox{\tt deriving} form is omitted from a \mbox{\tt data}
+%declaration, then \mbox{\tt instance} declarations are derived for the datatype
+%in as many of the six classes mentioned above as is possible (see
+%Chapter~\ref{derived-appendix}); that is, no
+%static error will result if the \mbox{\tt instance} declarations cannot be generated.
+
+%OLD:
+%If {\em no} derived \mbox{\tt instance} declarations for a datatype
+%are wanted, then the empty deriving form \mbox{\tt deriving\ ()} must be given
+%in the \mbox{\tt data} declaration for that type.
+
+\subsection{Ambiguous Types, and Defaults for Overloaded Numeric Operations}
+\label{default-decls}
+\index{default declaration@{\tt default} declaration}
+\index{overloading!defaults}
+
+\begin{flushleft}\it\begin{tabbing}
+\hspace{0.6in}\=\hspace{3.1in}\=\kill
+$\it topdecl$\>\makebox[3.5em]{$\rightarrow$}$\it \makebox{\tt default}\ \makebox{\tt (}type_1\ \makebox{\tt ,}\ \ldots \ \makebox{\tt ,}\ type_n\makebox{\tt )}$\>\makebox[3em]{}$\it (n\geq 0)$
+\end{tabbing}\end{flushleft}
+\index{topdecl@{\em topdecl} (\mbox{\tt default})}
+
+\noindent
+A problem inherent with \Haskell{}-style overloading is the
+possibility of an {\em ambiguous type}.
+\index{ambiguous type}
+For example, using the
+\mbox{\tt read} and \mbox{\tt show} functions defined in Chapter~\ref{derived-appendix},
+and supposing that just \mbox{\tt Int} and \mbox{\tt Bool} are members of \mbox{\tt Read} and
+\mbox{\tt Show}, then the expression
+\bprog
+{\small\begin{verbatim}
+  let x = read "..." in show x  -- invalid
+\end{verbatim}}
+\eprog
+is ambiguous, because the types for \mbox{\tt show} and \mbox{\tt read},
+\[\ba{ll}
+\mbox{\tt show} & \mbox{$\it ::\ \forall\ a.~\makebox{\tt Show}~\ a\ \Rightarrow\ a\ \rightarrow\ \makebox{\tt String}$} \\
+\mbox{\tt read} & \mbox{$\it ::\ \forall\ a.~\makebox{\tt Read}~\ a\ \Rightarrow\ \makebox{\tt String}\ \rightarrow\ a$}
+\ea\]
+could be satisfied by instantiating \mbox{\tt a} as either \mbox{\tt Int}
+in both cases, or \mbox{\tt Bool}.  Such expressions
+are considered ill-typed, a static error.
+
+We say that an expression \mbox{\tt e} has an {\em ambiguous type}
+if, in its type \mbox{$\it \forall\ \overline{u}.~cx\ \Rightarrow\ t$}, 
+there is a type variable \mbox{$\it u$} in \mbox{$\it \overline{u}$} that occurs in \mbox{$\it cx$} 
+but not in \mbox{$\it t$}.  Such types are invalid.
+
+For example, the earlier expression involving \mbox{\tt show} and \mbox{\tt read} has
+an ambiguous type since its type is 
+\mbox{$\it \forall\ a.~\ \makebox{\tt Show}~\ a,\ \makebox{\tt Read}~\ a\ \Rightarrow\ \makebox{\tt String}$}.
+
+Ambiguous types can only be circumvented by
+input from the user.  One way is through the use of {\em expression
+type-signatures}
+\index{expression type-signature}
+as described in Section~\ref{expression-type-sigs}.
+For example, for the ambiguous expression given earlier, one could
+write:
+\bprog
+{\small\begin{verbatim}
+  let x = read "..." in show (x::Bool)
+\end{verbatim}}
+\eprog
+which disambiguates the type.
+
+Occasionally, an otherwise ambiguous expression needs to be made
+the same type as some variable, rather than being given a fixed
+type with an expression type-signature.  This is the purpose
+of the function \mbox{\tt asTypeOf} (Chapter~\ref{stdprelude}):
+\mbox{$\it x$} \mbox{\tt `asTypeOf`} \mbox{$\it y$} has the value of \mbox{$\it x$}, but \mbox{$\it x$} and \mbox{$\it y$} are
+forced to have the same type.  For example,
+\bprog
+{\small\begin{verbatim}
+  approxSqrt x = encodeFloat 1 (exponent x `div` 2) `asTypeOf` x
+\end{verbatim}}
+\eprog
+(See Section~\ref{coercion} for a description of \mbox{\tt encodeFloat} and \mbox{\tt exponent}.)
+
+Ambiguities in the class \mbox{\tt Num}\indexclass{Num}
+are most common, so \Haskell{}
+provides another way to resolve them---with a {\em
+default declaration}:
+\[
+\mbox{$\it \makebox{\tt default\ (}t_1\ \makebox{\tt ,}\ \ldots \ \makebox{\tt ,}\ t_n\makebox{\tt )}$}
+\]
+where \mbox{$\it n\geq0$}, and each
+\mbox{$\it t_i$} must be a type for which \mbox{$\it \makebox{\tt Num\ }t_i$} holds.
+In situations where an ambiguous type is discovered, an ambiguous type variable, \mbox{$\it v$}, 
+is defaultable if:
+\begin{itemize}
+\item \mbox{$\it v$} appears only in constraints of the form \mbox{$\it C\ v$}, where \mbox{$\it C$} is a class, and
+\item at least one of these classes is a numeric class,
+        (that is, \mbox{\tt Num} or a subclass of \mbox{\tt Num}), and 
+\item all of these classes are defined in the Prelude or a standard library
+(Figures~\ref{basic-numeric-1}--\ref{basic-numeric-2}
+show the numeric classes, and
+Figure~\ref{standard-classes}
+shows the classes defined in the Prelude.)
+\end{itemize}
+Each defaultable variable is replaced by the first type in the
+default list that is an instance of all the ambiguous variable's classes.
+It is a static error if no such type is found.
+
+Only one default declaration is permitted per module, and its effect
+is limited to that module.  If no default declaration is given in a
+module then it assumed to be:
+\bprog
+{\small\begin{verbatim}
+  default (Integer, Double)
+\end{verbatim}}
+\eprog
+The empty default declaration, \mbox{\tt default\ ()}, turns off all defaults in a module.
+
+\section{Nested Declarations}
+\label{nested}
+
+The following declarations may be used in any declaration list,
+including the top level of a module.
+
+\subsection{Type Signatures}
+\index{type signature}
+\label{type-signatures}
+
+\begin{flushleft}\it\begin{tabbing}
+\hspace{0.6in}\=\hspace{3.1in}\=\kill
+$\it gendecl$\>\makebox[3.5em]{$\rightarrow$}$\it vars\ \makebox{\tt ::}\ [context\ \makebox{\tt =>}]\ type$\\ 
+$\it vars$\>\makebox[3.5em]{$\rightarrow$}$\it var_1\ \makebox{\tt ,}\ \ldots \makebox{\tt ,}\ var_n$\>\makebox[3em]{}$\it (n\geq 1)$
+\end{tabbing}\end{flushleft}
+\indexsyn{signdecl}%
+\indexsyn{vars}%
+A type signature specifies types for variables, possibly with respect
+to a context.  A type signature has the form:
+\[
+\mbox{$\it v_1,\ \ldots ,\ v_n\ \makebox{\tt ::}\ cx\ \makebox{\tt =>}\ t$}
+\]
+which is equivalent to asserting
+\mbox{$\it v_i\ \makebox{\tt ::}\ cx\ \makebox{\tt =>}\ t$}
+for each \mbox{$\it i$} from \mbox{$\it 1$} to \mbox{$\it n$}.  Each \mbox{$\it v_i$} must have a value binding in
+the same declaration list that contains the type signature; i.e.~it is
+invalid to give a type signature for a variable bound in an
+outer scope.
+Moreover, it is invalid to give more than one type signature for one
+variable, even if the signatures are identical.
+
+As mentioned in Section~\ref{type-syntax},
+every type variable appearing in a signature
+is universally quantified over that signature, and hence
+the scope of a type variable is limited to the type
+signature that contains it.  For example, in the following
+declarations
+\bprog
+{\small\begin{verbatim}
+  f :: a -> a
+  f x = x :: a                  -- invalid
+\end{verbatim}}
+\eprog
+the \mbox{\tt a}'s in the two type signatures are quite distinct.  Indeed,
+these declarations contain a static error, since \mbox{\tt x} does not have
+type \mbox{$\it \forall\ a.~a$}.  (The type of \mbox{\tt x} is dependent on the type of
+\mbox{\tt f}; there is currently no way in \Haskell{} to specify a signature
+for a variable with a dependent type; this is explained in Section
+\ref{monomorphism}.)
+
+If a given program includes a signature
+for a variable \mbox{$\it f$}, then each use of \mbox{$\it f$} is treated as having the
+declared type.  It is a static error if the same type cannot also be
+inferred for the defining occurrence of \mbox{$\it f$}.
+
+If a variable \mbox{$\it f$} is defined without providing a corresponding type
+signature declaration, then each use of \mbox{$\it f$} outside its own declaration
+group (see Section~\ref{dependencyanalysis}) is treated as having the
+corresponding inferred, or {\em principal} type \index{principal type}.
+However, to ensure that type inference is still possible, the defining
+occurrence, and all uses of \mbox{$\it f$} within its declaration group must have
+the same monomorphic type (from which the principal type is obtained
+by generalization, as described in Section~\ref{generalization}).
+
+%%A type signature for \mbox{$\it x$} may be more specific than the principal
+%%type derivable from the value binding of \mbox{$\it x$} (see
+%%Section~\ref{type-semantics}), but it is an error to give a type
+%%that is more
+%%general than, or incomparable to, the principal type.
+%%\index{principal type}
+%%If a more specific type is given then all occurrences of the
+%%variable must be used at the more specific type or at a more
+%%specific type still.
+%
+For example, if we define\nopagebreak[4]
+\bprog
+{\small\begin{verbatim}
+  sqr x  =  x*x
+\end{verbatim}}
+\eprog
+then the principal type is 
+\mbox{$\it \makebox{\tt sqr}\ ::\ \forall\ a.~\ \makebox{\tt Num}~\ a\ \Rightarrow\ a\ \rightarrow\ a$}, 
+which allows
+applications such as \mbox{\tt sqr\ 5} or \mbox{\tt sqr\ 0.1}.  It is also valid to declare
+a more specific type, such as
+\bprog
+{\small\begin{verbatim}
+  sqr :: Int -> Int
+\end{verbatim}}
+\eprog
+but now applications such as \mbox{\tt sqr\ 0.1} are invalid.  Type signatures such as
+\bprog
+{\small\begin{verbatim}
+  sqr :: (Num a, Num b) => a -> b     -- invalid
+  sqr :: a -> a                       -- invalid
+\end{verbatim}}
+\eprog
+are invalid, as they are more general than the principal type of \mbox{\tt sqr}.
+
+Type signatures can also be used to support
+{\em polymorphic recursion}\index{polymorphic recursion}.
+The following definition is pathological, but illustrates how a type
+signature can be used to specify a type more general than the one that
+would be inferred:
+\bprog
+{\small\begin{verbatim}
+  data T a  =  K (T Int) (T a)
+  f         :: T a -> a
+  f (K x y) =  if f x == 1 then f y else undefined
+\end{verbatim}}
+\eprog
+If we remove the signature declaration, the type of \mbox{\tt f} will be
+inferred as \mbox{\tt T\ Int\ ->\ Int} due to the first recursive call for which
+the argument to \mbox{\tt f} is \mbox{\tt T\ Int}.  Polymorphic recursion allows the user
+to supply the more general type signature, \mbox{\tt T\ a\ ->\ a}.
+
+\subsection{Fixity Declarations}
+\index{fixity declaration}
+\label{fixity}
+
+\begin{flushleft}\it\begin{tabbing}
+\hspace{0.6in}\=\hspace{3.1in}\=\kill
+$\it gendecl$\>\makebox[3.5em]{$\rightarrow$}$\it fixity\ [integer]\ ops$\\ 
+$\it fixity$\>\makebox[3.5em]{$\rightarrow$}$\it \makebox{\tt infixl}\ |\ \makebox{\tt infixr}\ |\ \makebox{\tt infix}$\\ 
+$\it ops$\>\makebox[3.5em]{$\rightarrow$}$\it op_1\ \makebox{\tt ,}\ \ldots \ \makebox{\tt ,}\ op_n$\>\makebox[3em]{}$\it (n\geq 1)$\\ 
+$\it op$\>\makebox[3.5em]{$\rightarrow$}$\it varop\ |\ conop$
+\end{tabbing}\end{flushleft}
+\indexsyn{gendecl}%
+\indexsyn{fixity}%
+\indexsyn{ops}%
+\indexsyn{op}%
+%\indextt{infixl}\indextt{infixr}\indextt{infix}
+A fixity declaration gives the fixity and binding
+precedence of one or more operators.  The \mbox{$\it integer$} in a fixity declaration
+must be in the range \mbox{$\it 0$} to \mbox{$\it 9$}.
+A fixity declaration may appear anywhere that 
+a type signature appears and, like a type signature, declares a property of
+a particular operator.  Also like a type signature,
+a fixity declaration can only occur in the same sequence of declarations as
+the declaration of the operator itself, and at most one fixity declaration
+may be given for any operator.  (Class methods are a minor exception;
+their fixity declarations can occur either in the class declaration itself
+or at top level.)
+
+There are three kinds of fixity, non-, left- and right-associativity
+(\mbox{\tt infix}, \mbox{\tt infixl}, and \mbox{\tt infixr}, respectively), and ten precedence
+levels, 0 to 9 inclusive (level 0 binds least tightly, and level 9
+binds most tightly).  If the \mbox{$\it digit$} is omitted, level 9 is assumed.
+Any operator lacking a fixity declaration
+is assumed to be \mbox{\tt infixl\ 9} (See Section~\ref{expressions} for more on
+the use of fixities).
+Table~\ref{prelude-fixities} lists the fixities and precedences of
+the operators defined in the Prelude.
+
+\begin{table}[htb]
+\[
+\centerline{
+\bto{|r||l|l|l|}
+\hline 
+Prec-  & Left associative       & Non-associative       & Right associative \\
+edence & operators              & operators             & operators \\ \hline\hline
+%9  & \mbox{\tt !}, \mbox{\tt !!}, \mbox{\tt //}   &                               & \mbox{\tt .}             \\ \hline
+9  & \mbox{\tt !!}               &                               & \mbox{\tt .}             \\ \hline
+8  &                    &                               & \mbox{\tt {\char'136}}, \mbox{\tt {\char'136}{\char'136}}, \mbox{\tt **} \\ \hline
+7  & \mbox{\tt *}, \mbox{\tt /}, \mbox{\tt `div`},                 &               &  \\
+   & \mbox{\tt `mod`}, \mbox{\tt `rem`}, \mbox{\tt `quot`}         &               &  \\ \hline
+6  & \mbox{\tt +}, \mbox{\tt -}           &                               &                 \\ \hline
+5  &                    &                               & \mbox{\tt :}, \mbox{\tt ++}       \\ \hline
+4  &                    & \mbox{\tt ==}, \mbox{\tt /=}, \mbox{\tt <}, \mbox{\tt <=}, \mbox{\tt >}, \mbox{\tt >=}, &             \\
+   &                    & \mbox{\tt `elem`}, \mbox{\tt `notElem`}         &                 \\ \hline
+3  &                    &                               & \mbox{\tt {\char'46}{\char'46}}            \\ \hline
+2  &                    &                               & \mbox{\tt ||}            \\ \hline
+1  &    \mbox{\tt >>}, \mbox{\tt >>=}     &                               &               \\ \hline
+0  &                    &                               & \mbox{\tt {\char'44}}, \mbox{\tt {\char'44}!}, \mbox{\tt `seq`}    \\ \hline
+\eto}
+\]
+%**<div align=center> <h4>Table 2</h4> </div>
+\ecaption{Precedences and fixities of prelude operators}
+% Removed (:%) -- infixl 7, on the grounds that it's not exported from 
+% PreludeRatio!
+\label{prelude-fixities}
+\index{"!"!@{\tt  {\char'041}{\char'041}}}
+\indextt{.}
+\indextt{**}
+\index{^@{\tt  {\char'136}}} % this is ^
+\index{^^@{\tt  {\char'136}{\char'136}}} % this is ^^
+\indextt{*}
+\indextt{/}
+\indextt{div}
+\indextt{mod}
+\indextt{rem}
+\indextt{+}
+\indextt{-}
+\indextt{:}
+\indextt{++}
+\indextt{/=}
+\indextt{<}
+\indextt{<=}
+\indextt{==}
+\indextt{>}
+\indextt{>=}
+\indextt{elem}
+\indextt{notElem}
+\index{&&@{\tt  \&\&}}
+\index{\vert\vert@{\tt  {\char'174}{\char'174}}}
+\indextt{>>}
+\indextt{>>=}
+\index{$@{\tt  {\char'044}}}
+\end{table}
+
+% Old table
+% \begin{tabular}{|c|l|l|}\hline
+% Precedence & Fixity & Operators \\ \hline
+% 9 & \mbox{\tt infixl} & \mbox{\tt !}, \mbox{\tt !!}, \mbox{\tt //} \\
+%   & \mbox{\tt infixr} & \mbox{\tt .} \\
+% 8 & \mbox{\tt infixr} & \mbox{\tt **}, \mbox{\tt {\char'136}}, \mbox{\tt {\char'136}{\char'136}} \\
+% 7 & \mbox{\tt infixl} & \mbox{\tt {\char'45}}, \mbox{\tt *} \\
+%   & \mbox{\tt infix}  & \mbox{\tt /}, \mbox{\tt `div`}, \mbox{\tt `mod`}, \mbox{\tt `rem`} \\
+% 6 & \mbox{\tt infixl} & \mbox{\tt +}, \mbox{\tt -} \\
+%   & \mbox{\tt infix}  & \mbox{\tt :+} \\
+% 5 & \mbox{\tt infixr} & \mbox{\tt :}, \mbox{\tt ++} \\
+%   & \mbox{\tt infix}  & \mbox{\tt {\char'134}{\char'134}} \\
+% 4 & \mbox{\tt infix}  & \mbox{\tt /=}, \mbox{\tt <}, \mbox{\tt <=}, \mbox{\tt ==}, \mbox{\tt >}, \mbox{\tt >=}, \mbox{\tt `elem`}, \mbox{\tt `notElem`} \\
+% 3 & \mbox{\tt infixr} & \mbox{\tt {\char'46}{\char'46}} \\
+% 2 & \mbox{\tt infixr} & \mbox{\tt ||} \\
+% 1 & \mbox{\tt infixr}  & \mbox{\tt >>}, \mbox{\tt >>=} \\
+% 0 & \mbox{\tt infixr} & \mbox{\tt {\char'44}} \\ \hline
+% \end{tabular}}
+
+Fixity is a property of a particular entity (constructor or variable), just like
+its type; fixity is not a property of that entity's {\em name}.
+For example: 
+\bprog
+{\small\begin{verbatim}
+  module Bar( op ) where
+    infixr 7 `op`
+    op = ...
+  
+  module Foo where
+    import qualified Bar
+    infix 3 `op`
+  
+    a `op` b = (a `Bar.op` b) + 1
+  
+    f x = let
+             p `op` q = (p `Foo.op` q) * 2
+          in ...
+\end{verbatim}}
+\eprog
+Here, \mbox{\tt `Bar.op`} is \mbox{\tt infixr\ 7}, \mbox{\tt `Foo.op`} is \mbox{\tt infix\ 3}, and
+the nested definition of \mbox{\tt op} in \mbox{\tt f}'s right-hand side has the
+default fixity of \mbox{\tt infixl\ 9}.  (It would also be possible
+to give a fixity to the nested definition of \mbox{\tt `op`} with a nested
+fixity declaration.)
+
+
+
+\subsection{Function and Pattern Bindings}
+ \label{function-bindings}\label{pattern-bindings}
+\index{function binding}\index{pattern binding}
+
+\begin{flushleft}\it\begin{tabbing}
+\hspace{0.6in}\=\hspace{3.1in}\=\kill
+$\it decl$\>\makebox[3.5em]{$\rightarrow$}$\it (funlhs\ |\ \hprime{pat})\ rhs$\\ 
+$\it $\\ 
+$\it funlhs$\>\makebox[3.5em]{$\rightarrow$}$\it var\ apat\ \{\ apat\ \}$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it \hprime{pat\ varop\ pat}$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it \makebox{\tt (}\ funlhs\ \makebox{\tt )}\ apat\ \{\ apat\ \}$\\ 
+$\it $\\ 
+$\it rhs$\>\makebox[3.5em]{$\rightarrow$}$\it \makebox{\tt =}\ exp\ [\makebox{\tt where}\ decls]$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it gdrhs\ [\makebox{\tt where}\ decls]$\\ 
+$\it $\\ 
+$\it gdrhs$\>\makebox[3.5em]{$\rightarrow$}$\it \hprime{guards\ \makebox{\tt =}\ exp\ [gdrhs]}$\\ 
+$\it $\\ 
+$\it \hprime{guards}$\>\makebox[3.5em]{$\rightarrow$}$\it \hprime{\makebox{\tt |}\ guard_1,\ \ldots ,\ guard_n}$\>\makebox[3em]{}$\it \hprime{(n\geq 1)}$\\ 
+$\it $\\ 
+$\it \indexsyn{guard}\hprime{guard}$\>\makebox[3.5em]{$\rightarrow$}$\it \hprime{pat\ \makebox{\tt <-}\ infixexp}$\>\makebox[3em]{}$\it (\hprime{\tr{pattern\ guard}})$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it \hprime{\makebox{\tt let}\ decls}$\>\makebox[3em]{}$\it (\hprime{\tr{local\ declaration}})$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it infixexp$\>\makebox[3em]{}$\it (\tr{boolean\ guard})$
+\end{tabbing}\end{flushleft}
+\indexsyn{decl}%
+\indexsyn{pat}%
+\indexsyn{rhs}%
+\indexsyn{gdrhs}%
+\indexsyn{guards}%
+\indexsyn{guard}%
+
+We distinguish two cases within this syntax: a {\em pattern binding}
+occurs when the left hand side is a \hprime{\mbox{$\it pat$}}; 
+otherwise, the binding is called a {\em function
+binding}.  Either binding may appear at the top-level of a module or
+within a \mbox{\tt where} or \mbox{\tt let} construct.  
+
+\subsubsection{Function bindings}
+\index{function binding}
+A function binding binds a variable to a function value.  The general
+form of a function binding for variable \mbox{$\it x$} is:
+\[\ba{lll}
+\mbox{$\it x$} & \mbox{$\it p_{11}\ \ldots \ p_{1k}$} & \mbox{$\it match_1$}\\
+\mbox{$\it \ldots $} \\
+\mbox{$\it x$} & \mbox{$\it p_{n1}\ \ldots \ p_{nk}$} & \mbox{$\it match_n$}
+\ea\]
+where each \mbox{$\it p_{ij}$} is a pattern, and where each \mbox{$\it match_i$} is of the
+general form:
+\[\ba{l}
+\mbox{$\it \makebox{\tt =}\ e_i\ \makebox{\tt where\ {\char'173}}\ decls_i\ \makebox{\tt {\char'175}}$}
+\ea\]
+or
+\[\ba{lll}
+
+\mbox{$\it \makebox{\tt |}\ \hprime{gs_{i1}}$}   & \mbox{$\it \makebox{\tt =}\ e_{i1}$} \\
+\mbox{$\it \ldots $} \\
+\mbox{$\it \makebox{\tt |}\ \hprime{gs_{im_i}}$} & \mbox{$\it \makebox{\tt =}\ e_{im_i}$} \\
+               & \multicolumn{2}{l}{\mbox{$\it \makebox{\tt where\ {\char'173}}\ decls_i\ \makebox{\tt {\char'175}}$}}
+\ea\]
+and where \mbox{$\it n\geq 1$}, \mbox{$\it 1\leq i\leq n$}, \mbox{$\it m_i\geq 1$}.  The former is treated
+as shorthand for a particular case of the latter, namely:
+\[\ba{l}
+\mbox{$\it \makebox{\tt |\ True\ =}\ e_i\ \makebox{\tt where\ {\char'173}}\ decls_i\ \makebox{\tt {\char'175}}$}
+\ea\]
+
+Note that all clauses defining a function must be contiguous, and the
+number of patterns in each clause must be the same.  The set of
+patterns corresponding to each match must be {\em
+linear}\index{linearity}\index{linear pattern}---no variable is
+allowed to appear more than once in the entire set.
+
+Alternative syntax is provided for binding functional values to infix
+operators.  For example, these three function
+definitions are all equivalent:
+\bprog
+{\small\begin{verbatim}
+  plus x y z = x+y+z
+  x `plus` y = \ z -> x+y+z
+  (x `plus` y) z = x+y+z
+\end{verbatim}}
+\eprog
+
+\begin{haskellprime}
+
+Note that fixity resolution applies to the infix variants of the
+function binding in the same way as for expressions
+(Section~\ref{fixity-resolution}).  Applying fixity resolution to the
+left side of the equals in a function binding must leave the \mbox{$\it varop$}
+being defined at the top level.  For example, if we are defining a new
+operator \mbox{\tt {\char'43}{\char'43}} with precedence 6, then this definition would be
+illegal:
+\bprog
+{\small\begin{verbatim}
+  a ## b : xs = exp
+\end{verbatim}}
+\eprog
+because \mbox{\tt :} has precedence 5, so the left hand side resolves to
+\mbox{\tt (a\ {\char'43}{\char'43}\ x)\ :\ xs}, and this cannot be a pattern binding because \mbox{\tt (a\ {\char'43}{\char'43}\ x)}
+is not a valid pattern.
+
+\end{haskellprime}
+
+\outline{
+\paragraph*{Translation:}
+The general binding form for functions is semantically
+equivalent to the equation (i.e.~simple pattern binding):
+\[
+\mbox{$\it x\ \makebox{\tt =\ {\char'134}}\ x_1\ \ldots \ x_k\ \makebox{\tt ->\ case\ (}x_1\makebox{\tt ,\ }\ldots \makebox{\tt ,\ }x_k\makebox{\tt )\ of}$}
+\ba[t]{lcl}
+\mbox{$\it \makebox{\tt (}p_{11},\ \ldots ,\ p_{1k}\makebox{\tt )}\ match_1$}  \\
+\mbox{$\it \ldots $} \\
+\mbox{$\it \makebox{\tt (}p_{n1},\ \ldots ,\ p_{nk}\makebox{\tt )}\ match_n$}
+\ea\]
+where the \mbox{$\it x_i$} are new identifiers.
+}
+
+\subsubsection{Pattern bindings}
+\label{patbind}
+\index{pattern binding}
+
+A pattern binding binds variables to values.  A {\em simple} pattern
+binding has form \mbox{$\it p\ =\ e$}.
+\index{simple pattern binding}
+The pattern \mbox{$\it p$} is
+matched ``lazily'' as an irrefutable pattern\index{irrefutable
+pattern}, as if there were an implicit \mbox{\tt {\char'176}} in front 
+of it.  See the translation in
+Section~\ref{let-expressions}.
+
+The {\em general} form of a pattern binding is \mbox{$\it p\ match$}, where a
+\mbox{$\it match$} is the same structure as for function bindings above; in other
+words, a pattern binding is:
+\[\ba{rcl}
+\mbox{$\it p$} & \mbox{$\it \makebox{\tt |}\ \hprime{gs_{1}}$}   & \mbox{$\it \makebox{\tt =}\ e_{1}$} \\
+    & \mbox{$\it \makebox{\tt |}\ \hprime{gs_{2}}$}   & \mbox{$\it \makebox{\tt =}\ e_{2}$} \\
+    & \mbox{$\it \ldots $} \\
+    & \mbox{$\it \makebox{\tt |}\ \hprime{gs_{m}}$}   & \mbox{$\it \makebox{\tt =}\ e_{m}$} \\
+    & \multicolumn{2}{l}{\mbox{$\it \makebox{\tt where\ {\char'173}}\ decls\ \makebox{\tt {\char'175}}$}}
+\ea\]
+
+%{\em Note}: the simple form
+%\WeSay{Yes}
+%\mbox{$\it p\ \makebox{\tt =}\ e$} is equivalent to \mbox{$\it p\ \makebox{\tt |\ True\ =}\ e$}.
+
+\outline{
+\paragraph*{Translation:}
+The pattern binding above is semantically equivalent to this
+simple pattern binding:
+\[\ba{lcl}
+\mbox{$\it p$} &\mbox{\tt =}& \mbox{$\it \makebox{\tt let}\ decls\ \makebox{\tt in}$} \\
+    &   & \hprime{\mbox{\tt case\ ()\ of\ }} \\
+    &   & \hprime{\mbox{$\it \makebox{\tt \ \ ()\ |\ }gs_{1}\makebox{\tt \ ->\ }e_{1}$}} \\
+    &   & \hprime{\mbox{$\it \makebox{\tt \ \ \ \ \ |\ }gs_{2}\makebox{\tt \ ->\ }e_{2}$}} \\
+    &   & \hprime{\mbox{$\it \makebox{\tt \ \ \ \ \ \ \ }\ldots $}} \\
+    &   & \hprime{\mbox{$\it \makebox{\tt \ \ \ \ \ |\ }gs_{m}\makebox{\tt \ ->\ }e_{m}$}} \\
+    &   & \hprime{\mbox{$\it \makebox{\tt \ \ {\char'137}\ ->\ error\ "Unmatched\ pattern"}$}}
+\ea\]
+}
+
+\section{Static Semantics of Function and Pattern Bindings}
+\label{dependencyanalysis}
+
+The static semantics of the function and pattern bindings of
+a \mbox{\tt let} expression or \mbox{\tt where} clause
+% (including that of the top-level of
+% a program that has been translated into a \mbox{\tt let} expression as
+% described at the beginning of Section~\ref{modules})
+are discussed in this section.
+
+\subsection{Dependency Analysis}
+\label{depend-anal}
+
+In general the static semantics are given by \hprime{applying} the
+normal Hindley-Milner\index{Hindley-Milner type system} inference
+rules.  \hprime{In order to increase polymorphism, these rules are applied to
+groups of bindings identified by a \emph{dependency analysis}.}
+
+\begin{haskellprime}
+
+A binding \mbox{$\it b1$} \emph{depends} on a binding \mbox{$\it b2$} in the same list of
+declarations if either
+
+\begin{enumerate}
+\item \mbox{$\it b1$} contains a free identifier that has no type signature and
+is bound by \mbox{$\it b2$}, or
+\item \mbox{$\it b1$} depends on a binding that depends on \mbox{$\it b2$}.
+\end{enumerate}
+
+A \emph{declaration group} is a minimal set of mutually dependent
+bindings. Hindley-Milner type inference is applied to each declaration
+group in dependency order. The order of declarations in \mbox{\tt where}/\mbox{\tt let}
+constructs is irrelevant.
+
+\end{haskellprime}
+
+% Notes: from http://hackage.haskell.org/trac/haskell-prime/wiki/RelaxedDependencyAnalysis
+% 
+%     * also tightens up the original wording, which didn't mention that the declarations had to be in the same list and also defined declaration group but not dependency.
+%     * defining dependencies between bindings is a little simpler than dependencies between variables.
+%     * the dependency analysis transformation formerly listed in this
+%     * section is no longer always possible. 
+
+%----------------
+
+\subsection{Generalization}
+\label{generalization}
+
+\begin{haskellprime}
+
+The Hindley-Milner type system assigns types to a let-expression in two stages:
+
+\begin{enumerate}
+\item The declaration groups are considered in dependency order. For
+each group, a type with no universal quantification is inferred for
+each variable bound in the group. Then, all type variables that occur
+in these types are universally quantified unless they are associated
+with bound variables in the type environment; this is called
+generalization.
+
+\item Finally, the body of the let-expression is typed.
+\end{enumerate}
+
+\end{haskellprime}
+
+% Notes: from http://hackage.haskell.org/trac/haskell-prime/wiki/RelaxedDependencyAnalysis
+% 
+%     * The original deals with let's consisting of a single binding, instead of declaration groups. Note that we can no longer assume that a let has a single declaration group.
+%     * The original does not deal with functions, non-trivial patterns
+%     * or recursion. 
+
+For example, consider the declaration
+\bprog
+{\small\begin{verbatim}
+  f x = let g y = (y,y)
+        in ...
+
+\end{verbatim}}
+\eprog
+The type of \mbox{\tt g}'s definition is 
+\mbox{$\it a\ \rightarrow\ (a,a)$}.  The generalization step
+attributes to \mbox{\tt g} the polymorphic type 
+\mbox{$\it \forall\ a.~\ a\ \rightarrow\ (a,a)$},
+after which the typing of the ``\mbox{\tt ...}'' part can proceed.
+
+When typing overloaded definitions, all the overloading 
+constraints from a single declaration group are collected together, 
+to form the context for the type of each variable declared in the group.
+For example, in the definition:
+\bprog
+{\small\begin{verbatim}
+  f x = let g1 x y = if x>y then show x else g2 y x
+            g2 p q = g1 q p
+        in ...
+\end{verbatim}}
+\eprog
+The types of the definitions of \mbox{\tt g1} and \mbox{\tt g2} are both
+\mbox{$\it a\ \rightarrow\ a\ \rightarrow\ \makebox{\tt String}$}, and the accumulated constraints are
+\mbox{$\it \makebox{\tt Ord}~a$} (arising from the use of \mbox{\tt >}), and \mbox{$\it \makebox{\tt Show}~a$} (arising from the
+use of \mbox{\tt show}).
+The type variables appearing in this collection of constraints are
+called the {\em constrained type variables}.
+
+The generalization step attributes to both \mbox{\tt g1} and \mbox{\tt g2} the type
+\[
+\mbox{$\it \forall\ a.~(\makebox{\tt Ord}~a,~\makebox{\tt Show}~a)\ \Rightarrow\ a\ \rightarrow\ a\ \rightarrow\ \makebox{\tt String}$}
+\]
+Notice that \mbox{\tt g2} is overloaded in the same way as \mbox{\tt g1} even though the
+occurrences of \mbox{\tt >} and \mbox{\tt show} are in the definition of \mbox{\tt g1}.
+
+If the programmer supplies explicit type signatures for more than one variable
+in a declaration group, the contexts of these signatures must be 
+identical up to renaming of the type variables.
+
+\subsection{Context Reduction Errors}
+\label{context-reduction}
+\index{context reduction}
+As mentioned in Section~\ref{type-semantics}, the context of a type
+may constrain only a type variable, or the application of a type variable
+to one or more types.  Hence, types produced by
+generalization must be expressed in a form in which all context
+constraints have be reduced to this ``head normal form''.
+Consider, for example, the
+definition:
+\bprog
+{\small\begin{verbatim}
+  f xs y  =  xs == [y]
+\end{verbatim}}
+\eprog
+Its type is given by
+\bprog
+{\small\begin{verbatim}
+  f :: Eq a => [a] -> a -> Bool
+\end{verbatim}}
+\eprog
+and not
+\bprog
+{\small\begin{verbatim}
+  f :: Eq [a] => [a] -> a -> Bool
+\end{verbatim}}
+\eprog
+Even though the equality is taken at the list type, the context must
+be simplified, using the instance declaration for \mbox{\tt Eq} on lists,
+before generalization.  If no such instance is in scope, a static
+error occurs.
+
+Here is an example that shows the need for a
+constraint of the form \mbox{$\it C\ (m\ t)$} where m is one of the type
+variables being generalized; that is, where the class \mbox{$\it C$} applies to a type
+expression that is not a type variable or a type constructor.
+Consider:
+\bprog
+{\small\begin{verbatim}
+  f :: (Monad m, Eq (m a)) => a -> m a -> Bool
+  f x y = return x == y
+\end{verbatim}}
+\eprog
+The type of \mbox{\tt return} is \mbox{\tt Monad\ m\ =>\ a\ ->\ m\ a}; the type of \mbox{\tt (==)} is
+\mbox{\tt Eq\ a\ =>\ a\ ->\ a\ ->\ Bool}.  The type of \mbox{\tt f} should be
+therefore \mbox{\tt (Monad\ m,\ Eq\ (m\ a))\ =>\ a\ ->\ m\ a\ ->\ Bool}, and the context
+cannot be simplified further.
+
+The instance declaration derived from a data type \mbox{\tt deriving} clause
+(see Section~\ref{derived-decls})
+must, like any instance declaration, have a {\em simple} context; that is,
+all the constraints must be of the form \mbox{$\it C\ a$}, where \mbox{$\it a$} is a type variable.
+For example, in the type
+\bprog
+{\small\begin{verbatim}
+  data Apply a b = App (a b)  deriving Show
+\end{verbatim}}
+\eprog
+the derived Show instance will produce a context \mbox{\tt Show\ (a\ b)}, which
+cannot be reduced and is not simple; thus a static error results.
+
+\subsection{Monomorphism}
+\label{monomorphism}
+Sometimes it is not possible to generalize over all the type variables
+used in the type of the definition.
+For example, consider the declaration\nopagebreak[4]
+\bprog
+{\small\begin{verbatim}
+  f x = let g y z = ([x,y], z)
+        in ...
+\end{verbatim}}
+\eprog
+In an environment where \mbox{\tt x} has type \mbox{$\it a$},
+the type of \mbox{\tt g}'s definition is 
+\mbox{$\it a\ \rightarrow\ b\ \rightarrow\ \makebox{\tt ([}a\makebox{\tt ]},b\makebox{\tt )}$}.
+The generalization step attributes to \mbox{\tt g} the type 
+\mbox{$\it \forall\ b.~\ a\ \rightarrow\ b\ \rightarrow\ \makebox{\tt ([}a\makebox{\tt ]},b\makebox{\tt )}$};
+only \mbox{$\it b$} can be universally quantified because \mbox{$\it a$} occurs in the
+type environment.
+We say that the type of \mbox{\tt g} is {\em monomorphic in the type variable \mbox{$\it a$}}.
+\index{monomorphic type variable}
+
+The effect of such monomorphism is that the first argument of all 
+applications of \mbox{\tt g} must be of a single type.  
+For example, it would be valid for
+the ``\mbox{\tt ...}'' to be
+\bprog
+{\small\begin{verbatim}
+  (g True, g False)
+\end{verbatim}}
+\eprog
+(which would, incidentally, force \mbox{\tt x} to have type \mbox{\tt Bool}) but invalid
+for it to be 
+\bprog
+{\small\begin{verbatim}
+  (g True, g 'c')
+\end{verbatim}}
+\eprog
+In general, a type \mbox{$\it \forall\ \overline{u}.~cx\ \Rightarrow\ t$}
+is said to be {\em monomorphic}
+\index{monomorphic type variable}
+in the type variable \mbox{$\it a$} if \mbox{$\it a$} is free in
+\mbox{$\it \forall\ \overline{u}.~cx\ \Rightarrow\ t$}.
+
+It is worth noting that the explicit type signatures provided by \Haskell{}
+are not powerful enough to express types that include monomorphic type
+variables.  For example, we cannot write
+\bprog
+{\small\begin{verbatim}
+  f x = let 
+          g :: a -> b -> ([a],b)
+          g y z = ([x,y], z)
+        in ...
+\end{verbatim}}
+\eprog
+because that would claim that \mbox{\tt g} was polymorphic in both \mbox{\tt a} and \mbox{\tt b}
+(Section~\ref{type-signatures}).  In this program, \mbox{\tt g} can only be given
+a type signature if its first argument is restricted to a type not involving
+type variables; for example
+\bprog
+{\small\begin{verbatim}
+  g :: Int -> b -> ([Int],b)
+\end{verbatim}}
+\eprog
+This signature would also cause \mbox{\tt x} to have type \mbox{\tt Int}.
+
+\subsection{The Monomorphism Restriction}
+\index{monomorphism restriction}
+\label{sect:monomorphism-restriction}
+
+\Haskell{} places certain extra restrictions on the generalization
+step, beyond the standard Hindley-Milner restriction described above,
+which further reduces polymorphism in particular cases.
+
+The monomorphism restriction depends on the binding syntax of a
+variable.  Recall that a variable is bound by either a {\em function
+binding} or a {\em pattern binding}, and that a {\em simple} pattern
+binding is a pattern binding in which the pattern consists of only a
+single variable (Section~\ref{pattern-bindings}).
+
+The following two rules define the monomorphism restriction:
+\outline{
+\paragraph*{The monomorphism restriction}
+
+\begin{description}
+\item[Rule 1.]
+We say that a given declaration group is {\em unrestricted} if and only if:
+\begin{description}
+\item[(a):]
+every variable in the group is bound by a function binding or a simple
+pattern binding\index{simple pattern binding} (Section~\ref{patbind}), {\em and}
+\item[(b):]
+an explicit type signature is given for every variable in the group
+that is bound by simple pattern binding.
+\end{description}
+The usual Hindley-Milner restriction on polymorphism is that
+only type variables that do not occur free in the environment may be generalized.
+In addition, {\em the constrained type variables of
+a restricted declaration group may not be generalized}
+in the generalization step for that group.
+(Recall that a type variable is constrained if it must belong
+to some type class; see Section~\ref{generalization}.)
+% 
+% \item[Rule 1.]
+% The variables of a given declaration group are monomorphic in
+% all their constrained type variables if and only if:
+% \begin{description}
+% \item[either (a):]
+% one or more variables in the declaration group 
+% is bound by a non-simple pattern binding.
+% \item[or (b):]
+% one or more variables in the declaration group is bound 
+% by a simple pattern binding, and
+% no type signature is given for any of the variables in the group.
+% \end{description}
+
+\item[Rule 2.]
+Any monomorphic type variables that remain when type inference for
+an entire module is complete, are considered {\em ambiguous}\index{ambiguous type},
+and are resolved to particular types using the defaulting 
+rules (Section~\ref{default-decls}).
+\end{description}
+}
+
+% When all variables in a declaration group are declared using function
+% binding the monomorphism restriction will not apply.  Any variable
+% declared in a non-simple pattern binding will invoke monomorphism for
+% the entire group containing it.  Simple pattern bindings will be
+% monomorphic unless a type signature is supplied.
+%
+
+\paragraph*{Motivation}
+
+Rule 1 is required for two reasons, both of which are fairly subtle.
+\begin{itemize}
+\item
+{\em Rule 1 prevents computations from being unexpectedly repeated.}
+For example, \mbox{\tt genericLength} is a standard function (in library \mbox{\tt Data.List}) whose
+type is given by
+\bprog
+{\small\begin{verbatim}
+  genericLength :: Num a => [b] -> a
+\end{verbatim}}
+\eprog
+Now consider the following expression:
+\bprog
+{\small\begin{verbatim}
+  let { len = genericLength xs } in (len, len)
+\end{verbatim}}
+\eprog
+It looks as if \mbox{\tt len} should be computed only once, but without Rule~1 it might
+be computed twice, once at each of two different overloadings.  If the 
+programmer does actually wish the computation to be repeated, an explicit
+type signature may be added:
+\bprog
+{\small\begin{verbatim}
+  let { len :: Num a => a; len = genericLength xs } in (len, len)
+\end{verbatim}}
+\eprog
+
+\item {\em Rule~1 prevents ambiguity.}  For example, consider the declaration
+group
+\bprog
+{\small\begin{verbatim}
+  [(n,s)] = reads t
+\end{verbatim}}
+\eprog
+Recall that \mbox{\tt reads} is a standard function whose type is given by the
+signature
+\bprog
+{\small\begin{verbatim}
+  reads :: (Read a) => String -> [(a,String)]
+\end{verbatim}}
+\eprog
+Without Rule~1, \mbox{\tt n} would be assigned the 
+type \mbox{$\it \forall\ a.~\makebox{\tt Read}~a\ \Rightarrow\ a$} 
+and \mbox{\tt s} the type \mbox{$\it \forall\ a.$} \mbox{$\it \makebox{\tt Read}~a$} \mbox{$\it \Rightarrow\ \makebox{\tt String}$}.
+The latter is an invalid type, because it is inherently ambiguous.
+It is not possible to determine at what overloading to use \mbox{\tt s}, nor
+can this be solved by adding a type signature for \mbox{\tt s}.
+Hence, when {\em non-simple} pattern bindings\index{simple pattern binding}
+are used (Section~\ref{patbind}), the types inferred are 
+always monomorphic in their constrained type variables, irrespective of whether
+a type signature is provided.
+In this case, both \mbox{\tt n} and \mbox{\tt s} are monomorphic in \mbox{$\it a$}.
+
+The same constraint applies to pattern-bound functions.  For example, in
+\bprog
+{\small\begin{verbatim}
+  (f,g) = ((+),(-))
+\end{verbatim}}
+\eprog
+both \mbox{\tt f} and \mbox{\tt g} are monomorphic regardless of any type
+signatures supplied for \mbox{\tt f} or \mbox{\tt g}.
+\end{itemize}
+
+Rule~2 is required because there is no way to enforce monomorphic use
+of an {\em exported} binding, except by performing type inference on modules
+outside the current module.  Rule~2 states that the exact types of all
+the variables bound in a module must be determined by that module alone, and not
+by any modules that import it.
+\bprog
+{\small\begin{verbatim}
+  module M1(len1) where
+    default( Int, Double )
+    len1 = genericLength "Hello"
+
+  module M2 where
+    import M1(len1)
+    len2 = (2*len1) :: Rational
+\end{verbatim}}
+\eprog
+When type inference on module \mbox{\tt M1} is complete, \mbox{\tt len1} has the 
+monomorphic type \mbox{\tt Num\ a\ =>\ a} (by Rule 1).  Rule 2 now states that
+the monomorphic type variable \mbox{\tt a} is ambiguous, and must be resolved using
+the defaulting rules of Section~\ref{default-decls}.
+Hence, \mbox{\tt len1} gets type \mbox{\tt Int}, and its use in \mbox{\tt len2} is type-incorrect.
+(If the above code is actually what is wanted, a type signature on
+\mbox{\tt len1} would solve the problem.)
+
+This issue does not arise for nested bindings, because their entire scope is 
+visible to the compiler.
+
+\paragraph*{Consequences}
+
+The monomorphism rule has a number of consequences for the programmer.
+Anything defined with function syntax usually
+generalizes as a function is expected to.  Thus in
+\bprog
+{\small\begin{verbatim}
+  f x y = x+y
+\end{verbatim}}
+\eprog
+the function \mbox{\tt f} may be used at any overloading in class \mbox{\tt Num}.
+There is no danger of recomputation here.  However, the same function
+defined with pattern syntax:
+\bprog
+{\small\begin{verbatim}
+  f = \x -> \y -> x+y
+\end{verbatim}}
+\eprog
+requires a type signature if \mbox{\tt f} is to be fully overloaded.
+Many functions are most naturally defined using simple pattern
+bindings; the user must be careful to affix these with type signatures
+to retain full overloading.  The standard prelude contains many
+examples of this:
+\bprog
+{\small\begin{verbatim}
+  sum  :: (Num a) => [a] -> a
+  sum  =  foldl (+) 0  
+\end{verbatim}}
+\eprog
+
+Rule~1 applies to both top-level and nested definitions.  Consider
+\bprog
+{\small\begin{verbatim}
+  module M where
+    len1 = genericLength "Hello"
+    len2 = (2*len1) :: Rational
+\end{verbatim}}
+\eprog
+Here, type inference finds that \mbox{\tt len1} has the monomorphic type (\mbox{\tt Num\ a\ =>\ a});
+and the type variable \mbox{\tt a} is resolved to \mbox{\tt Rational} when performing type
+inference on \mbox{\tt len2}.
+
+% Even when a function is defined using a function binding, it may still
+% be made monomorphic by another variable in the same declaration group.
+% Since groups defined through mutually recursive functions need not be
+% syntacticly adjacent, it may be difficult to see where overloading is
+% being lost.  In this example \mbox{\tt fact'} is defined with a pattern binding
+% and forces \mbox{\tt fact} to be monomorphic in the absence of a type signature
+% for either \mbox{\tt fact} or \mbox{\tt fact'}.  This would in turn result in an error as
+% per Rule~2.
+% \bprog
+% 
+% module Mod1(fact)
+% import Mod2
+% fact 0 = 1
+% fact n = n*fact'(n-1)
+% 
+% module Mod2(fact')
+% import Mod1
+% fact' = fact
+% 
+% \eprog
+
+\section{Kind Inference}
+\index{kind}
+\index{kind inference}
+\label{kindinference}
+
+This section describes the rules that are used to perform {\em kind
+inference}, i.e. to calculate a suitable kind for each type
+constructor and class appearing in a given
+program.
+
+The first step in the kind inference process is to arrange the set of
+datatype, synonym, and class definitions into dependency groups.  This can
+be achieved in much the same way as the dependency analysis for value
+declarations that was described in Section~\ref{dependencyanalysis}.
+For example, the following program fragment includes the definition
+of a datatype constructor \mbox{\tt D}, a synonym \mbox{\tt S} and a class \mbox{\tt C}, all of
+which would be included in the same dependency group:
+\bprog
+{\small\begin{verbatim}
+  data C a => D a = Foo (S a)
+  type S a = [D a]
+  class C a where
+      bar :: a -> D a -> Bool
+\end{verbatim}}
+\eprog
+The kinds of variables, constructors, and classes within each group
+are determined using standard techniques of type inference and
+kind-preserving unification \cite{jones:cclasses}.  For example, in the
+definitions above, the parameter \mbox{\tt a} appears as an argument of the
+function constructor \mbox{\tt (->)} in the type of \mbox{\tt bar} and hence must
+have kind $\ast$.  It follows that both \mbox{\tt D} and \mbox{\tt S} must have
+kind $\ast\rightarrow\ast$ and that every instance of class \mbox{\tt C} must
+have kind $\ast$.
+
+% The kind of any constructor that is exported from a module without
+% exposing its definition must be specified explicitly in the interface
+% for that module.  This is described in Section~\ref{somebodyneedstofillthisin}.
+
+It is possible that some parts of an inferred kind may not be fully
+determined by the corresponding definitions; in such cases, a default
+of $\ast$ is assumed.  For example, we could assume an arbitrary kind
+$\kappa$ for the \mbox{\tt a} parameter in each of the following examples:
+\bprog
+{\small\begin{verbatim}
+  data App f a = A (f a)
+  data Tree a  = Leaf | Fork (Tree a) (Tree a)
+\end{verbatim}}
+\eprog
+This would give kinds
+$(\kappa\rightarrow\ast)\rightarrow\kappa\rightarrow\ast$ and
+$\kappa\rightarrow\ast$ for \mbox{\tt App} and \mbox{\tt Tree}, respectively, for any
+kind $\kappa$, and would require an extension to allow polymorphic
+kinds.  Instead, using the default binding $\kappa=\ast$, the
+actual kinds for these two constructors are
+$(\ast\rightarrow\ast)\rightarrow\ast\rightarrow\ast$ and
+$\ast\rightarrow\ast$, respectively.
+
+Defaults are applied to each dependency group without consideration of
+the ways in which particular type constructor constants or classes are
+used in later dependency groups or elsewhere in the program.  For example,
+adding the following definition to those above does not influence the
+kind inferred for \mbox{\tt Tree} (by changing it to
+$(\ast\rightarrow\ast)\rightarrow\ast$, for instance), and instead
+generates a static error because the kind of \mbox{\tt []}, $\ast\rightarrow\ast$,
+does not match the kind $\ast$ that is expected for an argument of \mbox{\tt Tree}:
+\bprog
+{\small\begin{verbatim}
+  type FunnyTree = Tree []     -- invalid
+\end{verbatim}}
+\eprog
+This is important because it ensures that each constructor and class are
+used consistently with the same kind whenever they are in scope.
+
+%**~footer
+
+% Local Variables: 
+% mode: latex
+% End:

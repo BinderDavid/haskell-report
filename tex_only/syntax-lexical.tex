@@ -1,0 +1,92 @@
+%
+% $Header: /home/cvs/root/haskell-report/report/syntax-lexical.verb,v 1.10 2003/01/13 13:08:56 simonpj Exp $
+% 
+
+\begin{flushleft}\it\begin{tabbing}
+\hspace{0.6in}\=\hspace{3.1in}\=\kill
+$\it $\\ 
+$\it program$\>\makebox[3.5em]{$\rightarrow$}$\it \{\ lexeme\ |\ whitespace\ \}$\\ 
+$\it lexeme$\>\makebox[3.5em]{$\rightarrow$}$\it qvarid\ |\ qconid\ |\ qvarsym\ |\ qconsym$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it literal\ |\ special\ |\ reservedop\ |\ reservedid$\\ 
+$\it literal$\>\makebox[3.5em]{$\rightarrow$}$\it integer\ |\ float\ |\ char\ |\ string$\\ 
+$\it special$\>\makebox[3.5em]{$\rightarrow$}$\it \makebox{\tt (}\ |\ \makebox{\tt )}\ |\ \makebox{\tt ,}\ |\ \makebox{\tt ;}\ |\ \makebox{\tt [}\ |\ \makebox{\tt ]}\ |\ \bkq\ |\ \makebox{\tt {\char'173}}\ |\ \makebox{\tt {\char'175}}$\\ 
+$\it $\\ 
+$\it whitespace$\>\makebox[3.5em]{$\rightarrow$}$\it whitestuff\ \{whitestuff\}$\\ 
+$\it whitestuff$\>\makebox[3.5em]{$\rightarrow$}$\it whitechar\ |\ comment\ |\ ncomment$\\ 
+$\it whitechar$\>\makebox[3.5em]{$\rightarrow$}$\it newline\ |\ vertab\ |\ space\ |\ tab\ |\ uniWhite$\\ 
+$\it newline$\>\makebox[3.5em]{$\rightarrow$}$\it return\ linefeed\ |\ return\ |\ linefeed\ |\ formfeed$\\ 
+$\it return$\>\makebox[3.5em]{$\rightarrow$}$\it \tr{a\ carriage\ return}$\\ 
+$\it linefeed$\>\makebox[3.5em]{$\rightarrow$}$\it \tr{a\ line\ feed}$\\ 
+$\it vertab$\>\makebox[3.5em]{$\rightarrow$}$\it \tr{a\ vertical\ tab}$\\ 
+$\it formfeed$\>\makebox[3.5em]{$\rightarrow$}$\it \tr{a\ form\ feed}$\\ 
+$\it space$\>\makebox[3.5em]{$\rightarrow$}$\it \tr{a\ space}$\\ 
+$\it tab$\>\makebox[3.5em]{$\rightarrow$}$\it \tr{a\ horizontal\ tab}$\\ 
+$\it uniWhite$\>\makebox[3.5em]{$\rightarrow$}$\it \tr{any\ Unicode\ character\ defined\ as\ whitespace}$\\ 
+$\it $\\ 
+$\it comment$\>\makebox[3.5em]{$\rightarrow$}$\it dashes\ [\ any_{\langle{}symbol\rangle}\ \{any\}\ ]\ newline$\\ 
+$\it dashes$\>\makebox[3.5em]{$\rightarrow$}$\it \makebox{\tt --}\ \{\makebox{\tt -}\}$\\ 
+$\it opencom$\>\makebox[3.5em]{$\rightarrow$}$\it \makebox{\tt {\char'173}-}$\\ 
+$\it closecom$\>\makebox[3.5em]{$\rightarrow$}$\it \makebox{\tt -{\char'175}}$\\ 
+$\it ncomment$\>\makebox[3.5em]{$\rightarrow$}$\it opencom\ ANYseq\ \{ncomment\ ANYseq\}\ closecom$\\ 
+$\it ANYseq$\>\makebox[3.5em]{$\rightarrow$}$\it \{ANY\}_{\langle{}\{ANY\}\ (\ opencom\ |\ closecom\ )\ \{ANY\}\rangle{}}$\\ 
+$\it ANY$\>\makebox[3.5em]{$\rightarrow$}$\it graphic\ |\ whitechar$\\ 
+$\it any$\>\makebox[3.5em]{$\rightarrow$}$\it graphic\ |\ space\ |\ tab$\\ 
+$\it graphic$\>\makebox[3.5em]{$\rightarrow$}$\it small\ |\ large\ |\ symbol\ |\ digit\ |\ special\ |\ \makebox{\tt "}\ |\ \makebox{\tt '}$\\ 
+$\it $\\ 
+$\it small$\>\makebox[3.5em]{$\rightarrow$}$\it ascSmall\ |\ uniSmall\ |\ \makebox{\tt {\char'137}}$\\ 
+$\it ascSmall$\>\makebox[3.5em]{$\rightarrow$}$\it \makebox{\tt a}\ |\ \makebox{\tt b}\ |\ \ldots \ |\ \makebox{\tt z}$\\ 
+$\it uniSmall$\>\makebox[3.5em]{$\rightarrow$}$\it \tr{any\ Unicode\ lowercase\ letter}$\\ 
+$\it $\\ 
+$\it large$\>\makebox[3.5em]{$\rightarrow$}$\it ascLarge\ |\ uniLarge$\\ 
+$\it ascLarge$\>\makebox[3.5em]{$\rightarrow$}$\it \makebox{\tt A}\ |\ \makebox{\tt B}\ |\ \ldots \ |\ \makebox{\tt Z}$\\ 
+$\it uniLarge$\>\makebox[3.5em]{$\rightarrow$}$\it \tr{any\ uppercase\ or\ titlecase\ Unicode\ letter}$\\ 
+$\it symbol$\>\makebox[3.5em]{$\rightarrow$}$\it ascSymbol\ |\ uniSymbol_{\langle{}special\ |\ \makebox{\tt {\char'137}}\ |\ \makebox{\tt "}\ |\ \makebox{\tt '}\rangle{}}$\\ 
+$\it $\\ 
+$\it ascSymbol$\>\makebox[3.5em]{$\rightarrow$}$\it \makebox{\tt !}\ |\ \makebox{\tt {\char'43}}\ |\ \makebox{\tt {\char'44}}\ |\ \makebox{\tt {\char'45}}\ |\ \makebox{\tt {\char'46}}\ |\ \makebox{\tt *}\ |\ \makebox{\tt +}\ |\ \makebox{\tt .}\ |\ \makebox{\tt /}\ |\ \makebox{\tt <}\ |\ \makebox{\tt =}\ |\ \makebox{\tt >}\ |\ \makebox{\tt ?}\ |\ @$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it \makebox{\tt {\char'134}}\ |\ \makebox{\tt {\char'136}}\ |\ \makebox{\tt |}\ |\ \makebox{\tt -}\ |\ \makebox{\tt {\char'176}}\ \hprime{|\ \makebox{\tt :}}$\\ 
+$\it uniSymbol$\>\makebox[3.5em]{$\rightarrow$}$\it \tr{any\ Unicode\ symbol\ or\ punctuation}$\\ 
+$\it digit$\>\makebox[3.5em]{$\rightarrow$}$\it ascDigit\ |\ uniDigit$\\ 
+$\it ascDigit$\>\makebox[3.5em]{$\rightarrow$}$\it \makebox{\tt 0}\ |\ \makebox{\tt 1}\ |\ \ldots \ |\ \makebox{\tt 9}$\\ 
+$\it uniDigit$\>\makebox[3.5em]{$\rightarrow$}$\it \tr{any\ Unicode\ decimal\ digit}$\\ 
+$\it octit$\>\makebox[3.5em]{$\rightarrow$}$\it \makebox{\tt 0}\ |\ \makebox{\tt 1}\ |\ \ldots \ |\ \makebox{\tt 7}$\\ 
+$\it hexit$\>\makebox[3.5em]{$\rightarrow$}$\it digit\ |\ \makebox{\tt A}\ |\ \ldots \ |\ \makebox{\tt F}\ |\ \makebox{\tt a}\ |\ \ldots \ |\ \makebox{\tt f}$\\ 
+$\it $
+\end{tabbing}\end{flushleft}
+
+\indexsyn{program}%
+\indexsyn{lexeme}%
+\indexsyn{literal}%
+\indexsyn{special}%
+\indexsyn{whitespace}%
+\indexsyn{whitestuff}%
+\indexsyn{whitechar}%
+\indexsyn{uniWhite}%
+\indexsyn{newline}%
+\indexsyn{space}%
+\indexsyn{tab}%
+\indexsyn{vertab}%
+\indexsyn{formfeed}%
+\indexsyn{comment}%
+\indexsyn{dashes}%
+\indexsyn{ncomment}%
+\indexsyn{opencom}%
+\indexsyn{closecom}%
+\indexsyn{ANYseq}%
+\indexsyn{ANY}%
+\indexsyn{any}%
+\indexsyn{graphic}%
+\indexsyn{small}%
+\indexsyn{ascSmall}%
+\indexsyn{uniSmall}%
+\indexsyn{uniDigit}%
+\indexsyn{large}%
+\indexsyn{ascLarge}%
+\indexsyn{uniLarge}%
+\indexsyn{symbol}%
+\indexsyn{ascSymbol}%
+\indexsyn{uniSymbol}%
+\indexsyn{digit}%
+\indexsyn{ascDigit}%
+\indexsyn{uniDigit}%
+\indexsyn{octit}%
+\indexsyn{hexit}%
