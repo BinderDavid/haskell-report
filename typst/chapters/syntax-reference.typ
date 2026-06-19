@@ -1,6 +1,6 @@
 === Notational Conventions
 === Lexical Syntax
-=== Layout
+=== Layout <sec:layout>
 === Literate comments
 === Context-Free Syntax
 === Fixity Resolution
