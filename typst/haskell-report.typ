@@ -35,29 +35,51 @@
 == Introduction <chapter:intro>
 
 
-#include "sections/intro.typ"
+#include "chapters/intro.typ"
 
 == Lexical Structure <chapter:lexical-structure>
 
+#include "chapters/lexical-structure.typ"
+
 == Expressions <chapter:expressions>
+
+#include "chapters/expressions.typ"
 
 == Declarations and Bindings <chapter:declarations>
 
+#include "chapters/declarations.typ"
+
 == Modules <chapter:modules>
+
+#include "chapters/modules.typ"
 
 == Predefined Types and Classes <chapter:predefined-types>
 
+#include "chapters/predefined-types.typ"
+
 == Basic Input/Output <chapter:basic-input-output>
+
+#include "chapters/basic-input-output.typ"
 
 == Foreign Function Interface <chapter:ffi>
 
+#include "chapters/ffi.typ"
+
 == Standard Prelude <chapter:standard-prelude>
+
+#include "chapters/standard-prelude.typ"
 
 == Syntax Reference <chapter:syntax-reference>
 
+#include "chapters/syntax-reference.typ"
+
 == Specification of Derived Instances <chapter:derived-instances>
 
+#include "chapters/derived-instances.typ"
+
 == Compiler Pragmas <chapter:compiler-pragmas>
+
+#include "chapters/compiler-pragmas.typ"
 
 = The Haskell 2010 Libraries
 
