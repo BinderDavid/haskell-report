@@ -14,18 +14,23 @@
   }
 })
 
-#show heading.where(level: 1): it => if it.body == [Contents] { it } else {
-  set align(center + horizon)
-  set text(36pt)
-  pagebreak(weak: true) + [Part #it]
+#show heading.where(level: 1): it => {
+  if it.body == [Contents] or it.body == [Bibliography] { it }
+  else {
+    set align(center + horizon)
+    set text(36pt)
+    pagebreak(weak: true) + [Part #it]
+  }
 }
-
 #show heading.where(level: 2): set text(22pt)
 #show heading.where(level: 2): it => pagebreak(weak: true) + [Chapter #it]
+
+#show heading.where(level: 3): set text(18pt)
 
 #set par(
   justify: true,
 )
+
 #show title: set align(center)
 
 
@@ -157,3 +162,6 @@
 
 == System.IO.Error
 
+#pagebreak()
+
+#bibliography("bibliography.bib")
