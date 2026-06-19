@@ -16,7 +16,7 @@
 
 ==== Datatype Renamings
 
-=== Type Classes and Overloading
+=== Type Classes and Overloading <sec:type-classes>
 
 ==== Class Declarations
 
