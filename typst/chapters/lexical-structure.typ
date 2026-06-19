@@ -49,6 +49,30 @@ Haskell compilers are expected to make use of new versions of Unicode as they ar
 
 === Numeric Literals
 
+$
+  italic("decimal")	&-> italic("digit"){italic("digit")} \
+  italic("octal")		&-> italic("octit"){italic("octit")} \
+  italic("hexadecimal")	&-> italic("hexit"){italic("hexit")} \
+  italic("integer")	&-> italic("decimal") \
+                &|  mono("0o") italic("octal") | mono("0O") italic("octal") \
+                &|  mono("0x") italic("hexadecimal") | mono("0X") italic("hexadecimal") \
+  italic("float")	&-> italic("decimal") mono(".") italic("decimal") [ italic("exponent")] \
+	        &|  italic("decimal") italic("exponent") \
+  italic("exponent")	&-> (mono("e") | mono("E")) [mono("+") | mono("-")] italic("decimal")
+$
+
+
+There are two distinct kinds of numeric literals: integer and
+floating.  Integer literals may be given in decimal (the default),
+octal (prefixed by `0o` or `0O`) or hexadecimal notation (prefixed by
+`0x` or `0X`).
+Floating literals are always decimal.
+A floating literal must contain digits both before and after the
+decimal point; this ensures that a decimal point cannot be mistaken
+for another use of the dot character.  Negative numeric literals are
+discussed in @sec:operator-applications.  The typing of numeric literals
+is discussed in @sec:numeric-literals
+
 === Character and String Literals
 
 === Layout

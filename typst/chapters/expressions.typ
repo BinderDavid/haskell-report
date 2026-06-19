@@ -30,7 +30,7 @@ information when an error occurs.
 
 === Curried Applications and Lambda Abstractions
 
-=== Operator Applications
+=== Operator Applications <sec:operator-applications>
 
 === Sections
 

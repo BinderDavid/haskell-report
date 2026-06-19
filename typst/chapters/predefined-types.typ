@@ -17,7 +17,7 @@
 ==== The Monad Class
 ==== The Bounded Class
 === Numbers
-==== Numeric Literals
+==== Numeric Literals <sec:numeric-literals>
 ==== Arithmetic and Number-Theoretic Operations
 ==== Exponentiation and Logarithms
 ==== Magnitude and Sign

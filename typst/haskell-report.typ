@@ -3,7 +3,10 @@
 )
 
 #let chapter-count = counter("chapter counter")
-#show heading.where(level: 2): it => chapter-count.step() + it
+#show heading.where(level: 2): it => {
+  if it.body == [Preface] {it}
+  else {chapter-count.step() + it}
+}
 #set heading(numbering: (..nums) => {
   if nums.pos().len() == 1 {
     numbering("I.", ..nums) // Part
