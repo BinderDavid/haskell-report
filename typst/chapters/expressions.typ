@@ -1,4 +1,4 @@
-=== Errors
+=== Errors <sec:expressions:errors>
 
 Errors during expression evaluation, denoted by $bot$ ("bottom"),
 are indistinguishable by a Haskell program from non-termination.  Since Haskell is a

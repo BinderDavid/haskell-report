@@ -54,8 +54,7 @@ let x = 1
 in  z+1
 ```
 
-"Holes" in program fragments representing arbitrary pieces of Haskell code are written in italics, as in
-// \mbox{$\it \makebox{\tt if}\ e_1\ \makebox{\tt then}\ e_2\ \makebox{\tt else}\ e_3$}.
+"Holes" in program fragments representing arbitrary pieces of Haskell code are written in italics, as in `if` $e_1$ `then` $e_2$ `else` $e_3$.
 Generally the italicized names are mnemonic, such as $e$ for expressions, $d$ for declarations, $t$ for types, etc.
 
 === The Haskell Kernel
@@ -91,7 +90,8 @@ $bot$ ("bottom").  Technically, they are indistinguishable
 from nontermination, so the language includes no mechanism
 for detecting or acting upon errors.  However, implementations
 will probably try to provide useful information about
-errors.  See Section~\ref{basic-errors}.
+errors.
+See @sec:expressions:errors
 
 === Namespaces
 
@@ -104,4 +104,4 @@ There are two constraints on naming:
   the other four kinds of names are identifiers beginning with uppercase letters.
 + An identifier must not be used as the name of a type constructor and a class in the same scope.
 
-These are the only constraints; for example, Int may simultaneously be the name of a module, class, and constructor within a single scope.
+These are the only constraints; for example, `Int` may simultaneously be the name of a module, class, and constructor within a single scope.
