@@ -569,10 +569,240 @@ numeric types are undefined; an implementation may choose error
 ($bot$, semantically), a truncated value, or a special value such as
 infinity, indefinite, etc.
 
+The standard numeric classes and other numeric functions defined in
+the Prelude are shown
+in @fig:basic-numeric-1 @fig:basic-numeric-2.
+@fig:standard-classes shows the class dependencies and
+built-in types that are instances of the numeric classes.
+
+#figure(
+  caption: "Standard Numeric Classes and Related Operations, Part 1",
+  ```haskell
+class  (Eq a, Show a) => Num a  where
+    (+), (-), (*)  :: a -> a -> a
+    negate         :: a -> a
+    abs, signum    :: a -> a
+    fromInteger    :: Integer -> a
+
+class  (Num a, Ord a) => Real a  where
+    toRational ::  a -> Rational
+
+class  (Real a, Enum a) => Integral a  where
+    quot, rem, div, mod :: a -> a -> a
+    quotRem, divMod     :: a -> a -> (a,a)
+    toInteger           :: a -> Integer
+
+class  (Num a) => Fractional a  where
+    (/)          :: a -> a -> a
+    recip        :: a -> a
+    fromRational :: Rational -> a
+
+class  (Fractional a) => Floating a  where
+    pi                  :: a
+    exp, log, sqrt      :: a -> a
+    (**), logBase       :: a -> a -> a
+    sin, cos, tan       :: a -> a
+    asin, acos, atan    :: a -> a
+    sinh, cosh, tanh    :: a -> a
+    asinh, acosh, atanh :: a -> a
+  ```
+)<fig:basic-numeric-1>
+
+#figure(
+  caption: "Standard Numeric Classes and Related Operations, Part 2",
+  ```haskell
+class  (Real a, Fractional a) => RealFrac a  where
+    properFraction   :: (Integral b) => a -> (b,a)
+    truncate, round  :: (Integral b) => a -> b
+    ceiling, floor   :: (Integral b) => a -> b
+
+class  (RealFrac a, Floating a) => RealFloat a  where
+    floatRadix          :: a -> Integer
+    floatDigits         :: a -> Int
+    floatRange          :: a -> (Int,Int)
+    decodeFloat         :: a -> (Integer,Int)
+    encodeFloat         :: Integer -> Int -> a
+    exponent            :: a -> Int
+    significand         :: a -> a
+    scaleFloat          :: Int -> a -> a
+    isNaN, isInfinite, isDenormalized, isNegativeZero, isIEEE 
+                        :: a -> Bool
+    atan2               :: a -> a -> a
+
+gcd, lcm :: (Integral a) => a -> a-> a
+(^)      :: (Num a, Integral b) => a -> b -> a
+(^^)     :: (Fractional a, Integral b) => a -> b -> a
+
+fromIntegral :: (Integral a, Num b) => a -> b
+realToFrac   :: (Real a, Fractional b) => a -> b
+  ```
+)<fig:basic-numeric-2>
 
 ==== Numeric Literals <sec:numeric-literals>
+
+The syntax of numeric literals is given in
+Section~\ref{lexemes-numeric}.  An integer literal represents the
+application
+of the function `fromInteger` to the appropriate
+value of type `Integer`.  Similarly, a floating literal stands for an application of
+`fromRational` to a value of type `Rational` (that is, `Ratio Integer`).  Given the typings:
+```haskell
+fromInteger  :: (Num a) => Integer -> a
+fromRational :: (Fractional a) => Rational -> a
+```
+integer and floating literals have the
+typings `(Num a) => a` and `(Fractional a) => a`, respectively.
+Numeric literals are defined in this indirect way so that they may be
+interpreted as values of any appropriate numeric type.
+See Section~\ref{default-decls} for a discussion of overloading ambiguity.
+
 ==== Arithmetic and Number-Theoretic Operations
+
+The infix class methods `(+)`, `(*)`, `(-)`, and the unary function `negate` (which can also be written as a prefix minus sign; see
+section~\ref{operators}) apply to all numbers.  
+The class methods
+`quot`, `rem`, `div`, and `mod` apply only to integral numbers, while the class method `(/)`
+applies only to fractional ones.
+The `quot`, `rem`,
+`div`, and `mod` class methods satisfy these laws if `y` is non-zero:
+```haskell
+(x `quot` y)*y + (x `rem` y) == x
+(x `div`  y)*y + (x `mod` y) == x
+```
+`quot` is integer division truncated toward zero,
+while the result of `div` is truncated toward
+negative infinity.
+The `quotRem` class method takes a dividend and a divisor as arguments
+and returns a (quotient, remainder) pair; `divMod` is defined similarly:
+```haskell
+quotRem x y  =  (x `quot` y, x `rem` y)
+divMod  x y  =  (x `div`  y, x `mod` y)
+```
+Also available on integral numbers are the even and odd predicates:
+```haskell
+even x =  x `rem` 2 == 0
+odd    =  not . even
+```
+Finally, there are the greatest common divisor and least common
+multiple functions.  `gcd` $x$ $y$ is the greatest
+(positive) integer that divides both $x$ and $y$; for example `gcd (-3) 6 = 3`, `gcd (-3) (-6) = 3`, 
+`gcd 0 4 = 4`. `gcd 0 0` raises a runtime error.
+
+`lcm` $x$ $y$ is the smallest positive integer that both $x$ and $y$ divide.
+
 ==== Exponentiation and Logarithms
+
+The one-argument exponential function `exp` and the
+logarithm function `log` act on floating-point numbers and
+use base $e$.  `logBase` $a$ $x$ returns the
+logarithm of $x$ in base $a$.  `sqrt` returns the
+principal square root of a floating-point number.
+There are three two-argument exponentiation operations:
+`(^)` raises any number to a nonnegative integer power,
+`(^^)` raises a
+fractional number to any integer power, and `(**)`
+takes two floating-point arguments.  The value of `x ^ 0` or `x ^^ 0`}
+is `1` for any $x$, including zero; `0**y` is `1` if $y$ is `0`, and `0` otherwise.
+
 ==== Magnitude and Sign
+
+A number has a _magnitude_ and a _sign_.  The functions `abs` and `signum` apply to any number and satisfy the law:
+```haskell
+abs x * signum x == x
+```
+For real numbers, these functions are defined by:
+```haskell
+abs x    | x >= 0  = x
+         | x <  0  = -x
+
+signum x | x >  0  = 1
+         | x == 0  = 0
+         | x <  0  = -1
+```
+
 ==== Trigonometric Functions
+
+Class `Floating` provides the
+circular and hyperbolic sine, cosine,
+and tangent functions and their inverses.
+Default implementations of `tan`, `tanh`, `logBase`, `**`, and `sqrt` are
+provided, but implementors are free to provide more accurate implementations.
+
+Class `RealFloat` provides a version of arctangent
+taking two real floating-point arguments.
+For real floating $x$ and $y$, `atan2` $y$ $x$
+computes the angle (from the positive x-axis) of the vector from the origin
+to the point $(x,y)$.  `atan2` $y$ $x$
+returns a value in the range `[-pi,pi]`.  It
+follows the Common Lisp semantics for the origin when signed zeroes are
+supported.  `atan2` $y$ `1`, with $y$ in a type that is `RealFloat`, should return the
+same value as `atan` $y$.  A default definition of `atan2` is provided, but
+implementors can provide a more accurate implementation.
+
+The precise definition of the above functions is as in Common Lisp,
+which in turn follows Penfield's proposal for
+APL @Penfield1981.  See these references for discussions
+of branch cuts, discontinuities, and implementation.
+
 ==== Coercions and Component Extraction
+
+The `ceiling`, `floor`, `truncate`, and `round`
+functions each take a real fractional argument and return an integral
+result.  `ceiling` $x$ returns the least integer not less than $x$, and
+`floor` $x$, the greatest integer not greater than $x$.  `truncate` $x$
+yields the integer nearest $x$ between $0$ and $x$, inclusive.
+`round` $x$ returns the nearest integer to $x$, the even integer if
+$x$ is equidistant between two integers.
+
+
+The function `properFraction` takes a real
+fractional number $x$ and returns a pair $(n,f)$ such that $x = n + f$, and:
+$n$ is an integral number with the same sign as $x$; and $f$ is a
+fraction $f$ with the same type and sign as $x$, and with absolute
+value less than 1.
+The `ceiling`,  `floor`, `truncate`, and `round`
+functions can be defined in terms of `properFraction`.
+
+Two functions convert numbers to type `Rational`:
+`toRational` returns the rational equivalent of
+its real argument with full precision;
+`approxRational` takes two real fractional arguments
+$x$ and $epsilon$ and returns the simplest rational number within
+$epsilon$ of $x$, where a rational $p italic("/") q$ in reduced form is
+_simpler_ than another $p' italic("/") q'$ if
+$|p| <= |p'|$ and $q <= q^'$.
+Every real interval contains a unique simplest rational;
+in particular, note that $0 italic("/") 1$ is the simplest rational of all.
+
+The class methods of class `RealFloat` allow
+efficient, machine-independent
+access to the components of a floating-point number.
+The functions `floatRadix`,
+`floatDigits`, and
+`floatRange` give the parameters of a
+floating-point type:  the radix of the representation, the number of
+digits of this radix in the significand, and the lowest and highest
+values the exponent may assume, respectively.
+The function `decodeFloat` applied to a real floating-point number returns the significand
+expressed as an `Integer` and an appropriately scaled exponent (an
+`Int`).  If `decodeFloat` $x$ yields $(m,n)$, then `x` is
+equal in value to $m b^n$, where $b$ is the floating-point radix, and
+furthermore, either $m$ and $n$ are both zero or else
+$b^(d-1) <= |m| < b^d$, where $d$ is the value of `floatDigits x`.
+`encodeFloat` performs the inverse of this
+transformation.  The functions `significand`
+and `exponent` together provide the same
+information as `decodeFloat`,  but rather than an `Integer`,
+`significand` $x$ yields a value of the same type as `x`, scaled to lie
+in the open interval $(-1,1)$.  `exponent 0` is zero.
+`scaleFloat` multiplies a floating-point number by an integer power of the radix.
+
+The functions `isNaN`, `isInfinite`, `isDenormalized`, `isNegativeZero`, and `isIEEE` all support numbers represented using
+the IEEE standard.  For non-IEEE floating point numbers, these may all
+return false.
+
+Also available are the following coercion functions:
+```haskell
+fromIntegral :: (Integral a, Num b)    => a -> b
+realToFrac   :: (Real a, Fractional b) => a -> b
+```
