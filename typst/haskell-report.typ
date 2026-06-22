@@ -105,7 +105,7 @@
 
 #include "chapters/compiler-pragmas.typ"
 
-= The Haskell 2010 Libraries
+= The Haskell 2010 Libraries <part:libraries>
 
 == Control.Monad <chapter:control.monad>
 
