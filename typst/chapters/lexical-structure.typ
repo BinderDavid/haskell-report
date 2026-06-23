@@ -34,11 +34,11 @@ and $[dots]$ from concrete terminal syntax (given in typewriter font)
 such as `|` and `[...]`, although usually the context makes the
 distinction clear.
 
-Haskell uses the Unicode @Unicode character set. 
+Haskell uses the Unicode @Unicode character set.
 However, source  programs are currently biased toward the ASCII character set used in earlier versions of Haskell.
 
 This syntax depends on properties of the Unicode characters as defined
-by the Unicode consortium. 
+by the Unicode consortium.
 Haskell compilers are expected to make use of new versions of Unicode as they are made available.
 
 === Lexical Program Structure
@@ -90,7 +90,7 @@ Lexical analysis should use the ``maximal munch'' rule:
 at each point, the longest possible lexeme
 satisfying the $italic("lexeme")$ production is read.
 So, although `case` is a reserved word, `cases` is not.
-Similarly, although `=` is reserved, `==` and `~=` are not.  
+Similarly, although `=` is reserved, `==` and `~=` are not.
 
 Any kind of $italic("whitespace")$ is also a proper delimiter for lexemes.
 
@@ -99,7 +99,145 @@ in Haskell programs and should result in a lexing error.
 
 === Comments
 
+Comments are valid whitespace.
+
+An ordinary comment begins with a sequence of
+two or more consecutive dashes (e.g. `--`) and extends to the following newline.
+_The sequence of dashes must not form part of a legal lexeme._
+For example, "`-->`" or "`|--`" do _not_ begin
+a comment, because both of these are legal lexemes; however "`--foo`" does start a comment.
+
+A nested comment begins with "`{-`"
+and ends with "`-}`".  No legal lexeme starts with "`{-`";
+hence, for example, "`{---`" starts a nested comment despite the trailing dashes.
+
+The comment itself is not lexically analysed.  Instead, the first
+unmatched occurrence of the string "`-}`" terminates the nested comment.  Nested comments may be nested to any depth: any occurrence
+of the string "`{-`" within the nested comment starts a new nested
+comment, terminated by "`-}`".  Within a nested comment, each
+"`{-`" is matched by a corresponding occurrence of "`-}`".
+
+In an ordinary comment, the character
+sequences "`{-`" and "`-}`" have no special significance, and, in a
+nested comment, a sequence of dashes has no special significance.
+
+Nested comments are also used for compiler pragmas, as explained in @chapter:compiler-pragmas[Chapter]
+
+
+If some code is commented out using a nested comment, then any
+occurrence of `{-` or `-}` within a string or within an end-of-line
+comment in that code will interfere with the nested comments.
+
 === Identifiers and Operators
+$
+  italic("varid") &-> (italic("small") {italic("small") | italic("large") | italic("digit") | mono("'") med })_(chevron.l italic("reservedid") chevron.r)\
+  italic("conid") &-> italic("large") {italic("small") | italic("large") | italic("digit") | mono("'") med }\
+  italic("reservedid") &-> mono("case") | mono("class") | mono("data") | mono("default") | mono("deriving") | mono("do") | mono("else") \
+  &| mono("foreign") | mono("if") | mono("import") | mono("in") | mono("infix") | mono("infixl") \
+  &| mono("infixr") | mono("instance") | mono("let") | mono("module") | mono("newtype") | mono("of") \
+  &| mono("then") | mono("type") | mono("where") | mono("_")
+$
+
+An identifier consists of a letter followed by zero or more letters,
+digits, underscores, and single quotes.  Identifiers are lexically
+distinguished into two namespaces (@sec:namespaces[Section]): those that begin with a lowercase letter
+(variable identifiers) and those that begin with an upper-case letter
+(constructor identifiers).  Identifiers are case sensitive: `name`, `naMe`, and `Name` are three distinct identifiers (the first two are
+variable identifiers, the last is a constructor identifier).
+
+Underscore, "`_`", is treated as a lowercase letter, and can occur
+wherever a lowercase letter can.  However, "`_`" all by itself is a
+reserved identifier, used as wild card in patterns.  Compilers that offer
+warnings for unused identifiers are encouraged to suppress such warnings for
+identifiers beginning with underscore.  This allows programmers to use
+"`_foo`" for a parameter that they expect to be unused.
+
+$
+  italic("varsym") &-> ( italic("symbol")_(chevron.l mono(":") chevron.r) { italic("symbol")})_(chevron.l italic("reservedop") | italic("dashes") chevron.r) \
+  italic("consym") &-> (mono(":") { italic("symbol") })_(chevron.l italic("reservedop") chevron.r)\
+  italic("reservedop") &-> mono("..") | mono(":") | mono("::") | mono("=") | mono("\\") | mono("|") | mono("<-") | mono("->") | mono("@") | mono("~") | mono("=>")
+$
+
+_Operator symbols_
+are formed from one or more symbol characters, as
+defined above, and are lexically distinguished into two namespaces
+(@sec:namespaces[Section]):
+
+- An operator symbol starting with a colon is a constructor.
+- An operator symbol starting with any other character is an ordinary identifier.
+
+Notice that a colon by itself, "`:`", is reserved solely for use
+as the Haskell list constructor; this makes its treatment uniform with
+other parts of list syntax, such as "`[]`" and "`[a,b]`".
+
+Other than the special syntax for prefix negation, all operators are
+infix, although each infix operator can be used in a _section_ to yield partially applied operators (see
+Section~\ref{sections}).
+All of the standard infix operators are just
+predefined symbols and may be rebound.
+
+In the remainder of the report six different kinds of
+names will be used:
+
+$
+  italic("varid") & & text("(variables)")\
+  italic("conid") & & text("(constructors)")\
+  italic("tyvar") &-> italic("varid") & text("(type variables)")\
+  italic("tycon") &-> italic("conid") & text("(type constructors)")\
+  italic("tycls") &-> italic("conid") & text("(type classes)")\
+  italic("modid") &-> { italic("conid") mono(".")} italic("conid") & text("(modules)")
+$
+
+Variables and type variables are represented by identifiers beginning
+with small letters, and the others by identifiers beginning with
+capitals; also, variables and constructors have infix forms, the other
+four do not.
+Module names are a dot-separated sequence of $italic("conid")$s.
+Namespaces are also discussed in @sec:namespaces[Section]
+
+A name may optionally be _qualified_ in certain
+circumstances by prepending them with a module identifier.  This
+applies to variable, constructor, type constructor and type class
+names, but not type variables or module names.  Qualified
+names are discussed in detail in @chapter:modules[Chapter]
+
+$
+  italic("qvarid") &-> [italic("modid") mono(".")] italic("varid") \
+  italic("qconid") &-> [italic("modid") mono(".")] italic("conid") \
+  italic("qtycon") &-> [italic("modid") mono(".")] italic("tycon") \
+  italic("qtycls") &-> [italic("modid") mono(".")] italic("tycls") \
+  italic("qvarsym") &-> [italic("modid") mono(".")] italic("varsym") \
+  italic("qconsym") &-> [italic("modid") mono(".")] italic("consym") \
+$
+
+Since a qualified name is a lexeme, no spaces are
+allowed between the qualifier and the name.
+Sample lexical analyses are shown below.
+
+#align(center,
+  table(
+    columns: 2,
+    align: (left, left),
+    stroke: none,
+    table.vline(x: 0),
+    table.vline(x: 1),
+    table.vline(x: 2),
+    table.hline(),
+    table.header([This], [Lexes as this]),
+    table.hline(),
+    [`f.g`],[`f . g` (three tokens)],
+    [`F.g`],[`F.g` (qualified '`g`')],
+    [`f..`],[`f ..` (two tokens)],
+    [`F..`],[`F..` (qualified '`.`')],
+    [`F.`],[`F .` (two tokens)],
+    table.hline(),
+  )
+)
+
+The qualifier does not change the syntactic treatment of a name;
+for example, `Prelude.+` is an infix operator with the same fixity as the
+definition of `+` in the Prelude (Section~\ref{fixity}).
+
 
 === Numeric Literals
 
@@ -155,11 +293,11 @@ For each subsequent line, if it contains only whitespace or is
 indented more, then the previous item is continued (nothing is
 inserted); if it is indented the same amount, then a new item begins
 (a semicolon is inserted); and if it is indented less, then the
-layout list ends (a close brace is inserted).  If the indentation of the 
-non-brace lexeme immediately following a `where`, `let`, `do` or `of` is less 
-than or equal to the current indentation level, then instead of starting 
-a layout, an empty list "`{}`" is inserted, and layout processing 
-occurs for the current level (i.e. insert a semicolon or close brace). 
+layout list ends (a close brace is inserted).  If the indentation of the
+non-brace lexeme immediately following a `where`, `let`, `do` or `of` is less
+than or equal to the current indentation level, then instead of starting
+a layout, an empty list "`{}`" is inserted, and layout processing
+occurs for the current level (i.e. insert a semicolon or close brace).
 A close brace is
 also inserted whenever the syntactic category containing the
 layout list ends; that is, if an illegal lexeme is encountered at
@@ -168,7 +306,7 @@ The layout rule matches only those open braces that it has
 inserted; an explicit open brace must be matched by
 an explicit close brace.  Within these explicit open braces,
 _no_ layout processing is performed for constructs outside the
-braces, even if a line is 
+braces, even if a line is
 indented to the left of an earlier implicit open brace.
 
 @sec:layout[Section] gives a more precise definition of the layout rules.
@@ -176,7 +314,7 @@ indented to the left of an earlier implicit open brace.
 Given these rules, a single newline may actually terminate several
 layout lists.  Also, these rules permit:
 ```haskell
-f x = let a = 1; b = 2 
+f x = let a = 1; b = 2
           g y = exp2
        in exp1
 ```
@@ -199,7 +337,7 @@ because of the column 0 indentation of the end-of-file token.
 )[
 ```haskell
 module AStack( Stack, push, pop, top, size ) where
-data Stack a = Empty 
+data Stack a = Empty
              | MkStack a (Stack a)
 
 push :: a -> Stack a -> Stack a
@@ -225,7 +363,7 @@ top (MkStack x s) = x                     -- (top Empty) is an error
 )[
 ```haskell
 module AStack( Stack, push, pop, top, size ) where
-{data Stack a = Empty 
+{data Stack a = Empty
              | MkStack a (Stack a)
 
 ;push :: a -> Stack a -> Stack a

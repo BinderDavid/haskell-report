@@ -93,7 +93,7 @@ will probably try to provide useful information about
 errors.
 See @sec:expressions:errors
 
-=== Namespaces
+=== Namespaces <sec:namespaces>
 
 There are six kinds of names in Haskell: those for _variables_ and
 _constructors_ denote values; those for _type variables_, _type constructors_, and _type classes_ refer to entities related
