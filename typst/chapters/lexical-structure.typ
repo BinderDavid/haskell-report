@@ -43,6 +43,60 @@ Haskell compilers are expected to make use of new versions of Unicode as they ar
 
 === Lexical Program Structure
 
+$
+  italic("program") &-> { med italic("lexeme") | italic("whitespace") med }\
+  italic("lexeme") &-> italic("qvarid") | italic("qconid") | italic("qvarsym") | italic("qconsym") \
+  &| italic("literal") | italic("special") | italic("reservedop") | italic("reservedid") \
+  italic("literal") &-> italic("integer") | italic("float") | italic("char") | italic("string") \
+  italic("special") &-> mono("(") | mono(")") | mono(",") | mono(";") | mono("[") | mono("]") | mono("`") | mono("{") | mono("}") \
+  italic("whitespace") &-> italic("whitestuff") { italic("whitestuff") }\
+  italic("whitestuff") &-> italic("whitechar") | italic("comment") | italic("ncomment") \
+  italic("whitechar") &-> italic("newline") | italic("vertab") | italic("space") | italic("tab") | italic("uniWhite") \
+  italic("newline") &-> italic("return") italic("linefeed") | italic("return") | italic("linefeed") | italic("formfeed") \
+  italic("return") &-> text("a carriage return")\
+  italic("linefeed") &-> text("a line feed")\
+  italic("vertab") &-> text("a vertical tab")\
+  italic("formfeed") &-> text("a form feed")\
+  italic("space") &-> text("a space")\
+  italic("tab") &-> text("a horizontal tab")\
+  italic("uniWhite") &-> text("any Unicode character defined as whitespace")\
+  italic("comment") &-> italic("dashes") [italic("any")_(chevron.l italic("symbol") chevron.r) { italic("any") }] italic("newline") \
+  italic("dashes") &-> mono("--") { mono("-") }\
+  italic("opencom") &-> mono("{-") \
+  italic("closecom") &-> mono("-}")\
+  italic("ncomment") &-> italic("opencom") italic("ANYseq") { italic("ncomment") italic("ANYseq") } italic("closecom") \
+  italic("ANYseq") &-> { med italic("ANY") med }_(chevron.l { med italic("ANY") med } ( italic("opencom") | italic("closecom") ) { med italic("ANY") med } chevron.r)\
+  italic("ANY") &-> italic("graphic") | italic("whitechar") \
+  italic("any") &-> italic("graphic") | italic("space") | italic("tab") \
+  italic("graphic") &-> italic("small") | italic("large") | italic("symbol") | italic("digit") | italic("special") | mono("\"") | mono("'") \
+  italic("small") &-> italic("ascSmall") | italic("uniSmall") | mono("_") \
+  italic("ascSmall") &-> mono("a") | mono("b") | dots | mono("z") \
+  italic("uniSmall") &-> text("any Unicode lowercase letter")\
+  italic("large") &-> italic("ascLarge") | italic("uniLarge") \
+  italic("ascLarge") &-> mono("A") | mono("B") | dots | mono("Z")\
+  italic("uniLarge") &-> text("any uppercase or titlecase Unicode letter")\
+  italic("symbol") &-> italic("ascSymbol") | italic("uniSymbol")_(chevron.l italic("special") | mono("_") | mono("\"") | mono("'") chevron.r)\
+  italic("ascSymbol") &-> mono("!") | mono("#") | mono("$") | mono("%") | mono("&") | mono("*") | mono("+") | mono(".")  | mono("/") | mono("<") | mono("=") | mono(">") | mono("?") | mono("@") \
+  &| mono("\\") | mono("^") | mono("|") | mono("-") | mono("~") | mono(":") \
+  italic("uniSymbol") &-> text("any Unicode symbol or punctuation")\
+  italic("digit") &-> italic("ascDigit") | italic("uniDigit") \
+  italic("ascDigit") &-> mono("0") | mono("1") | dots | mono("9") \
+  italic("uniDigit") &-> text("any Unicode decimal digit")\
+  italic("octit") &-> mono("0") | mono("1") | dots | mono("7")\
+  italic("hexit") &-> italic("digit") | mono("A") | dots | mono("F") | mono("a") | dots | mono("f")
+$
+
+Lexical analysis should use the ``maximal munch'' rule:
+at each point, the longest possible lexeme
+satisfying the $italic("lexeme")$ production is read.
+So, although `case` is a reserved word, `cases` is not.
+Similarly, although `=` is reserved, `==` and `~=` are not.  
+
+Any kind of $italic("whitespace")$ is also a proper delimiter for lexemes.
+
+Characters not in the category $italic("ANY")$ are not valid
+in Haskell programs and should result in a lexing error.
+
 === Comments
 
 === Identifiers and Operators
