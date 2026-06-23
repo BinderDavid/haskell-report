@@ -8,11 +8,10 @@ describe the derivation of classes defined by the Prelude.
 
 If $T$ is an algebraic datatype declared by:
 
-TODO
-// \[\ba{lcl}
-// \mbox{$\it \makebox{\tt data\ }cx\makebox{\tt \ =>}\ T\ u_1\ \ldots \ u_k$}&\mbox{\tt =}&\mbox{$\it K_1\ t_{11}\ \ldots \ t_{1k_1}\ \makebox{\tt |}\ \cdots\ \makebox{\tt |}\ K_n\ t_{n1}\ \ldots \ t_{nk_n}$}\\
-// & & \mbox{$\it \makebox{\tt deriving\ (}C_1\makebox{\tt ,}\ \ldots \makebox{\tt ,}\ C_m\makebox{\tt )}$}
-// \ea\]
+$
+  mono("data") italic("cx") mono("=>") T med u_1 dots u_k = K_1 med t_(1,1) dots t_(1,k_1) | dots | K_n med t_(n,1) dots t_(n,k_n) \
+  mono("deriving") (C_1, dots, C_m)
+$
 
 (where $m >= 0$ and the parentheses may be omitted if $m=1$) then
 a derived instance declaration is possible for a class $C$
@@ -39,10 +38,9 @@ omitted or the form `deriving ()` may be used.
 
 Each derived instance declaration will have the form:
 
-TODO
-// \[
-// \mbox{$\it \makebox{\tt instance\ (}cx\makebox{\tt ,\ }cx'\makebox{\tt )\ =>}\ C_i\ (T\ u_1\ \ldots \ u_k)\ \makebox{\tt where}\ \makebox{\tt {\char'173}}\ d\ \makebox{\tt {\char'175}}$}
-// \]
+$
+  mono("instance") (italic("cx"), italic("cx")') mono("=>") C_i med (T med u_1 dots u_k) mono("where") { med d med }
+$
 
 where $d$ is derived automatically depending on $C_i$ and the data
 type declaration for $T$ (as will be described in the remainder of this section).

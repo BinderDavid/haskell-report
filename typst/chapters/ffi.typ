@@ -634,6 +634,22 @@ corresponding C type.
 
 === The External C Interface
 
+Every Haskell system that implements the FFI needs to provide a C header file
+named `HsFFI.h` that defines the C symbols listed in
+@tab:c-haskell-types and @tab:c-haskell-values.
+@tab:c-haskell-types lists symbols that represent types
+together with the Haskell type that they represent and any constraints that
+are placed on the concrete C types that implement these symbols.  When a C
+type `HsT` represents a Haskell type `T`, the occurrence of `T`
+in a foreign function declaration should be matched by `HsT` in the
+corresponding C function prototype.  Indeed, where the Haskell system
+translates Haskell to C code that invokes `foreign` `import`ed C
+routines, such prototypes need to be provided and included via the header that
+can be specified in external entity strings for foreign C functions (cf.\ 
+Section~\ref{sec:ccall}); otherwise, the system behaviour is undefined.  It is
+guaranteed that the Haskell value `nullPtr` is mapped to `(HsPtr) NULL` in C and `nullFunPtr` is mapped to `(HsFunPtr) NULL` and
+vice versa.
+
 #figure(
   caption: "C Interface to Basic Haskell Types",
   table(
@@ -665,7 +681,7 @@ corresponding C type.
     [`HsStablePtr`], [`StablePtr a`], [`(void *)`],
     table.hline(),
   )
-)
+)<tab:c-haskell-types>
 
 #figure(
   caption: "C Interface to Range and Precision of Basic Types",
@@ -712,4 +728,71 @@ corresponding C type.
     [`HS_BOOL_FALSE`],[False],[],
     [`HS_BOOL_TRUE`],[True],[],
   )
-)
+)<tab:c-haskell-values>
+
+@tab:c-haskell-values contains symbols characterising the range and
+precision of the types from @tab:c-haskell-types.  Where available, the table states the corresponding Haskell values.  All C symbols, with the
+exception of `HS_FLOAT_ROUND` are constants that are suitable for use in
+`#if` preprocessing directives.  Note that there is only one rounding
+style (`HS_FLOAT_ROUND`) and one radix (`HS_FLOAT_RADIX`), as
+this is all that is supported by ISO C~@C99.
+
+Moreover, an implementation that does not support 64 bit integral types on the
+C side should implement `HsInt64` and `HsWord64` as a structure.
+In this case, the bounds `HS_INT64_MIN`, `HS_INT64_MAX`, and
+`HS_WORD64_MAX` are undefined.
+
+In addition, to the symbols from @tab:c-haskell-types
+and @tab:c-haskell-values, the header `HsFFI.h` must also contain
+the following prototypes:
+```c
+void hs_init     (int *argc, char **argv[]);
+void hs_exit     (void);
+void hs_set_argv (int argc, char *argv[]);
+
+void hs_perform_gc (void);
+
+void hs_free_stable_ptr (HsStablePtr sp);
+void hs_free_fun_ptr    (HsFunPtr fp);
+```
+These routines are useful for mixed language programs, where the main
+application is implemented in a foreign language that accesses routines
+implemented in Haskell.  The function `hs_init()` initialises the
+Haskell system and provides it with the available command line arguments.
+Upon return, the arguments solely intended for the Haskell runtime system are
+removed (i.e., the values that `argc` and `argv` point to may have
+changed).  This function must be called during program startup before any
+Haskell function is invoked; otherwise, the system behaviour is undefined.
+Conversely, the Haskell system is deinitialised by a call to
+`hs_exit()`.  Multiple invocations of `hs_init()` are permitted,
+provided that they are followed by an equal number of calls to
+`hs_exit()` and that the first call to `hs_exit()` is after the
+last call to `hs_init()`.  In addition to nested calls to
+`hs_init()`, the Haskell system may be de-initialised with
+`hs_exit()` and be re-initialised with `hs_init()` at a later
+point in time.  This ensures that repeated initialisation due to multiple
+libraries being implemented in Haskell is covered.
+
+The Haskell system will ignore the command line arguments passed to the second
+and any following calls to `hs_init()`.  Moreover, `hs_init()` may
+be called with `NULL` for both `argc` and `argv`, signalling
+the absence of command line arguments.
+
+The function `hs_set_argv()` sets the values returned by the functions
+`getProgName` and `getArgs` of the module `System.Environment` (Section~\ref{module:System.Environment}).  This function may only be invoked after
+`hs_init()`.  Moreover, if `hs_set_argv()` is called at all, this
+call must precede the first invocation of `getProgName` and
+`getArgs`.  Note that the separation of `hs_init()` and
+`hs_set_argv()` is essential in cases where in addition to the Haskell
+system other libraries that process command line arguments during
+initialisation are used.
+
+The function `hs_perform_gc()` advises the Haskell storage manager to
+perform a garbage collection, where the storage manager makes an effort to
+releases all unreachable objects.  This function must not be invoked from C
+functions that are imported `unsafe` into Haskell code nor may it be used
+from a finalizer.
+
+Finally, `hs_free_stable_ptr()` and `hs_free_fun_ptr()` are
+the C counterparts of the Haskell functions `freeStablePtr` and
+`freeHaskellFunPtr`.
