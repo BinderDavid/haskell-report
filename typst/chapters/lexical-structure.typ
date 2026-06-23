@@ -267,6 +267,58 @@ is discussed in @sec:numeric-literals
 
 === Character and String Literals
 
+$
+  italic("char") &-> mono("'") (italic("graphic")_(chevron.l mono("'") | mono("\\") chevron.r) | italic("space") | italic("escape")_(chevron.l mono("\&") chevron.r)) mono("'")\
+  italic("string") &-> mono("\"") {italic("graphic")_(chevron.l mono("\"") | mono("\\") chevron.r) | italic("space") | italic("escape") | italic("gap") } mono("\"") \
+  italic("escape") &-> mono("\\") (italic("charesc") | italic("ascii") | italic("decimal") | mono("o") italic("octal") | mono("x") italic("hexadecimal"))\
+  italic("charesc") &-> mono("a") | mono("b") | mono("f") | mono("n") | mono("r") | mono("t") | mono("v") | mono("\\") | mono("\"") | mono("'") | mono("&")\
+  italic("ascii") &-> mono("^") italic("cntrl") | mono("NUL") | mono("SOH") | mono("STX") | mono("ETX") | mono("EOT") | mono("ENQ") | mono("ACK") \
+  &| mono("BEL") | mono("BS") | mono("HT") | mono("LF") | mono("VT") | mono("FF") | mono("CR") | mono("SO") | mono("SI") | mono("DLE")\
+  &| mono("DC1") | mono("DC2") | mono("DC3") | mono("DC4") | mono("NAK") | mono("SYN") | mono("ETB") | mono("CAN") \
+  &| mono("EM") | mono("SUB") | mono("ESC") | mono("FS") | mono("GS") | mono("RS") | mono("US") | mono("SP") | mono("DEL") \
+  italic("cntrl") &-> italic("ascLarge") | mono("@") | mono("[") | mono("\\") | mono("]") | mono("^") | mono("_") \
+  italic("gap") &-> mono("\\") italic("whitechar") { med italic("whitechar") med } mono("\\") \
+$
+
+Character literals are written between single quotes, as in `'a'`, and strings between double quotes, as in `"Hello"`.
+
+Escape codes may be used in characters and strings to represent
+special characters.  Note that a single quote~`'` may be used in a string, but
+must be escaped in a character; similarly, a double quote~`"` may be used in a
+character, but must be escaped in a string. `\` must always be
+escaped.  The category $italic("charesc")$ also includes portable
+representations for the characters "alert" (`\a`), "backspace"
+(`\b`), "form feed" (`\f`), "new line" (`\n`), "carriage return"
+(`\r`), "horizontal tab" (`\t`), and "vertical tab" (`\v`).
+
+Escape characters for the Unicode character
+set, including
+control characters such as `\^X`, are also provided.
+Numeric escapes such as `\137` are used to designate the character
+with decimal representation 137; octal
+(e.g.~`\o137`) and hexadecimal (e.g.~`\x37`) representations are also allowed.
+
+Consistent with the "maximal munch" rule,
+numeric escape
+characters in strings consist of all consecutive digits and may
+be of arbitrary length.  Similarly, the one ambiguous ASCII escape
+code, `"\SOH"`, is parsed as a string of length 1.  The escape
+character `\&` is provided as a "null character" to allow strings
+such as `"\137\&\9"` and `"\SO\&\H"` to be constructed (both of length two).  Thus `"\&"` is equivalent to `""` and the character `\&` is disallowed.  Further equivalences of characters are defined in Section~\ref{characters}.
+
+A string may include a "gap"---two backslants enclosing
+white characters---which is ignored.
+This allows one to write long strings on more than one line by writing
+a backslant at the end of one line and at the start of the next.  For
+example,
+```
+"Here is a backslant \\ as well as \137, \
+    \a numeric escape character, and \^X, a control character."
+```
+
+String literals are actually abbreviations for lists of characters
+(see Section~\ref{lists}).
+
 === Layout
 
 Haskell permits the omission of the braces and semicolons used in several
