@@ -141,4 +141,155 @@ would generate the following `Bounded` instance:
 ```
 
 === Derived instances of Read and Show
+
+The class methods automatically introduced by derived instances
+of `Read` and `Show` are `showsPrec`,
+`readsPrec`,
+`showList`, and `readList`.
+They are used to coerce values into strings and parse strings into values.
+
+The function `showsPrec d x r` accepts a precedence level `d`
+(a number from `0` to `11`), a value `x`, and a string `r`.
+It returns a string representing `x` concatenated to `r`.
+`showsPrec` satisfies the law:
+
+$
+  mono("showsPrec d x r ++ s") == mono("showsPrec d x (r ++ s)")
+$
+
+The representation will be enclosed in parentheses if the precedence of the top-level constructor in `x` is less than `d`.  Thus,
+if `d` is `0` then the result is never surrounded in parentheses; if
+`d` is `11` it is always surrounded in parentheses, unless it is an
+atomic expression (recall that function application has precedence `10`).
+The extra parameter `r` is essential if tree-like
+structures are to be printed in linear time rather than time quadratic in the size of the tree.
+
+The function `readsPrec d s` accepts a precedence level `d` (a number
+from `0` to `10`) and a string `s`, and attempts to parse a value from the front of the string, returning a list of (parsed value, remaining string) pairs.
+If there is no successful parse, the returned list is empty.
+Parsing of an un-parenthesised infix operator application succeeds only
+if the precedence of the operator is greater than or equal to `d`.
+
+It should be the case that
+#align(center,
+  [`(x,"")` is an element of `(readsPrec d (showsPrec d x ""))`]
+)
+That is, `readsPrec` should be able to parse the string produced by `showsPrec`, and should deliver the value that `showsPrec` started with.
+
+`showList` and `readList` allow lists of objects to be represented
+using non-standard denotations.  This is especially useful for strings
+(lists of `Char`).
+
+`readsPrec` will parse any valid representation of the standard types
+apart from strings, for which only quoted strings are accepted, and other lists,
+for which only the bracketed form `[...]` is accepted. See @chapter:standard-prelude[Chapter] for full details.
+
+The result of `show` is a syntactically correct Haskell expression
+containing only constants, given the fixity declarations in force at
+the point where the type is declared.  It contains only the
+constructor names defined in the data type, parentheses, and
+spaces. When labelled constructor fields are used, braces, commas,
+field names, and equal signs are also used.  Parentheses
+are only added where needed, _ignoring associativity_.  No line breaks
+are added. The result of `show` is readable by `read` if all component
+types are readable.  (This is true for all instances defined in the
+Prelude but may not be true for user-defined instances.)
+
+Derived instances of `Read` make the following assumptions,
+which derived instances of `Show` obey:
+- If the constructor is defined to be an infix operator, then
+  the derived `Read` instance will parse only infix applications of the
+  constructor (not the prefix form).
+- Associativity is not used to reduce the occurrence of
+  parentheses, although precedence may be. For example, given
+  ```haskell
+  infixr 4 :$
+  data T = Int :$ T  |  NT
+  ```
+  then:
+  - `show (1 :$ 2 :$ NT)` produces the string `"1 :$ (2 :$ NT)"`.
+  - `read "1 :$ (2 :$ NT)"` succeeds, with the obvious result.
+  - `read "1 :$ 2 :$ NT"` fails.
+- If the constructor is defined using record syntax, the derived `Read`
+  will parse only the record-syntax form, and furthermore, the fields must be
+  given in the same order as the original declaration.
+- The derived `Read` instance allows arbitrary Haskell whitespace between
+  tokens of the input string.  Extra parentheses are also allowed.
+
+The derived `Read` and `Show` instances may be unsuitable for some
+uses.  Some problems include:
+- Circular structures cannot be printed or read by these
+  instances.
+- The printer loses shared substructure; the printed
+  representation of an object may be much larger than necessary.
+- The parsing techniques used by the reader are very inefficient;
+  reading a large structure may be quite slow.
+- There is no user control over the printing of types defined in the Prelude.  For example, there is no way to change the
+  formatting of floating point numbers.
+
 === An Example
+
+As a complete example, consider a tree datatype:
+```haskell
+data Tree a = Leaf a | Tree a :^: Tree a
+       deriving (Eq, Ord, Read, Show)
+```
+
+Automatic derivation of instance
+declarations for `Bounded` and `Enum` are not possible, as `Tree` is not
+an enumeration or single-constructor datatype.  The complete
+instance declarations for `Tree` are shown in @fig:tree-inst.
+Note the implicit use of default class method
+definitions---for
+example, only `<=` is defined for `Ord`, with the other
+class methods (`<`, `>`, `>=`, `max`, and `min`) being defined by the defaults given in
+the class declaration shown in Figure~\ref{standard-classes}.
+
+#figure(
+  caption: "Example of Derived Instances",
+  ```haskell
+infixr 5 :^:
+data Tree a =  Leaf a  |  Tree a :^: Tree a
+
+instance (Eq a) => Eq (Tree a) where
+        Leaf m == Leaf n  =  m==n
+        u:^:v  == x:^:y   =  u==x && v==y
+             _ == _       =  False
+
+instance (Ord a) => Ord (Tree a) where
+        Leaf m <= Leaf n  =  m<=n
+        Leaf m <= x:^:y   =  True
+        u:^:v  <= Leaf n  =  False
+        u:^:v  <= x:^:y   =  u<x || u==x && v<=y
+
+instance (Show a) => Show (Tree a) where
+
+        showsPrec d (Leaf m) = showParen (d > app_prec) showStr
+          where
+             showStr = showString "Leaf " . showsPrec (app_prec+1) m
+
+        showsPrec d (u :^: v) = showParen (d > up_prec) showStr
+          where
+             showStr = showsPrec (up_prec+1) u . 
+                       showString " :^: "      .
+                       showsPrec (up_prec+1) v
+                -- Note: right-associativity of :^: ignored
+
+instance (Read a) => Read (Tree a) where
+
+        readsPrec d r =  readParen (d > up_prec)
+                         (\r -> [(u:^:v,w) |
+                                 (u,s) <- readsPrec (up_prec+1) r,
+                                 (":^:",t) <- lex s,
+                                 (v,w) <- readsPrec (up_prec+1) t]) r
+
+                      ++ readParen (d > app_prec)
+                         (\r -> [(Leaf m,t) |
+                                 ("Leaf",s) <- lex r,
+                                 (m,t) <- readsPrec (app_prec+1) s]) r
+
+up_prec  = 5    -- Precedence of :^:
+app_prec = 10   -- Application has precedence one more than
+                -- the most tightly-binding operator
+  ```
+)<fig:tree-inst>
