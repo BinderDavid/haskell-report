@@ -5,11 +5,14 @@
 
 /// Typesetting nonterminal symbols in the gramma
 #let nonterminal(x) = {
-  text(fill: maroon, $italic(#x)$)
+  link(label(x))[#text(fill: maroon, $italic(#x)$)]
 }
 
 #let nonterminaldef(x) = {
-  text(fill: maroon, $italic(#x)$)
+  [#figure(kind: "xxx",
+         supplement: "",
+         [#text(fill: maroon, $italic(#x)$)])
+   #label(x)]
 }
 
 /// A box used in defining the meaning of syntactic entities by translation.
