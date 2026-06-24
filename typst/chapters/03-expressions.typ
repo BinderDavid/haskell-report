@@ -161,8 +161,8 @@ Similarly, `(-)` is syntax for `\x y -> x-y`, as with any infix operator, and do
 === Sections
 
 $
-  italic("aexp") &-> ( italic("infixexp") med italic("qop")) && text("(left section)")\
-  &| (italic("qop")_(chevron.l terminal("-") chevron.r) italic("infixexp")) && text("(right section)")
+  italic("aexp") &-> terminal("(") italic("infixexp") med italic("qop") terminal(")") && text("(left section)")\
+  &| terminal("(") italic("qop")_(chevron.l terminal("-") chevron.r) italic("infixexp") terminal(")") && text("(right section)")
 $
 
 _Sections_ are written as $(italic("op") e)$ or $(e italic("op"))$, where
@@ -211,7 +211,7 @@ The expression $(+ (- italic("exp")))$ can serve the same purpose.
 === Conditionals
 
 $
-  italic("lexp") &-> mono("if") italic("exp") [mono(";")] mono("then") italic("exp") [mono(";")] mono("else") italic("exp")
+  italic("lexp") &-> terminal("if") italic("exp") [terminal(";")] terminal("then") italic("exp") [terminal(";")] terminal("else") italic("exp")
 $
 
 A _conditional expression_ has the form $mono("if") e_1 mono("then") e_2 mono("else") e_3$ and returns the value of $e_2$ if the
@@ -232,14 +232,14 @@ value of $e_1$ is `True`, $e_3$ if $e_1$ is `False`, and $bot$ otherwise.
 
 $
   italic("infixexp") &-> italic("exp")_1 italic("qop") italic("exp")_2\
-  italic("aexp") &-> [ italic("exp")_1, dots, italic("exp")_k ]& (k >= 1)\
+  italic("aexp") &-> terminal("[") italic("exp")_1 terminal(",") dots terminal(",") italic("exp")_k terminal("]")& (k >= 1)\
   &| italic("gcon") \
-  italic("gcon") &-> mono("[]") \
+  italic("gcon") &-> terminal("[]") \
   &| italic("qcon") \
-  italic("qcon") &-> (italic("gconsym"))\
+  italic("qcon") &-> terminal("(") italic("gconsym") terminal(")")\
   italic("qop") &-> italic("qconop")\
   italic("qconop") &-> italic("gconsym")\
-  italic("gconsym") &-> mono(":")\
+  italic("gconsym") &-> terminal(":")\
 $
 _Lists_ are written $[e_1, dots, e_k]$, where $k >= 1$.
 The list constructor is `:`, and the empty list is denoted `[]`.
@@ -262,9 +262,9 @@ It is a right-associative operator, with precedence level 5 (Section~\ref{fixity
 === Tuples
 
 $
-  italic("aexp") &-> (italic("exp")_1, dots, italic("exp")_k) (k >= 2) \
+  italic("aexp") &-> terminal("(") italic("exp")_1 terminal(",") dots terminal(",") italic("exp")_k terminal(")") (k >= 2) \
   &| italic("qcon") \
-  italic("qcon") &-> (,{,})
+  italic("qcon") &-> terminal("(") terminal(","){ terminal(",")}terminal(")")
 $
 
 _Tuples_ are written $(e_1, dots, e_k)$, and may be
@@ -285,8 +285,8 @@ in the Prelude (see Section~\ref{basic-tuples} and @chapter:standard-prelude[Cha
 
 $
   italic("aexp") &-> italic("gcon") \
-  &| ( italic("exp") ) \
-  italic("gcon") &-> ()
+  &| terminal("(") italic("exp") terminal(")") \
+  italic("gcon") &-> terminal("()")
 $
 
 The form $(e$) is simply a _parenthesized expression_, and is equivalent to $e$.
@@ -301,7 +301,7 @@ It is the only member of that type apart from $bot$, and can be thought of as th
 === Arithmetic Sequences <sec:arithmetic-sequences>
 
 $
-  italic("aexp") &-> [ italic("exp")_1 [, italic("exp")_2] mono("..") [italic("exp")_3]]
+  italic("aexp") &-> terminal("[") italic("exp")_1 [terminal(",") italic("exp")_2] terminal("..") [italic("exp")_3] terminal("]")
 $
 
 The _arithmetic sequence_ $[e_1, e_2 .. e_3]$ denotes a list of values of type $t$, where each of the $e_i$ has type $t$, and $t$ is an instance of class `Enum`.
