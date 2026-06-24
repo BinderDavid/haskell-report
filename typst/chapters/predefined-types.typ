@@ -194,9 +194,19 @@ are instances of these classes.
   image(width: 50%, "../assets/classes.pdf")
 )<fig:standard-classes>
 
+// Cf. https://forum.typst.app/t/how-to-export-cetz-diagrams-in-html/3034/5
+#let drawing(..args) = {
+  let canvas = cetz.canvas(..args)
+  context if target() == "html" {
+    html.frame(canvas)
+  } else {
+    canvas
+  }
+}
+
 #figure(
   caption: "Standard Haskell Classes",
-  cetz.canvas({
+  drawing({
     import cetz.draw: *
       let ellipse_size = (40pt, 20pt)
       // Eq
