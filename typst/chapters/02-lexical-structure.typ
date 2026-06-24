@@ -46,12 +46,12 @@ Haskell compilers are expected to make use of new versions of Unicode as they ar
 === Lexical Program Structure
 
 $
-  italic("program") &-> { med italic("lexeme") | italic("whitespace") med }\
-  italic("lexeme") &-> italic("qvarid") | italic("qconid") | italic("qvarsym") | italic("qconsym") \
+  italic("program") &-> { med nonterminal("lexeme") | nonterminal("whitespace") med }\
+  nonterminaldef("lexeme") &-> italic("qvarid") | italic("qconid") | italic("qvarsym") | italic("qconsym") \
   &| italic("literal") | italic("special") | italic("reservedop") | italic("reservedid") \
   italic("literal") &-> italic("integer") | italic("float") | italic("char") | italic("string") \
   italic("special") &-> terminal("(") | terminal(")") | terminal(",") | terminal(";") | terminal("[") | terminal("]") | terminal("`") | terminal("{") | terminal("}") \
-  italic("whitespace") &-> italic("whitestuff") { italic("whitestuff") }\
+  nonterminaldef("whitespace") &-> italic("whitestuff") { italic("whitestuff") }\
   italic("whitestuff") &-> italic("whitechar") | italic("comment") | italic("ncomment") \
   italic("whitechar") &-> italic("newline") | italic("vertab") | italic("space") | italic("tab") | italic("uniWhite") \
   italic("newline") &-> italic("return") italic("linefeed") | italic("return") | italic("linefeed") | italic("formfeed") \
