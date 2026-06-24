@@ -46,57 +46,57 @@ Haskell compilers are expected to make use of new versions of Unicode as they ar
 === Lexical Program Structure
 
 $
-  italic("program") &-> { med nonterminal("lexeme") | nonterminal("whitespace") med }\
+  nonterminaldef("program") &-> { med nonterminal("lexeme") | nonterminal("whitespace") med }\
   nonterminaldef("lexeme") &-> italic("qvarid") | italic("qconid") | italic("qvarsym") | italic("qconsym") \
-  &| italic("literal") | italic("special") | italic("reservedop") | italic("reservedid") \
-  italic("literal") &-> italic("integer") | italic("float") | italic("char") | italic("string") \
-  italic("special") &-> terminal("(") | terminal(")") | terminal(",") | terminal(";") | terminal("[") | terminal("]") | terminal("`") | terminal("{") | terminal("}") \
-  nonterminaldef("whitespace") &-> italic("whitestuff") { italic("whitestuff") }\
-  italic("whitestuff") &-> italic("whitechar") | italic("comment") | italic("ncomment") \
-  italic("whitechar") &-> italic("newline") | italic("vertab") | italic("space") | italic("tab") | italic("uniWhite") \
-  italic("newline") &-> italic("return") italic("linefeed") | italic("return") | italic("linefeed") | italic("formfeed") \
-  italic("return") &-> text("a carriage return")\
-  italic("linefeed") &-> text("a line feed")\
-  italic("vertab") &-> text("a vertical tab")\
-  italic("formfeed") &-> text("a form feed")\
-  italic("space") &-> text("a space")\
-  italic("tab") &-> text("a horizontal tab")\
-  italic("uniWhite") &-> text("any Unicode character defined as whitespace")\
-  italic("comment") &-> italic("dashes") [italic("any")_(chevron.l italic("symbol") chevron.r) { italic("any") }] italic("newline") \
-  italic("dashes") &-> terminal("--") { terminal("-") }\
-  italic("opencom") &-> terminal("{-") \
-  italic("closecom") &-> terminal("-}")\
-  italic("ncomment") &-> italic("opencom") italic("ANYseq") { italic("ncomment") italic("ANYseq") } italic("closecom") \
-  italic("ANYseq") &-> { med italic("ANY") med }_(chevron.l { med italic("ANY") med } ( italic("opencom") | italic("closecom") ) { med italic("ANY") med } chevron.r)\
-  italic("ANY") &-> italic("graphic") | italic("whitechar") \
-  italic("any") &-> italic("graphic") | italic("space") | italic("tab") \
-  italic("graphic") &-> italic("small") | italic("large") | italic("symbol") | italic("digit") | italic("special") | terminal("\"") | terminal("'") \
-  italic("small") &-> italic("ascSmall") | italic("uniSmall") | terminal("_") \
-  italic("ascSmall") &-> terminal("a") | terminal("b") | dots | terminal("z") \
-  italic("uniSmall") &-> text("any Unicode lowercase letter")\
-  italic("large") &-> italic("ascLarge") | italic("uniLarge") \
-  italic("ascLarge") &-> terminal("A") | terminal("B") | dots | terminal("Z")\
-  italic("uniLarge") &-> text("any uppercase or titlecase Unicode letter")\
-  italic("symbol") &-> italic("ascSymbol") | italic("uniSymbol")_(chevron.l italic("special") | terminal("_") | terminal("\"") | terminal("'") chevron.r)\
-  italic("ascSymbol") &-> terminal("!") | terminal("#") | terminal("$") | terminal("%") | terminal("&") | terminal("*") | terminal("+") | terminal(".")  | terminal("/") | terminal("<") | terminal("=") | terminal(">") | terminal("?") | terminal("@") \
+  &| nonterminal("literal") | nonterminal("special") | italic("reservedop") | italic("reservedid") \
+  nonterminaldef("literal") &-> italic("integer") | italic("float") | italic("char") | italic("string") \
+  nonterminaldef("special") &-> terminal("(") | terminal(")") | terminal(",") | terminal(";") | terminal("[") | terminal("]") | terminal("`") | terminal("{") | terminal("}") \
+  nonterminaldef("whitespace") &-> nonterminal("whitestuff") { nonterminal("whitestuff") }\
+  nonterminaldef("whitestuff") &-> nonterminal("whitechar") | nonterminal("comment") | nonterminal("ncomment") \
+  nonterminaldef("whitechar") &-> nonterminal("newline") | nonterminal("vertab") | nonterminal("space") | nonterminal("tab") | nonterminal("uniWhite") \
+  nonterminaldef("newline") &-> nonterminal("return") nonterminal("linefeed") | nonterminal("return") | nonterminal("linefeed") | nonterminal("formfeed") \
+  nonterminaldef("return") &-> text("a carriage return")\
+  nonterminaldef("linefeed") &-> text("a line feed")\
+  nonterminaldef("vertab") &-> text("a vertical tab")\
+  nonterminaldef("formfeed") &-> text("a form feed")\
+  nonterminaldef("space") &-> text("a space")\
+  nonterminaldef("tab") &-> text("a horizontal tab")\
+  nonterminaldef("uniWhite") &-> text("any Unicode character defined as whitespace")\
+  nonterminaldef("comment") &-> nonterminal("dashes") [nonterminal("any")_(chevron.l nonterminal("symbol") chevron.r) { nonterminal("any") }] nonterminal("newline") \
+  nonterminaldef("dashes") &-> terminal("--") { terminal("-") }\
+  nonterminaldef("opencom") &-> terminal("{-") \
+  nonterminaldef("closecom") &-> terminal("-}")\
+  nonterminaldef("ncomment") &-> nonterminal("opencom") nonterminal("ANYseq") { nonterminal("ncomment") nonterminal("ANYseq") } nonterminal("closecom") \
+  nonterminaldef("ANYseq") &-> { med nonterminal("ANY") med }_(chevron.l { med nonterminal("ANY") med } ( nonterminal("opencom") | nonterminal("closecom") ) { med nonterminal("ANY") med } chevron.r)\
+  nonterminaldef("ANY") &-> nonterminal("graphic") | nonterminal("whitechar") \
+  nonterminaldef("any") &-> nonterminal("graphic") | nonterminal("space") | nonterminal("tab") \
+  nonterminaldef("graphic") &-> nonterminal("small") | nonterminal("large") | nonterminal("symbol") | nonterminal("digit") | nonterminal("special") | terminal("\"") | terminal("'") \
+  nonterminaldef("small") &-> nonterminal("ascSmall") | nonterminal("uniSmall") | terminal("_") \
+  nonterminaldef("ascSmall") &-> terminal("a") | terminal("b") | dots | terminal("z") \
+  nonterminaldef("uniSmall") &-> text("any Unicode lowercase letter")\
+  nonterminaldef("large") &-> nonterminal("ascLarge") | nonterminal("uniLarge") \
+  nonterminaldef("ascLarge") &-> terminal("A") | terminal("B") | dots | terminal("Z")\
+  nonterminaldef("uniLarge") &-> text("any uppercase or titlecase Unicode letter")\
+  nonterminaldef("symbol") &-> nonterminal("ascSymbol") | nonterminal("uniSymbol")_(chevron.l nonterminal("special") | terminal("_") | terminal("\"") | terminal("'") chevron.r)\
+  nonterminaldef("ascSymbol") &-> terminal("!") | terminal("#") | terminal("$") | terminal("%") | terminal("&") | terminal("*") | terminal("+") | terminal(".")  | terminal("/") | terminal("<") | terminal("=") | terminal(">") | terminal("?") | terminal("@") \
   &| terminal("\\") | terminal("^") | terminal("|") | terminal("-") | terminal("~") | terminal(":") \
-  italic("uniSymbol") &-> text("any Unicode symbol or punctuation")\
-  italic("digit") &-> italic("ascDigit") | italic("uniDigit") \
-  italic("ascDigit") &-> terminal("0") | terminal("1") | dots | terminal("9") \
-  italic("uniDigit") &-> text("any Unicode decimal digit")\
-  italic("octit") &-> terminal("0") | terminal("1") | dots | terminal("7")\
-  italic("hexit") &-> italic("digit") | terminal("A") | dots | terminal("F") | terminal("a") | dots | terminal("f")
+  nonterminaldef("uniSymbol") &-> text("any Unicode symbol or punctuation")\
+  nonterminaldef("digit") &-> nonterminal("ascDigit") | nonterminal("uniDigit") \
+  nonterminaldef("ascDigit") &-> terminal("0") | terminal("1") | dots | terminal("9") \
+  nonterminaldef("uniDigit") &-> text("any Unicode decimal digit")\
+  nonterminaldef("octit") &-> terminal("0") | terminal("1") | dots | terminal("7")\
+  nonterminaldef("hexit") &-> nonterminal("digit") | terminal("A") | dots | terminal("F") | terminal("a") | dots | terminal("f")
 $
 
 Lexical analysis should use the ``maximal munch'' rule:
 at each point, the longest possible lexeme
-satisfying the $italic("lexeme")$ production is read.
+satisfying the $nonterminal("lexeme")$ production is read.
 So, although `case` is a reserved word, `cases` is not.
 Similarly, although `=` is reserved, `==` and `~=` are not.
 
-Any kind of $italic("whitespace")$ is also a proper delimiter for lexemes.
+Any kind of $nonterminal("whitespace")$ is also a proper delimiter for lexemes.
 
-Characters not in the category $italic("ANY")$ are not valid
+Characters not in the category $nonterminal("ANY")$ are not valid
 in Haskell programs and should result in a lexing error.
 
 === Comments
@@ -132,9 +132,9 @@ comment in that code will interfere with the nested comments.
 
 === Identifiers and Operators
 $
-  italic("varid") &-> (italic("small") {italic("small") | italic("large") | italic("digit") | terminal("'") med })_(chevron.l italic("reservedid") chevron.r)\
-  italic("conid") &-> italic("large") {italic("small") | italic("large") | italic("digit") | terminal("'") med }\
-  italic("reservedid") &-> terminal("case") | terminal("class") | terminal("data") | terminal("default") | terminal("deriving") | terminal("do") | terminal("else") \
+  nonterminaldef("varid") &-> (nonterminal("small") {nonterminal("small") | nonterminal("large") | nonterminal("digit") | terminal("'") med })_(chevron.l nonterminal("reservedid") chevron.r)\
+  nonterminaldef("conid") &-> nonterminal("large") {nonterminal("small") | nonterminal("large") | nonterminal("digit") | terminal("'") med }\
+  nonterminaldef("reservedid") &-> terminal("case") | terminal("class") | terminal("data") | terminal("default") | terminal("deriving") | terminal("do") | terminal("else") \
   &| terminal("foreign") | terminal("if") | terminal("import") | terminal("in") | terminal("infix") | terminal("infixl") \
   &| terminal("infixr") | terminal("instance") | terminal("let") | terminal("module") | terminal("newtype") | terminal("of") \
   &| terminal("then") | terminal("type") | terminal("where") | terminal("_")
@@ -155,9 +155,9 @@ identifiers beginning with underscore.  This allows programmers to use
 "`_foo`" for a parameter that they expect to be unused.
 
 $
-  italic("varsym") &-> ( italic("symbol")_(chevron.l terminal(":") chevron.r) { italic("symbol")})_(chevron.l italic("reservedop") | italic("dashes") chevron.r) \
-  italic("consym") &-> (terminal(":") { italic("symbol") })_(chevron.l italic("reservedop") chevron.r)\
-  italic("reservedop") &-> terminal("..") | terminal(":") | terminal("::") | terminal("=") | terminal("\\") | terminal("|") | terminal("<-") | terminal("->") | terminal("@") | terminal("~") | terminal("=>")
+  nonterminaldef("varsym") &-> ( nonterminal("symbol")_(chevron.l terminal(":") chevron.r) { nonterminal("symbol")})_(chevron.l nonterminal("reservedop") | nonterminal("dashes") chevron.r) \
+  nonterminaldef("consym") &-> (terminal(":") { nonterminal("symbol") })_(chevron.l nonterminal("reservedop") chevron.r)\
+  nonterminaldef("reservedop") &-> terminal("..") | terminal(":") | terminal("::") | terminal("=") | terminal("\\") | terminal("|") | terminal("<-") | terminal("->") | terminal("@") | terminal("~") | terminal("=>")
 $
 
 _Operator symbols_
