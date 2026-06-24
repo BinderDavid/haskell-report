@@ -1,3 +1,66 @@
+#import "../macros.typ" : *
+
+In this chapter, we describe the syntax and informal semantics of
+Haskell _expressions_, including their translations into the
+Haskell kernel, where appropriate.  Except in the case of `let`
+expressions, these translations preserve both the static and dynamic
+semantics.  Free variables and constructors used in these translations
+always refer to entities defined by the `Prelude`.  For example,
+"`concatMap`" used in the translation of list comprehensions
+(@sec:list-comprehensions[Section]) means the `concatMap` defined by
+the `Prelude`, regardless of whether or not the identifier "`concatMap`" is in
+scope where the list comprehension is used, and (if it is in scope)
+what it is bound to.
+
+$
+  italic("exp") &-> dots \
+  italic("infixexp") &-> dots \
+  italic("lexp") &-> dots \
+  italic("fexp") &-> dots \
+  italic("aexp") &-> dots \
+$
+
+Expressions involving infix operators are disambiguated by the operator's fixity (see Section~\ref{fixity}).  Consecutive unparenthesized operators with the same precedence must both be either
+left or right associative to avoid a syntax error.
+Given an unparenthesized expression "$x med italic("qop")^((a,i)) med y med italic("qop")^((b,j)) med z$"
+(where $italic("qop")^((a,i))$ means an operator with associativity $a$ and
+precedence $i$), parentheses must be added around either $x med italic("qop")^((a,i)) med y$ or $y med italic("qop")^((b,j)) med z$ when $i = j$ unless $a = b = text("l")$ or $a = b = text("r")$.
+
+An example algorithm for resolving expressions involving infix operators is given in @sec:fixity-resolution[Section]
+
+Negation is the only prefix operator in
+Haskell; it has the same precedence as the infix `-` operator defined in the Prelude (see Section~\ref{fixity}, Figure~\ref{prelude-fixities}).
+
+The grammar is ambiguous regarding the extent of lambda abstractions, let expressions, and conditionals.
+The ambiguity is resolved by the meta-rule that each of these constructs extends as far to the right as possible.
+
+
+Sample parses are shown below.
+
+#align(center,
+  table(
+    columns: 2,
+    align: (left, left),
+    stroke: none,
+    table.vline(x: 0),
+    table.vline(x: 1),
+    table.vline(x: 2),
+    table.hline(),
+    table.header([This], [Parses as]),
+    table.hline(),
+    [`f x + g y`],[`(f x) + (g y)`],
+    [`- f x + y`],[`(- (f x)) + y`],
+    [`let {...} in x + y`],[`let {...} in (x + y)`],
+    [`z + let {...} in x + y`],[`z + (let {...} in (x + y))`],
+    [`f x y :: Int`],[`(f x y) :: Int`],
+    [`\ x -> a+b :: Int`],[`\x -> ((a+b) :: Int)`],
+    table.hline(),
+  )
+
+)
+
+For the sake of clarity, the rest of this section will assume that expressions involving infix operators have been resolved according to the fixities of the operators.
+
 === Errors <sec:expressions:errors>
 
 Errors during expression evaluation, denoted by $bot$ ("bottom"),
@@ -30,9 +93,121 @@ information when an error occurs.
 
 === Curried Applications and Lambda Abstractions
 
+$
+  italic("fexp") &-> [italic("fexp")] italic("aexp") && text("(function application)")\
+  italic("lexp") &-> mono("\\") italic("apat")_1 med dots med italic("apat")_n mono("->") italic("exp") &&(text("lambda abstraction") n >= 1)\
+$
+
+_Function application_ is written $e_1 med e_2$.
+Application associates to the left, so the
+parentheses may be omitted in `(f x) y`.
+Because $e_1$ could be a data constructor, partial applications of data constructors are allowed.
+
+_Lambda abstractions_ are written
+$dots$, where the $p_i$ are _patterns_.
+An expression such as `\x:xs->x` is syntactically incorrect;
+it may legally be written as `\(x:xs)->x`.
+
+The set of patterns must be _linear_---no variable may appear more than once in the set.
+
+#translation-box(
+  [The following identity holds:
+    $
+      mono("\\") p_1 med dots med p_n mono("->") e = mono("\\") x_1 med dots med x_n mono("->") mono("case") (x_1, dots, x_n) mono("of") (p_1, dots, p_n) mono("->") e
+    $
+    where the $x_i$ are new identifiers.]
+)
+
+Given this translation combined with the semantics of case
+expressions and pattern matching described in @subsec:formal-semantics-pattern-matching, if the
+pattern fails to match, then the result is $bot$.
+
 === Operator Applications <sec:operator-applications>
 
+$
+  italic("infixexp") &-> italic("lexp") med italic("qop") med italic("infixexp") \
+  &| mono("-") italic("infixexp") && text("(qualified operator)") \
+  &| italic("infixexp") \
+  italic("qop") &-> italic("qvarop") | italic("qconop") && text("(qualified operator)")\
+$
+
+The form $e_1 italic("qop") e_2$ is the infix application of binary operator $italic("qop")$ to expressions $e_1$ and $e_2$.
+
+The special
+form $-e$ denotes prefix negation, the only
+prefix operator in Haskell, and is
+syntax for $mono("negate") (e)$.
+The binary `-` operator does not necessarily refer
+to the definition of `-` in the Prelude; it may be rebound by the module system.
+However, unary `-` will always refer to the
+`negate` function defined in the Prelude.  There is no link between the local meaning of the `-` operator and unary negation.
+
+Prefix negation has the same precedence as the infix operator `-` defined in the Prelude (see
+Table~\ref{prelude-fixities}).
+Because `e1-e2` parses as an
+infix application of the binary operator `-`, one must write `e1(-e2)` for the alternative parsing.
+Similarly, `(-)` is syntax for `\x y -> x-y`, as with any infix operator, and does not denote
+`\x -> -x`---one must use `negate` for that.
+
+#translation-box([
+  The following identities hold:
+  $
+    e_1 italic("op") e_2 &= (italic("op")) med e_1 med e_2 \
+    -e &= mono("negate") (e)
+  $
+  ]
+)
+
 === Sections
+
+$
+  italic("aexp") &-> ( italic("infixexp") med italic("qop")) && text("(left section)")\
+  &| (italic("qop")_(chevron.l mono("-") chevron.r) italic("infixexp")) && text("(right section)")
+$
+
+_Sections_ are written as $(italic("op") e)$ or $(e italic("op"))$, where
+$italic("op")$ is a binary operator and $e$ is an expression.
+Sections are a convenient syntax for partial application of binary operators.
+
+// Syntactic precedence rules apply to sections as follows.
+// \mbox{$\it \makebox{\tt (}op~e\makebox{\tt )}$} is legal if and only if \mbox{$\it \makebox{\tt (x}~op~e\makebox{\tt )}$} parses 
+// in the same way as \mbox{$\it \makebox{\tt (x}~op~\makebox{\tt (}e\makebox{\tt ))}$};
+// and similarly for  \mbox{$\it \makebox{\tt (}e~op\makebox{\tt )}$}.
+// For example, \mbox{\tt (*a+b)} is syntactically invalid, but \mbox{\tt (+a*b)} and
+// \mbox{\tt (*(a+b))} are valid.  Because \mbox{\tt (+)} is left associative, \mbox{\tt (a+b+)} is syntactically correct,
+// but \mbox{\tt (+a+b)} is not; the latter may legally be written as \mbox{\tt (+(a+b))}.
+As another example, the expression
+```haskell
+  (let n = 10 in n +)
+```
+is invalid because, by the let/lambda meta-rule (Section~\ref{expressions}),
+the expression
+```haskell
+  (let n = 10 in n + x)
+```
+parses as
+```haskell
+  (let n = 10 in (n + x))
+```
+rather than
+```haskell
+  ((let n = 10 in n) + x)
+```
+
+Because `-` is treated specially in the grammar,
+$(- italic("exp"))$ is not a section, but an application of prefix negation, as described in the preceding section.
+However, there is a `subtract` function defined in the Prelude such that $(mono("subtract") italic("exp"))$
+is equivalent to the disallowed section.
+The expression $(+ (- italic("exp")))$ can serve the same purpose.
+
+#translation-box([
+  The following identities hold:
+  $
+    (italic("op") e) &= mono("\\") x mono("->") x italic("op") e\
+    (e italic("op")) &= mono("\\") x mono("->") e italic("op") x
+  $
+  where $italic("op")$ is a binary operator, $e$ is an expression, and $x$ is a variable that does not occur free in $e$.
+])
 
 === Conditionals
 
@@ -44,7 +219,7 @@ information when an error occurs.
 
 === Arithmetic Sequences
 
-=== List Comprehensions
+=== List Comprehensions <sec:list-comprehensions>
 
 === Let Expressions
 
@@ -68,4 +243,4 @@ information when an error occurs.
 
 ==== Informal Semantics of Pattern Matching
 
-==== Formal Semantics of Pattern Matching
+==== Formal Semantics of Pattern Matching <subsec:formal-semantics-pattern-matching>

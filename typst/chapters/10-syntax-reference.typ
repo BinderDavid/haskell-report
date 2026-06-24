@@ -3,4 +3,4 @@
 === Layout <sec:layout>
 === Literate comments
 === Context-Free Syntax
-=== Fixity Resolution
+=== Fixity Resolution <sec:fixity-resolution>
