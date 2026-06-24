@@ -1,10 +1,10 @@
 #set document(
-  title: [Haskell 2010 \ Language Report]
+  title: [Haskell 2010 \ Revised Language Report]
 )
 
 #let chapter-count = counter("chapter counter")
 #show heading.where(level: 2): it => {
-  if it.body == [Preface] {it}
+  if it.body == [Preface] or it.body == [Preface to the Revised Report] {it}
   else {chapter-count.step() + it}
 }
 #set heading(numbering: (..nums) => {
@@ -53,6 +53,10 @@
 #heading(level: 2, numbering: none)[Preface]
 
 #include "other/preface.typ"
+
+#heading(level: 2, numbering: none)[Preface to the Revised Report]
+
+#include "other/preface_revised.typ"
 
 = The Haskell 2010 Language
 
