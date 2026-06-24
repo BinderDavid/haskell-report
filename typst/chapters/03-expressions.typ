@@ -95,7 +95,7 @@ information when an error occurs.
 
 $
   italic("fexp") &-> [italic("fexp")] italic("aexp") && text("(function application)")\
-  italic("lexp") &-> mono("\\") italic("apat")_1 med dots med italic("apat")_n mono("->") italic("exp") &&(text("lambda abstraction") n >= 1)\
+  italic("lexp") &-> terminal("\\") italic("apat")_1 med dots med italic("apat")_n terminal("->") italic("exp") &&(text("lambda abstraction") n >= 1)\
 $
 
 _Function application_ is written $e_1 med e_2$.
@@ -126,7 +126,7 @@ pattern fails to match, then the result is $bot$.
 
 $
   italic("infixexp") &-> italic("lexp") med italic("qop") med italic("infixexp") \
-  &| mono("-") italic("infixexp") && text("(qualified operator)") \
+  &| terminal("-") italic("infixexp") && text("(qualified operator)") \
   &| italic("infixexp") \
   italic("qop") &-> italic("qvarop") | italic("qconop") && text("(qualified operator)")\
 $
@@ -162,20 +162,19 @@ Similarly, `(-)` is syntax for `\x y -> x-y`, as with any infix operator, and do
 
 $
   italic("aexp") &-> ( italic("infixexp") med italic("qop")) && text("(left section)")\
-  &| (italic("qop")_(chevron.l mono("-") chevron.r) italic("infixexp")) && text("(right section)")
+  &| (italic("qop")_(chevron.l terminal("-") chevron.r) italic("infixexp")) && text("(right section)")
 $
 
 _Sections_ are written as $(italic("op") e)$ or $(e italic("op"))$, where
 $italic("op")$ is a binary operator and $e$ is an expression.
 Sections are a convenient syntax for partial application of binary operators.
 
-// Syntactic precedence rules apply to sections as follows.
-// \mbox{$\it \makebox{\tt (}op~e\makebox{\tt )}$} is legal if and only if \mbox{$\it \makebox{\tt (x}~op~e\makebox{\tt )}$} parses 
-// in the same way as \mbox{$\it \makebox{\tt (x}~op~\makebox{\tt (}e\makebox{\tt ))}$};
-// and similarly for  \mbox{$\it \makebox{\tt (}e~op\makebox{\tt )}$}.
-// For example, \mbox{\tt (*a+b)} is syntactically invalid, but \mbox{\tt (+a*b)} and
-// \mbox{\tt (*(a+b))} are valid.  Because \mbox{\tt (+)} is left associative, \mbox{\tt (a+b+)} is syntactically correct,
-// but \mbox{\tt (+a+b)} is not; the latter may legally be written as \mbox{\tt (+(a+b))}.
+Syntactic precedence rules apply to sections as follows.
+$(italic("op") e)$ is legal if and only if $(x italic("op") e)$ parses in the same way as $(x italic("op") (e))$;
+and similarly for $(e italic("op")$.
+For example, `(*a+b)` is syntactically invalid, but `(+a*b)` and `(*(a+b))` are valid.
+Because `(+)` is left associative, `(a+b+)` is syntactically correct,
+but `(+a+b)` is not; the latter may legally be written as `(+(a+b))`.
 As another example, the expression
 ```haskell
   (let n = 10 in n +)
