@@ -1,3 +1,5 @@
+#import "@preview/cetz:0.5.1"
+
 The Haskell Prelude contains predefined classes, types,
 and functions that are implicitly imported into every Haskell
 program.  In this chapter, we describe the types and classes found in
@@ -191,6 +193,75 @@ are instances of these classes.
   caption: "Standard Haskell Classes",
   image(width: 50%, "../assets/classes.pdf")
 )<fig:standard-classes>
+
+#figure(
+  caption: "Standard Haskell Classes",
+  cetz.canvas({
+    import cetz.draw: *
+      let ellipse_size = (40pt, 20pt)
+      // Eq
+      let eq_pos = (0,0)
+      circle(eq_pos, radius: ellipse_size)
+      content(eq_pos, [*Eq*])
+      // Show
+      let show_pos = (4,0)
+      circle(show_pos, radius: ellipse_size)
+      content(show_pos, [*Show*])
+      // Read
+      let read_pos = (8,0)
+      circle(read_pos, radius: ellipse_size)
+      content(read_pos, [*Read*])
+      // Ord
+      let ord_pos = (0,-2)
+      circle(ord_pos, radius: ellipse_size)
+      content(ord_pos, [*Ord*])
+      // Num
+      let num_pos = (4,-2)
+      circle(num_pos, radius: ellipse_size)
+      content(num_pos, [*Num*])
+      // Bounded
+      let bounded_pos = (8,-2)
+      circle(bounded_pos, radius: ellipse_size)
+      content(bounded_pos, [*Bounded*])
+      // Enum
+      let enum_pos = (0,-4)
+      circle(enum_pos, radius: ellipse_size)
+      content(enum_pos, [*Enum*])
+      // Real
+      let real_pos = (4,-4)
+      circle(real_pos, radius: ellipse_size)
+      content(real_pos, [*Real*])
+      // Fractional
+      let fractional_pos = (8,-4)
+      circle(fractional_pos, radius: ellipse_size)
+      content(fractional_pos, [*Fractional*])
+      // Integral
+      let integral_pos = (0,-6)
+      circle(integral_pos, radius: ellipse_size)
+      content(integral_pos, [*Integral*])
+      // RealFrac
+      let realfrac_pos = (4,-6)
+      circle(realfrac_pos, radius: ellipse_size)
+      content(realfrac_pos, [*RealFrac*])
+      // Floating
+      let floating_pos = (8,-6)
+      circle(floating_pos, radius: ellipse_size)
+      content(floating_pos, [*Floating*])
+      // RealFloat
+      let realfloat_pos = (6,-8)
+      circle(realfloat_pos, radius: ellipse_size)
+      content(realfloat_pos, [*RealFloat*])
+      // Monad
+      let monad_pos = (2,-10)
+      circle(monad_pos, radius: ellipse_size)
+      content(monad_pos, [*Monad*])
+      // Functor
+      let functor_pos = (6,-10)
+      circle(functor_pos, radius: ellipse_size)
+      content(functor_pos, [*Functor*])
+    }
+  )
+)
 
 Default class method declarations (@sec:type-classes) are provided
 for many of the methods in standard classes.  A comment with each
