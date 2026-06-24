@@ -210,13 +210,115 @@ The expression $(+ (- italic("exp")))$ can serve the same purpose.
 
 === Conditionals
 
+$
+  italic("lexp") &-> mono("if") italic("exp") [mono(";")] mono("then") italic("exp") [mono(";")] mono("else") italic("exp")
+$
+
+A _conditional expression_ has the form $mono("if") e_1 mono("then") e_2 mono("else") e_3$ and returns the value of $e_2$ if the
+value of $e_1$ is `True`, $e_3$ if $e_1$ is `False`, and $bot$ otherwise.
+
+#translation-box([
+  The following identity holds:
+  $
+    mono("if") e_1 mono("then") e_2 mono("else") e_3 = mono("case") e_1 mono("of") { mono("True") mono("->") e_2 mono(";") mono("False") mono("->") e_3}
+  $
+  where `True` and `False` are the two nullary constructors from the type `Bool`, as defined in the Prelude.
+  The type of $e_1$ must be `Bool`;
+  $e_2$ and $e_3$ must have the same type, which is also the type of the entire conditional expression.
+])
+
+
 === Lists
+
+$
+  italic("infixexp") &-> italic("exp")_1 italic("qop") italic("exp")_2\
+  italic("aexp") &-> [ italic("exp")_1, dots, italic("exp")_k ]& (k >= 1)\
+  &| italic("gcon") \
+  italic("gcon") &-> mono("[]") \
+  &| italic("qcon") \
+  italic("qcon") &-> (italic("gconsym"))\
+  italic("qop") &-> italic("qconop")\
+  italic("qconop") &-> italic("gconsym")\
+  italic("gconsym") &-> mono(":")\
+$
+_Lists_ are written $[e_1, dots, e_k]$, where $k >= 1$.
+The list constructor is `:`, and the empty list is denoted `[]`.
+Standard operations on lists are given in the Prelude (see Section~\ref{basic-lists}, and
+@chapter:standard-prelude[Chapter] notably Section~\ref{preludelist}).
+
+#translation-box([
+  The following identity holds:
+  $
+    [e_1, dots, e_k] = e_1 : (e_2 : ( dots ( e_k : [ thin ])))
+  $
+  where `:` and `[]` are constructors for lists, as defined in the Prelude (see Section~\ref{basic-lists}).
+  The types of $e_1$ through $e_k$ must all be the same (call it $t$), and the
+  type of the overall expression is `[t]` (see Section~\ref{type-syntax}).
+])
+
+The constructor "`:`" is reserved solely for list construction; like `[]`, it is considered part of the language syntax, and cannot be hidden or redefined.
+It is a right-associative operator, with precedence level 5 (Section~\ref{fixity}).
 
 === Tuples
 
+$
+  italic("aexp") &-> (italic("exp")_1, dots, italic("exp")_k) (k >= 2) \
+  &| italic("qcon") \
+  italic("qcon") &-> (,{,})
+$
+
+_Tuples_ are written $(e_1, dots, e_k)$, and may be
+of arbitrary length $k >= 2$.
+The constructor for an $n$-tuple is denoted by $(, dots ,)$, where there are $n-1$ commas.
+Thus `(a,b,c)` and `(,,) a b c` denote the same value.
+Standard operations on tuples are given
+in the Prelude (see Section~\ref{basic-tuples} and @chapter:standard-prelude[Chapter].
+
+#translation-box([
+  $(e_1, dots, e_k)$ for $k >= 2$ is an instance of a $k$-tuple as defined in the Prelude, and requires no translation.
+  If $t_1$ through $t_k$ are the types of $e_1$ through $e_k$, respectively, then the type of the resulting tuple is $(t_1, dots, t_k)$ (see Section~\ref{type-syntax}).
+])
+
+
+
 === Unit Expressions and Parenthesized Expressions
 
-=== Arithmetic Sequences
+$
+  italic("aexp") &-> italic("gcon") \
+  &| ( italic("exp") ) \
+  italic("gcon") &-> ()
+$
+
+The form $(e$) is simply a _parenthesized expression_, and is equivalent to $e$.
+The _unit expression_ `()` has type `()` (see
+Section~\ref{type-syntax}).
+It is the only member of that type apart from $bot$, and can be thought of as the "nullary tuple" (see Section~\ref{basic-trivial}).
+
+#translation-box([
+  $(e)$ is equivalent to $e$.
+])
+
+=== Arithmetic Sequences <sec:arithmetic-sequences>
+
+$
+  italic("aexp") &-> [ italic("exp")_1 [, italic("exp")_2] mono("..") [italic("exp")_3]]
+$
+
+The _arithmetic sequence_ $[e_1, e_2 .. e_3]$ denotes a list of values of type $t$, where each of the $e_i$ has type $t$, and $t$ is an instance of class `Enum`.
+
+#translation-box([
+  Arithmetic sequences satisfy these identities:
+  $
+    X &= Y\
+    X &= Y\
+    X &= Y\
+    X &= Y\
+  $
+  where `enumFrom`, `enumFromThen`, `enumFromTo`, and `enumFromThenTo` are class methods in the class `Enum` as defined in the Prelude (see Figure~\ref{standard-classes}).
+])
+
+The semantics of arithmetic sequences therefore depends entirely on the instance declaration for the type `t`.  
+See Section~\ref{enum-class} for more details of which `Prelude` types are in `Enum` and their semantics.
 
 === List Comprehensions <sec:list-comprehensions>
 
