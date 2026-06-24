@@ -59,51 +59,51 @@
 == Introduction <chapter:intro>
 
 
-#include "chapters/intro.typ"
+#include "chapters/01-intro.typ"
 
 == Lexical Structure <chapter:lexical-structure>
 
-#include "chapters/lexical-structure.typ"
+#include "chapters/02-lexical-structure.typ"
 
 == Expressions <chapter:expressions>
 
-#include "chapters/expressions.typ"
+#include "chapters/03-expressions.typ"
 
 == Declarations and Bindings <chapter:declarations>
 
-#include "chapters/declarations.typ"
+#include "chapters/04-declarations.typ"
 
 == Modules <chapter:modules>
 
-#include "chapters/modules.typ"
+#include "chapters/05-modules.typ"
 
 == Predefined Types and Classes <chapter:predefined-types>
 
-#include "chapters/predefined-types.typ"
+#include "chapters/06-predefined-types.typ"
 
 == Basic Input/Output <chapter:basic-input-output>
 
-#include "chapters/basic-input-output.typ"
+#include "chapters/07-basic-input-output.typ"
 
 == Foreign Function Interface <chapter:ffi>
 
-#include "chapters/ffi.typ"
+#include "chapters/08-ffi.typ"
 
 == Standard Prelude <chapter:standard-prelude>
 
-#include "chapters/standard-prelude.typ"
+#include "chapters/09-standard-prelude.typ"
 
 == Syntax Reference <chapter:syntax-reference>
 
-#include "chapters/syntax-reference.typ"
+#include "chapters/10-syntax-reference.typ"
 
 == Specification of Derived Instances <chapter:derived-instances>
 
-#include "chapters/derived-instances.typ"
+#include "chapters/11-derived-instances.typ"
 
 == Compiler Pragmas <chapter:compiler-pragmas>
 
-#include "chapters/compiler-pragmas.typ"
+#include "chapters/12-compiler-pragmas.typ"
 
 = The Haskell 2010 Libraries <part:libraries>
 
