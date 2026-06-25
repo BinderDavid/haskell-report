@@ -45,48 +45,89 @@ Haskell compilers are expected to make use of new versions of Unicode as they ar
 
 === Lexical Program Structure
 
-$
-  nonterminaldef("program") &-> { med nonterminal("lexeme") | nonterminal("whitespace") med }\
-  nonterminaldef("lexeme") &-> nonterminal("qvarid") | nonterminal("qconid") | nonterminal("qvarsym") | nonterminal("qconsym") \
-  &| nonterminal("literal") | nonterminal("special") | nonterminal("reservedop") | nonterminal("reservedid") \
-  nonterminaldef("literal") &-> nonterminal("integer") | nonterminal("float") | nonterminal("char") | nonterminal("string") \
-  nonterminaldef("special") &-> terminal("(") | terminal(")") | terminal(",") | terminal(";") | terminal("[") | terminal("]") | terminal("`") | terminal("{") | terminal("}") \
-  nonterminaldef("whitespace") &-> nonterminal("whitestuff") { nonterminal("whitestuff") }\
-  nonterminaldef("whitestuff") &-> nonterminal("whitechar") | nonterminal("comment") | nonterminal("ncomment") \
-  nonterminaldef("whitechar") &-> nonterminal("newline") | nonterminal("vertab") | nonterminal("space") | nonterminal("tab") | nonterminal("uniWhite") \
-  nonterminaldef("newline") &-> nonterminal("return") nonterminal("linefeed") | nonterminal("return") | nonterminal("linefeed") | nonterminal("formfeed") \
-  nonterminaldef("return") &-> text("a carriage return")\
-  nonterminaldef("linefeed") &-> text("a line feed")\
-  nonterminaldef("vertab") &-> text("a vertical tab")\
-  nonterminaldef("formfeed") &-> text("a form feed")\
-  nonterminaldef("space") &-> text("a space")\
-  nonterminaldef("tab") &-> text("a horizontal tab")\
-  nonterminaldef("uniWhite") &-> text("any Unicode character defined as whitespace")\
-  nonterminaldef("comment") &-> nonterminal("dashes") [nonterminal("any")_(chevron.l nonterminal("symbol") chevron.r) { nonterminal("any") }] nonterminal("newline") \
-  nonterminaldef("dashes") &-> terminal("--") { terminal("-") }\
-  nonterminaldef("opencom") &-> terminal("{-") \
-  nonterminaldef("closecom") &-> terminal("-}")\
-  nonterminaldef("ncomment") &-> nonterminal("opencom") nonterminal("ANYseq") { nonterminal("ncomment") nonterminal("ANYseq") } nonterminal("closecom") \
-  nonterminaldef("ANYseq") &-> { med nonterminal("ANY") med }_(chevron.l { med nonterminal("ANY") med } ( nonterminal("opencom") | nonterminal("closecom") ) { med nonterminal("ANY") med } chevron.r)\
-  nonterminaldef("ANY") &-> nonterminal("graphic") | nonterminal("whitechar") \
-  nonterminaldef("any") &-> nonterminal("graphic") | nonterminal("space") | nonterminal("tab") \
-  nonterminaldef("graphic") &-> nonterminal("small") | nonterminal("large") | nonterminal("symbol") | nonterminal("digit") | nonterminal("special") | terminal("\"") | terminal("'") \
-  nonterminaldef("small") &-> nonterminal("ascSmall") | nonterminal("uniSmall") | terminal("_") \
-  nonterminaldef("ascSmall") &-> terminal("a") | terminal("b") | dots | terminal("z") \
-  nonterminaldef("uniSmall") &-> text("any Unicode lowercase letter")\
-  nonterminaldef("large") &-> nonterminal("ascLarge") | nonterminal("uniLarge") \
-  nonterminaldef("ascLarge") &-> terminal("A") | terminal("B") | dots | terminal("Z")\
-  nonterminaldef("uniLarge") &-> text("any uppercase or titlecase Unicode letter")\
-  nonterminaldef("symbol") &-> nonterminal("ascSymbol") | nonterminal("uniSymbol")_(chevron.l nonterminal("special") | terminal("_") | terminal("\"") | terminal("'") chevron.r)\
-  nonterminaldef("ascSymbol") &-> terminal("!") | terminal("#") | terminal("$") | terminal("%") | terminal("&") | terminal("*") | terminal("+") | terminal(".")  | terminal("/") | terminal("<") | terminal("=") | terminal(">") | terminal("?") | terminal("@") \
-  &| terminal("\\") | terminal("^") | terminal("|") | terminal("-") | terminal("~") | terminal(":") \
-  nonterminaldef("uniSymbol") &-> text("any Unicode symbol or punctuation")\
-  nonterminaldef("digit") &-> nonterminal("ascDigit") | nonterminal("uniDigit") \
-  nonterminaldef("ascDigit") &-> terminal("0") | terminal("1") | dots | terminal("9") \
-  nonterminaldef("uniDigit") &-> text("any Unicode decimal digit")\
-  nonterminaldef("octit") &-> terminal("0") | terminal("1") | dots | terminal("7")\
-  nonterminaldef("hexit") &-> nonterminal("digit") | terminal("A") | dots | terminal("F") | terminal("a") | dots | terminal("f")
-$
+#table(
+  columns: 3,
+  align: (left, center, left),
+  stroke: none,
+  // program
+  $nonterminaldef("program")$, $->$, ${ med nonterminal("lexeme") | nonterminal("whitespace") med }$,
+  // lexeme
+  $nonterminaldef("lexeme")$, $->$, $nonterminal("qvarid") | nonterminal("qconid") | nonterminal("qvarsym") | nonterminal("qconsym")$,
+  [], $|$, $nonterminal("literal") | nonterminal("special") | nonterminal("reservedop") | nonterminal("reservedid")$,
+  // literal
+  $nonterminaldef("literal")$, $->$, $nonterminal("integer") | nonterminal("float") | nonterminal("char") | nonterminal("string")$,
+  // special
+  $nonterminaldef("special")$, $->$, $terminal("(") | terminal(")") | terminal(",") | terminal(";") | terminal("[") | terminal("]") | terminal("`") | terminal("{") | terminal("}")$,
+  // whitespace
+  $nonterminaldef("whitespace")$, $->$, $nonterminal("whitestuff") { nonterminal("whitestuff") }$,
+  // whitestuff
+  $nonterminaldef("whitestuff")$, $->$, $nonterminal("whitechar") | nonterminal("comment") | nonterminal("ncomment")$,
+  // whitechar
+  $nonterminaldef("whitechar")$, $->$, $nonterminal("newline") | nonterminal("vertab") | nonterminal("space") | nonterminal("tab") | nonterminal("uniWhite")$,
+  // newline
+  $nonterminaldef("newline")$, $->$, $nonterminal("return") nonterminal("linefeed") | nonterminal("return") | nonterminal("linefeed") | nonterminal("formfeed")$,
+  // return
+  $nonterminaldef("return")$, $->$, $text("a carriage return")$,
+  // linefeed
+  $nonterminaldef("linefeed")$, $->$, $text("a line feed")$,
+  // vertab
+  $nonterminaldef("vertab")$, $->$, $text("a vertical tab")$,
+  // formfeed
+  $nonterminaldef("formfeed")$, $->$, $text("a form feed")$,
+  // space
+  $nonterminaldef("space")$, $->$, $text("a space")$,
+  // tab
+  $nonterminaldef("tab")$, $->$, $text("a horizontal tab")$,
+  // uniWhite
+  $nonterminaldef("uniWhite")$, $->$, $text("any Unicode character defined as whitespace")$,
+  // comment
+  $nonterminaldef("comment")$, $->$, $nonterminal("dashes") [nonterminal("any")_(chevron.l nonterminal("symbol") chevron.r) { nonterminal("any") }] nonterminal("newline")$,
+  // dashes
+  $nonterminaldef("dashes")$, $->$, $terminal("--") { terminal("-") }$,
+  // opencom
+  $nonterminaldef("opencom")$, $->$, $terminal("{-")$,
+  // closecom
+  $nonterminaldef("closecom")$, $->$, $terminal("-}")$,
+  // ncomment
+  $nonterminaldef("ncomment")$, $->$, $nonterminal("opencom") nonterminal("ANYseq") { nonterminal("ncomment") nonterminal("ANYseq") } nonterminal("closecom")$,
+  // ANYseq
+  $nonterminaldef("ANYseq")$, $->$, ${ med nonterminal("ANY") med }_(chevron.l { med nonterminal("ANY") med } ( nonterminal("opencom") | nonterminal("closecom") ) { med nonterminal("ANY") med } chevron.r)$,
+  // ANY
+  $nonterminaldef("ANY")$, $->$, $nonterminal("graphic") | nonterminal("whitechar")$,
+  // any
+  $nonterminaldef("any")$, $->$, $nonterminal("graphic") | nonterminal("space") | nonterminal("tab")$,
+  // graphic
+  $nonterminaldef("graphic")$, $->$, $nonterminal("small") | nonterminal("large") | nonterminal("symbol") | nonterminal("digit") | nonterminal("special") | terminal("\"") | terminal("'")$,
+  // small
+  $nonterminaldef("small")$, $->$, $nonterminal("ascSmall") | nonterminal("uniSmall") | terminal("_")$,
+  // ascSmall
+  $nonterminaldef("ascSmall")$, $->$, $terminal("a") | terminal("b") | dots | terminal("z")$,
+  // uniSmall
+  $nonterminaldef("uniSmall")$, $->$, $text("any Unicode lowercase letter")$,
+  // large
+  $nonterminaldef("large")$, $->$, $nonterminal("ascLarge") | nonterminal("uniLarge")$,
+  // ascLarge
+  $nonterminaldef("ascLarge")$, $->$, $terminal("A") | terminal("B") | dots | terminal("Z")$,
+  // uniLarge
+  $nonterminaldef("uniLarge")$, $->$, $text("any uppercase or titlecase Unicode letter")$,
+  // symbol
+  $nonterminaldef("symbol")$, $->$, $nonterminal("ascSymbol") | nonterminal("uniSymbol")_(chevron.l nonterminal("special") | terminal("_") | terminal("\"") | terminal("'") chevron.r)$,
+  // ascSymbol
+  $nonterminaldef("ascSymbol")$, $->$, $terminal("!") | terminal("#") | terminal("$") | terminal("%") | terminal("&") | terminal("*") | terminal("+") | terminal(".")  | terminal("/") | terminal("<") | terminal("=") | terminal(">") | terminal("?") | terminal("@")$,
+  [], $|$, $terminal("\\") | terminal("^") | terminal("|") | terminal("-") | terminal("~") | terminal(":")$,
+  // uniSymbol
+  $nonterminaldef("uniSymbol")$, $->$, $text("any Unicode symbol or punctuation")$,
+  // digit
+  $nonterminaldef("digit")$, $->$, $nonterminal("ascDigit") | nonterminal("uniDigit")$,
+  // ascDigit
+  $nonterminaldef("ascDigit")$, $->$, $terminal("0") | terminal("1") | dots | terminal("9")$,
+  // uniDigit
+  $nonterminaldef("uniDigit")$, $->$, $text("any Unicode decimal digit")$,
+  // octit
+  $nonterminaldef("octit")$, $->$, $terminal("0") | terminal("1") | dots | terminal("7")$,
+  // hexit
+  $nonterminaldef("hexit")$, $->$, $nonterminal("digit") | terminal("A") | dots | terminal("F") | terminal("a") | dots | terminal("f")$,
+)
 
 Lexical analysis should use the ``maximal munch'' rule:
 at each point, the longest possible lexeme
