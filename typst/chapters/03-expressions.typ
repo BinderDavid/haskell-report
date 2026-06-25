@@ -12,13 +12,41 @@ the `Prelude`, regardless of whether or not the identifier "`concatMap`" is in
 scope where the list comprehension is used, and (if it is in scope)
 what it is bound to.
 
-$
-  italic("exp") &-> dots \
-  italic("infixexp") &-> dots \
-  italic("lexp") &-> dots \
-  italic("fexp") &-> dots \
-  italic("aexp") &-> dots \
-$
+#table(
+  columns: 4,
+  stroke: none,
+  align: (left, center, left, left),
+  // exp
+  $nonterminaldef("exp")$, $->$, $nonterminal("infixexp") terminal("::") [italic("context") terminal("=>")] italic("type")$, [(expression type signature)],
+  [],$|$, $nonterminal("infixexp")$,[],
+  // infixexp
+  $nonterminaldef("infixexp")$, $->$, $nonterminal("lexp") italic("qop") nonterminal("infixexp")$, [],
+  [], $|$, $terminal("-") nonterminal("infixexp")$, [(prefix negation)],
+  [], $|$, $nonterminal("lexp")$, [],
+  // lexp
+  $nonterminaldef("lexp")$, $->$, $terminal("\\") italic("apat")_1 dots italic("apat")_n terminal("->") nonterminal("exp")$, [(lambda abstraction, $n >= 1$)],
+  [], $|$, $terminal("let") italic("decls") terminal("in") nonterminal("exp")$, [(let expression)],
+  [], $|$, $terminal("if") nonterminal("exp") [terminal(";")] terminal("then") nonterminal("exp") [terminal(";")] terminal("else") nonterminal("exp")$, [(conditional)],
+  [], $|$, $terminal("case") nonterminal("exp") terminal("of") terminal("{") italic("alts") terminal("}")$, [(case expression)],
+  [], $|$, $terminal("do") terminal("{") italic("stmts") terminal("}")$, [(do expression)],
+  [], $|$, $nonterminal("fexp")$, [],
+  // fexp
+  $nonterminaldef("fexp")$, $->$, $[nonterminal("fexp")] nonterminal("aexp")$, [(function application)],
+  // aexp
+  $nonterminaldef("aexp")$, $->$, $italic("qvar")$, [(variable)],
+  [], $|$, $italic("gcon")$, [(general constructor)],
+  [], $|$, $nonterminal("literal")$, [],
+  [], $|$, $terminal("(") nonterminal("exp") terminal(")")$, [(parenthesized expression)],
+  [], $|$, $terminal("(") nonterminal("exp")_1 terminal(",") dots terminal(",") nonterminal("exp")_k terminal(")")$, [(tuple, $k>=2$)],
+  [], $|$, $terminal("[") nonterminal("exp")_1 terminal(",") dots terminal(",") nonterminal("exp")_k terminal("]")$, [(list, $k>=1$)],
+  [], $|$, $terminal("[") nonterminal("exp")_1 [terminal(",") nonterminal("exp")_2] terminal("..") [nonterminal("exp")_3] terminal("]")$, [(arithmetic sequence)],
+  [], $|$, $terminal("[") nonterminal("exp") terminal("|") italic("qual")_1 terminal(",") dots terminal(",") italic("qual")_n terminal("]")$, [(list comprehension, $n>=1$)],
+  [], $|$, $terminal("(") nonterminal("infixexp") italic("qop") terminal(")")$, [(left section)],
+  [], $|$, $terminal("(") italic("qop")_(chevron.l terminal("-") chevron.r) nonterminal("infixexp") terminal(")")$, [(right section)],
+  [], $|$, $italic("qcon") terminal("{") italic("fbind")_1 terminal(",") dots terminal(",") italic("fbind")_n terminal("}")$, [(labeled construction, $n>=0$)],
+  [], $|$, $nonterminal("aexp")_(chevron.l italic("qcon") chevron.r) terminal("{") italic("fbind")_1 terminal(",") dots terminal(",") italic("fbind")_n terminal("}")$, [(labeled update, $n>=1$)],
+)
+
 
 Expressions involving infix operators are disambiguated by the operator's fixity (see Section~\ref{fixity}).  Consecutive unparenthesized operators with the same precedence must both be either
 left or right associative to avoid a syntax error.
