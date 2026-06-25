@@ -250,9 +250,13 @@ The expression $(+ (- italic("exp")))$ can serve the same purpose.
 
 === Conditionals
 
-$
-  italic("lexp") &-> terminal("if") italic("exp") [terminal(";")] terminal("then") italic("exp") [terminal(";")] terminal("else") italic("exp")
-$
+#table(
+  columns: 3,
+  align: (left, center, left),
+  stroke: none,
+  $italic("lexp")$, $->$, $terminal("if") nonterminal("exp") [terminal(";")] terminal("then") nonterminal("exp") [terminal(";")] terminal("else") nonterminal("exp")$
+
+)
 
 A _conditional expression_ has the form $mono("if") e_1 mono("then") e_2 mono("else") e_3$ and returns the value of $e_2$ if the
 value of $e_1$ is `True`, $e_3$ if $e_1$ is `False`, and $bot$ otherwise.
@@ -270,17 +274,28 @@ value of $e_1$ is `True`, $e_3$ if $e_1$ is `False`, and $bot$ otherwise.
 
 === Lists
 
-$
-  italic("infixexp") &-> italic("exp")_1 italic("qop") italic("exp")_2\
-  italic("aexp") &-> terminal("[") italic("exp")_1 terminal(",") dots terminal(",") italic("exp")_k terminal("]")& (k >= 1)\
-  &| italic("gcon") \
-  italic("gcon") &-> terminal("[]") \
-  &| italic("qcon") \
-  italic("qcon") &-> terminal("(") italic("gconsym") terminal(")")\
-  italic("qop") &-> italic("qconop")\
-  italic("qconop") &-> italic("gconsym")\
-  italic("gconsym") &-> terminal(":")\
-$
+#table(
+  columns: 4,
+  align: (left, center, left, left),
+  stroke: none,
+  // infixexp
+  $italic("infixexp")$, $->$, $nonterminal("exp")_1 italic("qop") nonterminal("exp")_2$, [],
+  // aexp
+  $italic("aexp")$, $->$, $terminal("[") nonterminal("exp")_1 terminal(",") dots terminal(",") nonterminal("exp")_k terminal("]")$, $(k >= 1)$,
+  $$, $|$, $italic("gcon")$, [],
+  // gcon
+  $italic("gcon")$, $->$, $terminal("[]")$, [],
+  [], $|$, $italic("qcon")$, [],
+  // qcon
+  $italic("qcon")$, $->$, $terminal("(") italic("gconsym") terminal(")")$, [],
+  // qop
+  $italic("qop")$, $->$, $italic("qconop")$, [],
+  // qconop
+  $italic("qconop")$, $->$, $italic("gconsym")$,[],
+  // gconsym
+  $italic("gconsym")$, $->$, $terminal(":")$, [],
+)
+
 _Lists_ are written $[e_1, dots, e_k]$, where $k >= 1$.
 The list constructor is `:`, and the empty list is denoted `[]`.
 Standard operations on lists are given in the Prelude (see Section~\ref{basic-lists}, and
@@ -301,11 +316,14 @@ It is a right-associative operator, with precedence level 5 (Section~\ref{fixity
 
 === Tuples
 
-$
-  italic("aexp") &-> terminal("(") italic("exp")_1 terminal(",") dots terminal(",") italic("exp")_k terminal(")") (k >= 2) \
-  &| italic("qcon") \
-  italic("qcon") &-> terminal("(") terminal(","){ terminal(",")}terminal(")")
-$
+#table(
+  columns: 4,
+  align: (left, center, left, left),
+  stroke: none,
+  $italic("aexp")$, $->$, $terminal("(") nonterminal("exp")_1 terminal(",") dots terminal(",") nonterminal("exp")_k terminal(")")$, $(k >= 2)$,
+  [], $|$, $italic("qcon")$, [],
+  $italic("qcon")$, $->$, $terminal("(") terminal(","){ terminal(",")}terminal(")")$, []
+)
 
 _Tuples_ are written $(e_1, dots, e_k)$, and may be
 of arbitrary length $k >= 2$.
@@ -323,11 +341,14 @@ in the Prelude (see Section~\ref{basic-tuples} and @chapter:standard-prelude[Cha
 
 === Unit Expressions and Parenthesized Expressions
 
-$
-  italic("aexp") &-> italic("gcon") \
-  &| terminal("(") italic("exp") terminal(")") \
-  italic("gcon") &-> terminal("()")
-$
+#table(
+  columns: 3,
+  align: (left, center, left),
+  stroke: none,
+  $italic("aexp")$, $->$, $italic("gcon")$,
+  [], $|$, $terminal("(") nonterminal("exp") terminal(")")$,
+  $italic("gcon")$, $->$, $terminal("()")$
+)
 
 The form $(e$) is simply a _parenthesized expression_, and is equivalent to $e$.
 The _unit expression_ `()` has type `()` (see
@@ -340,9 +361,12 @@ It is the only member of that type apart from $bot$, and can be thought of as th
 
 === Arithmetic Sequences <sec:arithmetic-sequences>
 
-$
-  italic("aexp") &-> terminal("[") italic("exp")_1 [terminal(",") italic("exp")_2] terminal("..") [italic("exp")_3] terminal("]")
-$
+#table(
+  columns: 3,
+  align: (left, center, left),
+  stroke: none,
+  $italic("aexp")$, $->$, $terminal("[") nonterminal("exp")_1 [terminal(",") nonterminal("exp")_2] terminal("..") [nonterminal("exp")_3] terminal("]")$,
+)
 
 The _arithmetic sequence_ $[e_1, e_2 .. e_3]$ denotes a list of values of type $t$, where each of the $e_i$ has type $t$, and $t$ is an instance of class `Enum`.
 
