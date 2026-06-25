@@ -397,6 +397,13 @@ See Section~\ref{enum-class} for more details of which `Prelude` types are in `E
 )
 === Let Expressions
 
+#table(
+  columns: 3,
+  align: (left, center, left),
+  stroke: none,
+  $italic("lexp")$, $->$, $terminal("let") italic("decls") terminal("in") nonterminal("exp")$
+)
+
 === Case Expressions
 
 === Do Expressions
