@@ -386,6 +386,15 @@ See Section~\ref{enum-class} for more details of which `Prelude` types are in `E
 
 === List Comprehensions <sec:list-comprehensions>
 
+#table(
+  columns: 4,
+  align: (left, center, left, left),
+  stroke: none,
+  $italic("aexp")$, $->$, $terminal("[") nonterminal("exp") terminal("|") italic("qual")_1 terminal(",") dots terminal(",") italic("qual")_n terminal("]")$, [(list comprehension, $n >= 1$)],
+  $italic("qual")$, $->$, $italic("pat") terminal("<-") nonterminal("exp")$, [(generator)],
+  $$, $|$, $terminal("let") italic("decls")$, [(local declaration)],
+  $$, $|$, $nonterminal("exp")$, [(boolean guard)],
+)
 === Let Expressions
 
 === Case Expressions
