@@ -47,9 +47,9 @@ Haskell compilers are expected to make use of new versions of Unicode as they ar
 
 $
   nonterminaldef("program") &-> { med nonterminal("lexeme") | nonterminal("whitespace") med }\
-  nonterminaldef("lexeme") &-> italic("qvarid") | italic("qconid") | italic("qvarsym") | italic("qconsym") \
-  &| nonterminal("literal") | nonterminal("special") | italic("reservedop") | italic("reservedid") \
-  nonterminaldef("literal") &-> italic("integer") | italic("float") | italic("char") | italic("string") \
+  nonterminaldef("lexeme") &-> nonterminal("qvarid") | nonterminal("qconid") | nonterminal("qvarsym") | nonterminal("qconsym") \
+  &| nonterminal("literal") | nonterminal("special") | nonterminal("reservedop") | nonterminal("reservedid") \
+  nonterminaldef("literal") &-> nonterminal("integer") | nonterminal("float") | nonterminal("char") | nonterminal("string") \
   nonterminaldef("special") &-> terminal("(") | terminal(")") | terminal(",") | terminal(";") | terminal("[") | terminal("]") | terminal("`") | terminal("{") | terminal("}") \
   nonterminaldef("whitespace") &-> nonterminal("whitestuff") { nonterminal("whitestuff") }\
   nonterminaldef("whitestuff") &-> nonterminal("whitechar") | nonterminal("comment") | nonterminal("ncomment") \
@@ -182,12 +182,12 @@ In the remainder of the report six different kinds of
 names will be used:
 
 $
-  italic("varid") & & text("(variables)")\
-  italic("conid") & & text("(constructors)")\
-  italic("tyvar") &-> italic("varid") & text("(type variables)")\
-  italic("tycon") &-> italic("conid") & text("(type constructors)")\
-  italic("tycls") &-> italic("conid") & text("(type classes)")\
-  italic("modid") &-> { italic("conid") terminal(".")} italic("conid") & text("(modules)")
+  nonterminal("varid") & & text("(variables)")\
+  nonterminal("conid") & & text("(constructors)")\
+  nonterminaldef("tyvar") &-> nonterminal("varid") & text("(type variables)")\
+  nonterminaldef("tycon") &-> nonterminal("conid") & text("(type constructors)")\
+  nonterminaldef("tycls") &-> nonterminal("conid") & text("(type classes)")\
+  nonterminaldef("modid") &-> { nonterminal("conid") terminal(".")} nonterminal("conid") & text("(modules)")
 $
 
 Variables and type variables are represented by identifiers beginning
@@ -204,12 +204,12 @@ names, but not type variables or module names.  Qualified
 names are discussed in detail in @chapter:modules[Chapter]
 
 $
-  italic("qvarid") &-> [italic("modid") terminal(".")] italic("varid") \
-  italic("qconid") &-> [italic("modid") terminal(".")] italic("conid") \
-  italic("qtycon") &-> [italic("modid") terminal(".")] italic("tycon") \
-  italic("qtycls") &-> [italic("modid") terminal(".")] italic("tycls") \
-  italic("qvarsym") &-> [italic("modid") terminal(".")] italic("varsym") \
-  italic("qconsym") &-> [italic("modid") terminal(".")] italic("consym") \
+  nonterminaldef("qvarid") &-> [nonterminal("modid") terminal(".")] nonterminal("varid") \
+  nonterminaldef("qconid") &-> [nonterminal("modid") terminal(".")] nonterminal("conid") \
+  nonterminaldef("qtycon") &-> [nonterminal("modid") terminal(".")] nonterminal("tycon") \
+  nonterminaldef("qtycls") &-> [nonterminal("modid") terminal(".")] nonterminal("tycls") \
+  nonterminaldef("qvarsym") &-> [nonterminal("modid") terminal(".")] nonterminal("varsym") \
+  nonterminaldef("qconsym") &-> [nonterminal("modid") terminal(".")] nonterminal("consym") \
 $
 
 Since a qualified name is a lexeme, no spaces are
@@ -244,15 +244,15 @@ definition of `+` in the Prelude (Section~\ref{fixity}).
 === Numeric Literals
 
 $
-  italic("decimal")	&-> italic("digit"){italic("digit")} \
-  italic("octal")		&-> italic("octit"){italic("octit")} \
-  italic("hexadecimal")	&-> italic("hexit"){italic("hexit")} \
-  italic("integer")	&-> italic("decimal") \
-                &|  terminal("0o") italic("octal") | terminal("0O") italic("octal") \
-                &|  terminal("0x") italic("hexadecimal") | terminal("0X") italic("hexadecimal") \
-  italic("float")	&-> italic("decimal") terminal(".") italic("decimal") [ italic("exponent")] \
-	        &|  italic("decimal") italic("exponent") \
-  italic("exponent")	&-> (terminal("e") | terminal("E")) [terminal("+") | terminal("-")] italic("decimal")
+  nonterminaldef("decimal")	&-> nonterminal("digit"){nonterminal("digit")} \
+  nonterminaldef("octal")		&-> nonterminal("octit"){nonterminal("octit")} \
+  nonterminaldef("hexadecimal")	&-> nonterminal("hexit"){nonterminal("hexit")} \
+  nonterminaldef("integer")	&-> nonterminal("decimal") \
+                &|  terminal("0o") nonterminal("octal") | terminal("0O") nonterminal("octal") \
+                &|  terminal("0x") nonterminal("hexadecimal") | terminal("0X") nonterminal("hexadecimal") \
+  nonterminaldef("float")	&-> nonterminal("decimal") terminal(".") nonterminal("decimal") [ nonterminal("exponent")] \
+	        &|  nonterminal("decimal") nonterminal("exponent") \
+  nonterminaldef("exponent")	&-> (terminal("e") | terminal("E")) [terminal("+") | terminal("-")] nonterminal("decimal")
 $
 
 
@@ -270,16 +270,16 @@ is discussed in @sec:numeric-literals
 === Character and String Literals
 
 $
-  italic("char") &-> terminal("'") (italic("graphic")_(chevron.l terminal("'") | terminal("\\") chevron.r) | italic("space") | italic("escape")_(chevron.l terminal("\&") chevron.r)) terminal("'")\
-  italic("string") &-> terminal("\"") {italic("graphic")_(chevron.l terminal("\"") | terminal("\\") chevron.r) | italic("space") | italic("escape") | italic("gap") } terminal("\"") \
-  italic("escape") &-> terminal("\\") (italic("charesc") | italic("ascii") | italic("decimal") | terminal("o") italic("octal") | terminal("x") italic("hexadecimal"))\
-  italic("charesc") &-> terminal("a") | terminal("b") | terminal("f") | terminal("n") | terminal("r") | terminal("t") | terminal("v") | terminal("\\") | terminal("\"") | terminal("'") | terminal("&")\
-  italic("ascii") &-> terminal("^") italic("cntrl") | terminal("NUL") | terminal("SOH") | terminal("STX") | terminal("ETX") | terminal("EOT") | terminal("ENQ") | terminal("ACK") \
+  nonterminaldef("char") &-> terminal("'") (nonterminal("graphic")_(chevron.l terminal("'") | terminal("\\") chevron.r) | nonterminal("space") | nonterminal("escape")_(chevron.l terminal("\&") chevron.r)) terminal("'")\
+  nonterminaldef("string") &-> terminal("\"") {nonterminal("graphic")_(chevron.l terminal("\"") | terminal("\\") chevron.r) | nonterminal("space") | nonterminal("escape") | nonterminal("gap") } terminal("\"") \
+  nonterminaldef("escape") &-> terminal("\\") (nonterminal("charesc") | nonterminal("ascii") | nonterminal("decimal") | terminal("o") nonterminal("octal") | terminal("x") nonterminal("hexadecimal"))\
+  nonterminaldef("charesc") &-> terminal("a") | terminal("b") | terminal("f") | terminal("n") | terminal("r") | terminal("t") | terminal("v") | terminal("\\") | terminal("\"") | terminal("'") | terminal("&")\
+  nonterminaldef("ascii") &-> terminal("^") nonterminal("cntrl") | terminal("NUL") | terminal("SOH") | terminal("STX") | terminal("ETX") | terminal("EOT") | terminal("ENQ") | terminal("ACK") \
   &| terminal("BEL") | terminal("BS") | terminal("HT") | terminal("LF") | terminal("VT") | terminal("FF") | terminal("CR") | terminal("SO") | terminal("SI") | terminal("DLE")\
   &| terminal("DC1") | terminal("DC2") | terminal("DC3") | terminal("DC4") | terminal("NAK") | terminal("SYN") | terminal("ETB") | terminal("CAN") \
   &| terminal("EM") | terminal("SUB") | terminal("ESC") | terminal("FS") | terminal("GS") | terminal("RS") | terminal("US") | terminal("SP") | terminal("DEL") \
-  italic("cntrl") &-> italic("ascLarge") | terminal("@") | terminal("[") | terminal("\\") | terminal("]") | terminal("^") | terminal("_") \
-  italic("gap") &-> terminal("\\") italic("whitechar") { med italic("whitechar") med } terminal("\\") \
+  nonterminaldef("cntrl") &-> nonterminal("ascLarge") | terminal("@") | terminal("[") | terminal("\\") | terminal("]") | terminal("^") | terminal("_") \
+  nonterminaldef("gap") &-> terminal("\\") nonterminal("whitechar") { med nonterminal("whitechar") med } terminal("\\") \
 $
 
 Character literals are written between single quotes, as in `'a'`, and strings between double quotes, as in `"Hello"`.
