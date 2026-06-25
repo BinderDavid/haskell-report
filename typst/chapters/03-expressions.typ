@@ -41,8 +41,8 @@ what it is bound to.
   [], $|$, $terminal("[") nonterminal("exp")_1 terminal(",") dots terminal(",") nonterminal("exp")_k terminal("]")$, [(list, $k>=1$)],
   [], $|$, $terminal("[") nonterminal("exp")_1 [terminal(",") nonterminal("exp")_2] terminal("..") [nonterminal("exp")_3] terminal("]")$, [(arithmetic sequence)],
   [], $|$, $terminal("[") nonterminal("exp") terminal("|") italic("qual")_1 terminal(",") dots terminal(",") italic("qual")_n terminal("]")$, [(list comprehension, $n>=1$)],
-  [], $|$, $terminal("(") nonterminal("infixexp") italic("qop") terminal(")")$, [(left section)],
-  [], $|$, $terminal("(") italic("qop")_(chevron.l terminal("-") chevron.r) nonterminal("infixexp") terminal(")")$, [(right section)],
+  [], $|$, $terminal("(") nonterminal("infixexp") nonterminal("qop") terminal(")")$, [(left section)],
+  [], $|$, $terminal("(") nonterminal("qop")_(chevron.l terminal("-") chevron.r) nonterminal("infixexp") terminal(")")$, [(right section)],
   [], $|$, $italic("qcon") terminal("{") italic("fbind")_1 terminal(",") dots terminal(",") italic("fbind")_n terminal("}")$, [(labeled construction, $n>=0$)],
   [], $|$, $nonterminal("aexp")_(chevron.l italic("qcon") chevron.r) terminal("{") italic("fbind")_1 terminal(",") dots terminal(",") italic("fbind")_n terminal("}")$, [(labeled update, $n>=1$)],
 )
@@ -121,10 +121,13 @@ information when an error occurs.
 
 === Curried Applications and Lambda Abstractions
 
-$
-  italic("fexp") &-> [italic("fexp")] italic("aexp") && text("(function application)")\
-  italic("lexp") &-> terminal("\\") italic("apat")_1 med dots med italic("apat")_n terminal("->") italic("exp") &&(text("lambda abstraction") n >= 1)\
-$
+#table(
+  columns: 4,
+  align: (left, center, left, left),
+  stroke: none,
+  $italic("fexp")$, $->$, $[nonterminal("fexp")] nonterminal("aexp")$, [(function application)],
+  $italic("lexp")$, $->$, $terminal("\\") italic("apat")_1 med dots med italic("apat")_n terminal("->") nonterminal("exp")$, [(lambda abstraction $n>=1$)]
+)
 
 _Function application_ is written $e_1 med e_2$.
 Application associates to the left, so the
@@ -152,12 +155,15 @@ pattern fails to match, then the result is $bot$.
 
 === Operator Applications <sec:operator-applications>
 
-$
-  italic("infixexp") &-> italic("lexp") med italic("qop") med italic("infixexp") \
-  &| terminal("-") italic("infixexp") && text("(qualified operator)") \
-  &| italic("infixexp") \
-  italic("qop") &-> italic("qvarop") | italic("qconop") && text("(qualified operator)")\
-$
+#table(
+  columns: 4,
+  align: (left, center, left, left),
+  stroke: none,
+  $italic("infixexp")$, $->$, $nonterminal("lexp") med nonterminal("qop") med nonterminal("infixexp")$, [],
+  [], $|$, $terminal("-") nonterminal("infixexp")$, [(prefix negation)],
+  [], $|$, nonterminal("lexp"), [],
+  $nonterminaldef("qop")$, $->$, $italic("qvarop") | italic("qconop")$, [(qualified operator)],
+)
 
 The form $e_1 italic("qop") e_2$ is the infix application of binary operator $italic("qop")$ to expressions $e_1$ and $e_2$.
 
@@ -188,9 +194,15 @@ Similarly, `(-)` is syntax for `\x y -> x-y`, as with any infix operator, and do
 
 === Sections
 
+#table(
+  columns: 4,
+  align: (left, center, left, left),
+  stroke: none,
+  $italic("aexp")$, $->$, $terminal("(") nonterminal("infixexp") med nonterminal("qop") terminal(")")$, [(left section)],
+  [], $|$, $terminal("(") nonterminal("qop")_(chevron.l terminal("-") chevron.r) nonterminal("infixexp") terminal(")")$, [(right section)]
+)
 $
-  italic("aexp") &-> terminal("(") italic("infixexp") med italic("qop") terminal(")") && text("(left section)")\
-  &| terminal("(") italic("qop")_(chevron.l terminal("-") chevron.r) italic("infixexp") terminal(")") && text("(right section)")
+  &|  && text("")
 $
 
 _Sections_ are written as $(italic("op") e)$ or $(e italic("op"))$, where
