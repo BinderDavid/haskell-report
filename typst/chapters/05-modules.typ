@@ -415,8 +415,143 @@ instance Show (IO a) where
 
 === Name Clashes and Closure
 ==== Qualified names
+
+A _qualified name_ is written as $italic("modid").italic("name")$ (Section~\ref{ids}).
+A qualified name is brought into scope:
+
+- _By a top level declaration._
+  A top-level declaration brings into scope both the unqualified _and_
+  the qualified name of the entity being defined. Thus:
+  ```haskell
+  module M where
+  f x = ...
+  g x = M.f x x
+  ```
+  is legal.  The _defining_ occurrence must mention the _unqualified_ name; therefore, it is
+  illegal to write
+  ```haskell
+  module M where
+  M.f x = ...                 -- ILLEGAL
+  g x = let M.y = x+1 in ...  -- ILLEGAL
+  ```
+- _By an `import` declaration._  An `import` declaration, whether `qualified` or not,
+  always brings into scope the qualified name of the imported entity (Section~\ref{import}).
+  This allows a qualified
+  import to be replaced with an unqualified one without forcing changes
+  in the references to the imported names.  
+
+
 ==== Name clashes
+
+If a module contains a bound occurrence of a name, such as `f` or `A.f`,
+it must be possible unambiguously to resolve which entity is thereby referred to;
+that is, there must be only one binding for `f` or `A.f` respectively.
+
+It is _not_ an error for there to exist names that cannot be so 
+resolved, provided that the program does not mention those names.  For example:
+```haskell
+module A where
+import B
+import C
+tup = (b, c, d, x)
+  
+module B( d, b, x, y ) where
+import D
+x = ...
+y = ...
+b = ...
+  
+module C( d, c, x, y ) where
+import D
+x = ...
+y = ...
+c = ...
+
+module D( d ) where
+d = ...
+```
+Consider the definition of `tup`.  
+
+- The references to `b` and `c`
+  can be unambiguously resolved to `b` declared in `B`, and `c` declared in
+  `C` respectively.
+- The reference to `d` is unambiguously resolved to
+  `d` declared in `D`.  In this case the same entity is brought into scope by two routes
+  (the import of `B` and the import of `C`), and can be referred to in `A` by the names
+  `d`, `B.d`, and `C.d`.
+- The reference to `x` is ambiguous: it could mean `x` declared in `B`, or `x` 
+  declared in `C`.  The ambiguity could be fixed by replacing the reference to `x` by
+  `B.x` or `C.x`.
+- There is no reference to `y`, so it is not erroneous that distinct entities called
+  `y` are exported by both `B` and `C`.  An error is only reported if `y` is actually mentioned.
+
+
+The name occurring in a type signature or fixity declarations is
+always unqualified, and unambiguously refers to another declaration in
+the same declaration list (except that the fixity declaration for a
+class method can occur at top level --- Section~\ref{fixity}). For example,
+the following module is legal:
+```haskell
+module F where
+
+sin :: Float -> Float
+sin x = (x::Float)
+
+f x = Prelude.sin (F.sin x)
+```
+The local declaration for `sin` is
+legal, even though the Prelude function `sin` is implicitly in
+scope. The references to `Prelude.sin` and `F.sin` must both be qualified
+to make it unambiguous which `sin` is meant. However, the unqualified
+name `sin` in the type signature in the first line of `F` unambiguously
+refers to the local declaration for `sin`.
+
 ==== Closure
+
+Every module in a Haskell program must be _closed_.  That is,
+every name explicitly mentioned by the source code
+must be either defined locally or imported from another module.
+However, entities that the compiler requires for type checking or other
+compile time analysis need not be imported if they are not mentioned
+by name.  The Haskell compilation system is responsible for finding
+any information needed for compilation without the help of the
+programmer.  That is, the import of a variable `x` does not
+require that the datatypes and classes in the signature of `x` be
+brought into the module along with `x` unless these entities are
+referenced by name in the user program.  The Haskell
+system silently imports any information that must accompany an
+entity for type checking or any other purposes.  Such entities need
+not even be explicitly exported: the following program is valid even though
+`T` does not escape `M1`:
+```haskell
+module M1(x) where
+data T = T
+x = T
+
+module M2 where
+import M1(x)
+y = x
+```
+In this example, there is no way to supply an explicit type signature
+for `y` since `T` is not in scope.
+Whether or not `T` is explicitly exported, module `M2` knows
+enough about `T` to correctly type check the program.
+
+The type of an exported entity is unaffected by non-exported type
+synonyms.  For example, in
+```haskell
+module M(x) where
+type T = Int
+x :: T
+x = 1
+```
+the type of `x` is both `T` and `Int`; these are interchangeable even
+when `T` is not in scope.  That is, the definition of `T` is available
+to any module that encounters it whether or not the name `T` is
+in scope.  The only reason to export `T` is to allow other modules to
+refer it by name; the type checker finds the definition of `T` if
+needed whether or not it is exported.
+
 === Standard Prelude
 
 Many of the features of Haskell are defined in Haskell
