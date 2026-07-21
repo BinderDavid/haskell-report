@@ -1,5 +1,230 @@
+#import "../macros.typ" : *
+
+A module defines a collection of values, datatypes, type synonyms,
+classes, etc.~(see @chapter:declarations[Chapter]), in an environment created
+by a set of _imports_ (resources brought into scope from other modules).
+It _exports_ some of these resources, making them available to
+other modules.  
+We use the term _entity_ to refer to
+a value, type, or class defined in, imported into, or perhaps
+exported from a module.
+
+A Haskell _program_ is a collection of modules, one of
+which, by convention, must be called `Main` and must
+export the value `main`.  The _value_ of the program
+is the value of the identifier `main` in module `Main`,
+which must be a computation of type $mono("IO") tau$ for some type $tau$
+(see @chapter:basic-input-output[Chapter]).  When the program is executed, the computation
+`main` is performed, and its result (of type $tau$) is discarded.
+
+Modules may reference other modules via explicit
+`import` declarations, each giving the name of a module to be
+imported and specifying its entities to be imported.
+Modules may be mutually recursive.
+
+Modules are used for name-space control, and are not first class values.
+A multi-module Haskell program can be converted into a single-module
+program by giving each entity a unique name, changing all occurrences
+to refer to the appropriate unique name, and then concatenating all the module
+bodies#footnote[There are two minor exceptions to this statement.
+First, `default` declarations scope over a single module (Section~\ref{default-decls}).
+Second, Rule 2 of the monomorphism restriction (Section~\ref{sect:monomorphism-restriction})
+is affected by module boundaries.
+].  
+For example, here is a three-module program:
+```haskell
+module Main where
+import A
+import B
+main = A.f >> B.f
+
+module A where
+f = ...
+
+module B where
+f = ...
+```
+It is equivalent to the following single-module program:
+```haskell
+module Main where
+main = af >> bf
+
+af = ...
+
+bf = ...
+```
+Because they are allowed to be mutually recursive,
+modules allow a program to be partitioned freely without regard to
+dependencies.
+
+A module name (lexeme $italic("modid")$) is a sequence of one or more
+identifiers beginning with capital letters, separated by dots, with no
+intervening spaces.  For example, `Data.Bool`, `Main` and
+`Foreign.Marshal.Alloc` are all valid module names.
+
+#table(
+  columns: 4,
+  align: (left, center, left, left),
+  stroke: none,
+  $italic("modid")$, $->$, ${ nonterminal("conid") terminal(".") } nonterminal("conid")$, $$
+
+)
+
+Module names can be thought of as being arranged in a hierarchy in
+which appending a new component creates a child of the original module
+name.  For example, the module `Control.Monad.ST` is a child of the
+`Control.Monad` sub-hierarchy.  This is purely a convention, however,
+and not part of the language definition; in this report a $italic("modid")$ is
+treated as a single identifier occupying a flat namespace.
+
+There is one distinguished module, `Prelude`, which is imported into
+all modules by default (see Section~\ref{standard-prelude}), plus a
+set of standard library modules that may be imported as required
+(see Part~\ref{libraries}).
+
 === Module Structure
+
+A module defines a mutually
+recursive scope containing declarations for value bindings, data
+types, type synonyms, classes, etc. (see @chapter:declarations[Chapter]).
+
+#table(
+  columns: 4,
+  align: (left, center, left, left),
+  stroke: none,
+  $italic("module")$, $->$, $terminal("module") nonterminal("modid") [ italic("exports")] terminal("where") italic("body")$,$$,
+  $$, $|$, $italic("body")$, $$,
+  $italic("body")$, $->$, $terminal("{") italic("impdecls") terminal(";") italic("topdecls") terminal("}")$, $$,
+  $$, $|$, $terminal("{") italic("impdecls") terminal("}")$, $$,
+  $$, $|$, $terminal("{") italic("topdecls") terminal("}")$, $$,
+  $italic("impdecls")$, $->$, $italic("impdecl")_1 terminal(";") dots terminal(";") italic("impdecl")_n$, $(n >= 1)$,
+  $italic("topdecls")$, $->$, $italic("topdecl")_1 terminal(";") dots terminal(";") italic("topdecl")_n$, $(n >= 1)$,
+)
+
+A module begins with a header: the keyword
+`module`, the module name, and a list of entities (enclosed in round
+parentheses) to be exported.  The header is followed by a possibly-empty
+list of `import` declarations ($italic("impdecls")$, Section~\ref{import}) that specify modules to be imported,
+optionally restricting the imported bindings.  
+This is followed by a possibly-empty list of top-level declarations ($italic("topdecls")$, @chapter:declarations[Chapter]).
+
+An abbreviated form of module, consisting only 
+of the module body, is permitted.  If this is used, the header is assumed to be `module Main(main) where`.
+If the first lexeme in the abbreviated module is not a `{`, then the layout rule applies for the top level of the module.
+
 === Export Lists
+
+#table(
+  columns: 4,
+  align: (left, center, left, left),
+  stroke: none,
+  $italic("exports")$, $->$, $terminal("(") italic("export")_1 terminal(",") dots terminal(",") italic("export")_n [terminal(",")]terminal(")")$, $(n >= 0)$,
+  $italic("export")$, $->$, $italic("qvar")$, $$,
+  $$, $|$, $italic("qtycon") [ terminal("(..)") | terminal("(") italic("cname")_1 terminal(",") dots terminal(",") italic("cname")_n terminal(")")]$, $(n >= 0)$,
+  $$, $|$, $italic("qtycls") [ terminal("(..)") | terminal("(") italic("var")_1 terminal(",") dots terminal(",") italic("var")_n terminal(")")]$, $(n >= 0)$,
+  $$, $|$, $terminal("module") nonterminal("modid")$, $$,
+  $italic("cname")$, $->$, $ italic("var") | italic("con")$, $$,
+)
+
+An _export list_ identifies the entities to be exported by a
+module declaration.  A module implementation may only export an entity
+that it declares, or that it imports from some other module.  If the
+export list is omitted, all values, types and classes defined in the
+module are exported, _but not those that are imported_.
+
+Entities in an export list may be named as follows:
+
+1. A value, field name, or class method, whether declared in
+   the module body or imported,
+   may be named by giving the name of the value as a $nonterminal("qvarid")$, which must be in scope.
+   Operators should be enclosed in parentheses to turn them into
+   $nonterminal("qvarid")$s.  
+2. An algebraic datatype $T$
+   declared by a `data` or `newtype` declaration may be named in one of
+   three ways: 
+   - The form $T$ names the type _but not the constructors or field names_.
+     The ability to export a type without its constructors allows the
+     construction of abstract datatypes (see Section~\ref{abstract-types}).
+   - The form $T(c_1, dots ,c_n)$, names the type and some or all of its constructors and field names.  
+   - The abbreviated form $T(..)$ names the type 
+     and all its constructors and field names that are currently in scope
+     (whether qualified or not).
+   In all cases, the (possibly-qualified) type constructor $T$ must be in scope. 
+   The constructor and field names $c_i$ in the second form are unqualified;
+   one of these subordinate names is legal if and only if (a) it names a constructor
+   or field of $T$, and (b) the constructor or field
+   is in scope in the module body _regardless of whether it is in scope
+   under a qualified or unqualified name_. For example, the following is 
+   legal
+   ```haskell
+   module A( Mb.Maybe( Nothing, Just ) ) where
+     import qualified Data.Maybe as Mb
+   ```
+   Data constructors cannot be named in export lists except as subordinate names, because
+   they cannot otherwise be distinguished from type constructors.
+3. A type synonym $T$ declared by a `type` declaration may be named by the form $T$, where $T$ is in scope.
+4. A class $C$ with operations $f_1, dots,f_n$
+   declared in a `class` declaration may be named in one of three ways:
+   - The form $C$ names the class _but not the class methods_.
+   - The form $C(f_1, dots,f_n)$, names the class and some or all of its methods.  
+   - The abbreviated form $C(..)$ names the class and all its methods
+     that are in scope (whether qualified or not).
+   In all cases, $C$ must be in scope.  In the second form,
+   one of the (unqualified) subordinate names $f_i$ is legal if and only if (a) it names a
+   class method of $C$, and (b) the class method 
+   is in scope in the module body regardless of whether it is in scope
+   under a qualified or unqualified name.
+5. The form "`module M`" names the set of all entities that are in
+   scope with both an unqualified name "`e`" and a qualified name "`M.e`".
+   This set may be empty.
+   For example:
+   ```haskell
+   module Queue( module Stack, enqueue, dequeue ) where
+   import Stack
+   ...
+   ```
+   Here the module `Queue` uses the module name `Stack` in its export
+   list to abbreviate all the entities imported from `Stack`.  
+
+   A module can name its own local definitions in its export
+   list using its own name in the "`module M`" syntax, because a local
+   declaration brings into scope both a qualified and unqualified name (Section~\ref{qualifiers}). 
+   For example:
+   ```haskell
+   module Mod1( module Mod1, module Mod2 ) where
+   import Mod2
+   import Mod3
+   ```
+   Here module `Mod1` exports all local definitions as well as those
+   imported from `Mod2` but not those imported from `Mod3`.
+
+   It is an error to use `module M` in an export list unless `M` is 
+   the module bearing the export list, or `M` is imported by at 
+   least one import declaration (qualified or unqualified).
+
+Exports lists are cumulative: the set of entities exported by an export
+list is the union of the entities exported by the individual items of the list.
+
+It makes no difference to an importing module how an entity was 
+exported.  For example, a field name `f` from data type `T` may be exported individually
+(`f`, item (1) above); or as an explicitly-named member of its data type (`T(f)`, item (2));
+or as an implicitly-named member (`T(..)`, item(2)); or by exporting an entire
+module (`module M`, item (5)).  
+
+The _unqualified_ names of the entities exported by a module must all be distinct
+(within their respective namespace).  For example
+```haskell
+module A ( C.f, C.g, g, module B ) where   -- an invalid module
+import B(f)
+import qualified C(f,g)
+g = f True
+```
+There are no name clashes within module `A` itself, 
+but there are name clashes in the export list between `C.g` and `g`
+(assuming `C.g` and `g` are different entities -- remember, modules
+can import each other recursively), and between `module B` and `C.f`
+(assuming `B.f` and `C.f` are different entities).
+
 === Import Declarations
 ==== What is imported
 ==== Qualified import
@@ -11,7 +236,137 @@
 ==== Name clashes
 ==== Closure
 === Standard Prelude
+
+Many of the features of Haskell are defined in Haskell
+itself as a library of standard datatypes, classes, and
+functions, called the "Standard Prelude."  In
+Haskell, the Prelude is contained in the
+module `Prelude`. There are also
+many predefined library modules, which provide less frequently used
+functions and types.  For example, complex numbers, arrays, 
+and most of the input/output are all part of the standard
+libraries.
+These are defined in Part~\ref{libraries}.
+Separating libraries from the Prelude has the advantage of reducing the size and complexity of the Prelude, allowing it to be more easily assimilated,
+and increasing the space of useful names available to the programmer.
+
+Prelude and library modules differ from other modules in that
+their semantics (but not their implementation) are a fixed part of the
+Haskell language definition.
+This means, for example, that a compiler may optimize calls to
+functions in the Prelude without consulting the source code
+of the Prelude.
+
 ==== The Prelude Module
+
+The `Prelude` module is imported automatically into all modules as if
+by the statement `import Prelude`, if and only if it is not imported
+with an explicit `import` declaration. This provision for explicit
+import allows entities defined in the Prelude to be selectively imported,
+just like those from any other module.
+
+The semantics of the entities in `Prelude` is specified by a reference
+implementation of `Prelude` written in Haskell, given in
+Chapter~\ref{stdprelude}.  Some datatypes (such as `Int`) and
+functions (such as `Int` addition) cannot be specified directly in
+Haskell.  Since the treatment of such entities depends on the
+implementation, they are not formally defined in Chapter~\ref{stdprelude}.
+The implementation of
+`Prelude` is also incomplete in its treatment of tuples: there should
+be an infinite family of tuples and their instance declarations, but the
+implementation only gives a scheme.
+
+Chapter~\ref{stdprelude} defines the module `Prelude` using
+several other modules: `PreludeList`, `PreludeIO`, and so on.
+These modules are _not_ part of Haskell, and they cannot be imported
+separately.  They are simply 
+there to help explain the structure of the `Prelude` module; they
+should be considered part of its implementation, not part of the language
+definition.
+
 ==== Shadowing Prelude Names
+
+The rules about the Prelude have been cast so that it is
+possible to use Prelude names for nonstandard purposes; however,
+every module that does so must have an `import` declaration
+that makes this nonstandard usage explicit.  For example:
+```haskell
+module A( null, nonNull ) where
+import Prelude hiding( null ) 
+null, nonNull :: Int -> Bool
+null    x = x == 0
+nonNull x = not (null x)
+```
+Module `A` redefines `null`, and contains an unqualified reference to `null`
+on the right hand side of `nonNull`. The latter would be ambiguous
+without the `hiding(null)` on the `import Prelude` statement. Every
+module that imports `A` unqualified, and then makes an unqualified
+reference to `null` must also resolve the ambiguous use of `null` just as
+`A` does. Thus there is little danger of accidentally shadowing Prelude
+names.
+
+It is possible to construct and use a different module to serve in
+place of the Prelude.  Other than the fact that it is implicitly
+imported, the Prelude is an ordinary Haskell module; it is special
+only in that some objects in the Prelude are referenced by special
+syntactic constructs.  Redefining names used by the Prelude does not
+affect the meaning of these special constructs.  For example, in
+```haskell
+module B where
+import Prelude()
+import MyPrelude
+f x = (x,x)
+g x = (,) x x
+h x = [x] ++ []
+```
+the explicit `import Prelude()` declaration prevents the automatic
+import of `Prelude`, while the declaration `import MyPrelude` brings the
+non-standard prelude into scope.
+The special syntax for tuples (such as `(x,x)` and `(,)`) and lists
+(such as `[x]` and `[]`) continues to refer to the tuples and lists
+defined by the standard `Prelude`;
+there is no way to redefine the meaning of `[x]`, for example, in terms of a
+different implementation of lists.
+On the other hand, the use of `++` is not special syntax, so it refers
+to `++` imported from `MyPrelude`.
+
+It is not possible, however, to hide `instance` declarations in the
+`Prelude`.  For example, one cannot define a new instance for `Show Char`.
+
 === Separate Compilation
+
+Depending on the Haskell implementation used, separate compilation
+of mutually recursive modules may require that imported modules contain
+additional information so that they may be referenced before they are
+compiled.  Explicit type signatures for all exported values may be
+necessary to deal with mutual recursion.  The
+precise details of separate compilation are not defined by this
+report. 
+
 === Abstract Datatypes
+
+The ability to export a datatype without its constructors
+allows the construction of abstract datatypes (ADTs).  For example,
+an ADT for stacks could be defined as:
+
+```haskell
+module Stack( StkType, push, pop, empty ) where
+data StkType a = EmptyStk | Stk a (StkType a)
+push x s = Stk x s
+pop (Stk _ s) = s
+empty = EmptyStk
+```
+Modules importing `Stack` cannot construct values of type `StkType`
+because they do not have access to the constructors of the type.
+Instead, they must use `push`, `pop`, and `empty` to construct such values.
+
+It is also possible to build an ADT on top of an existing type by
+using a `newtype` declaration.  For example, stacks can be defined
+with lists: 
+```haskell
+module Stack( StkType, push, pop, empty ) where
+newtype StkType a = Stk [a]
+push x (Stk s) = Stk (x:s)
+pop (Stk (_:s)) = Stk s
+empty = Stk []
+```
