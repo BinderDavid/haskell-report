@@ -226,11 +226,193 @@ can import each other recursively), and between `module B` and `C.f`
 (assuming `B.f` and `C.f` are different entities).
 
 === Import Declarations
+
+#table(
+  columns: 4,
+  align: (left, center, left, left),
+  stroke: none,
+  $italic("impdecl")$, $->$, $terminal("import") [terminal("qualified")] nonterminal("modid") [terminal("as") nonterminal("modid")] [italic("impspec")]$, $$,
+  $$, $|$, $$, [(empty declaration)],
+  $italic("impspec")$, $->$, $terminal("(") italic("import")_1 terminal(",") dots terminal(",") italic("import")_n [terminal(",")] terminal(")")$, $(n >= 0)$,
+  $$, $|$, $terminal("hiding") terminal("(") italic("import")_1 terminal(",") dots terminal(",") italic("import")_n [terminal(",")] terminal(")")$, $(n >= 0)$,
+  $italic("import")$, $->$, $italic("var")$, $$,
+  $$, $|$, $italic("tycon") [ terminal("(..)") | terminal("(") italic("cname")_1 terminal(",") dots terminal(",") italic("cname")_n terminal(")")]$, $(n >= 0)$,
+  $$, $|$, $italic("tycls") [ terminal("(..)") | terminal("(") italic("var")_1 terminal(",") dots terminal(",") italic("var")_n terminal(")")]$, $(n >= 0)$,
+  $italic("cname")$, $->$, $italic("var") | italic("con")$, $$,
+)
+
+The entities exported by a module may be brought into scope in
+another module with
+an `import`
+declaration at the beginning
+of the module.  
+The `import` declaration names the module to be
+imported
+and optionally specifies the entities to be imported.
+A single module may be imported by more than one `import` declaration.  
+Imported names serve as top level declarations: they scope over
+the entire body of the module but may  be shadowed by local
+non-top-level bindings.  
+
+The effect of multiple `import` declarations is strictly
+cumulative: an entity is in scope if it is imported by any of the `import`
+declarations in a module.  The ordering of import declarations is irrelevant.
+
+Lexically, the terminal symbols "`as`", "`qualified`" and
+"`hiding`" are each a $italic("varid")$ rather than a $italic("reservedid")$.  They have
+special significance only in the context of an `import` declaration;
+they may also be used as variables.
+
 ==== What is imported
+
+Exactly which entities are to be imported can be specified in one
+of the following three ways:
+
+1. The imported entities can be specified explicitly
+   by listing them in parentheses.
+   Items in the list have the same form as those in export lists, except
+   qualifiers are not permitted and
+   the "`module` $italic("modid")$" entity is not permitted.  When the `(..)` form
+   of import is used for a type or class, the `(..)` refers to all of the
+   constructors, methods, or field names exported from the module.
+
+   The list must name only
+   entities exported by the imported module.
+   The list may be empty, in which case nothing except the instances is
+   imported.
+
+2. Entities can be excluded by 
+   using the form $mono("hiding") (italic("import")_1, dots, italic("import")_n)$, which
+   specifies that all entities exported by the named module should
+   be imported except for those named in the list.  Data constructors may be
+   named directly in hiding lists without being prefixed by the
+   associated type.  Thus, in
+   ```haskell
+   import M hiding (C)
+   ```
+   any constructor, class, or type named `C` is excluded.  In contrast,
+   using `C` in an import list names only a class or type.  
+
+   It is an error to hide an entity that is not, in fact, exported by
+   the imported module.
+
+3. Finally, if $italic("impspec")$ is omitted then 
+   all the entities exported by the specified module are imported.
+
+
 ==== Qualified import
+
+For each entity imported under the rules of Section~\ref{whatisimported},
+the top-level environment is extended.  If the import declaration used
+the `qualified` keyword, only the _qualified name_ of the entity is
+brought into scope.  If the `qualified` keyword is omitted, then _both_ the
+qualified _and_ unqualified name of the entity is brought into scope.
+Section~\ref{qualifiers} describes qualified names in more detail.
+
+The qualifier on the imported name is either the name of the imported module,
+or the local alias given in the `as` clause (Section~\ref{as-clause}) 
+on the `import` statement.
+Hence, _the qualifier is not necessarily the name of the module in which the
+entity was originally declared_.
+
+The ability to exclude the unqualified names allows full programmer control of
+the unqualified namespace: a locally defined entity can share the same
+name as a qualified import:
+```haskell
+module Ring where
+import qualified Prelude    -- All Prelude names must be qualified
+import Data.List( nub )
+
+l1 + l2 = l1 Prelude.++ l2  -- This + differs from the one in the Prelude
+l1 * l2 = nub (l1 + l2)     -- This * differs from the one in the Prelude
+
+succ = (Prelude.+ 1)
+```
+
 ==== Local aliases
+
+Imported modules may be assigned a local alias in the importing module
+using the `as` clause.
+For example, in
+```haskell
+import qualified VeryLongModuleName as C
+```
+entities must be referenced using "`C.`" as a qualifier instead of
+"`VeryLongModuleName.`".  This also allows a different module to be substituted
+for `VeryLongModuleName` without changing the qualifiers used for the imported module.
+It is legal for more than one module in scope to 
+use the same qualifier, provided that all names can still be resolved unambiguously.
+For example:
+```haskell
+module M where
+import qualified Foo as A
+import qualified Baz as A
+x = A.f
+```
+This module is legal provided only that `Foo` and `Baz` do not both export `f`.
+
+An `as` clause may also be used on an un-`qualified` `import` statement:
+```haskell
+import Foo as A(f)
+```
+This declaration brings into scope `f` and `A.f`.
+
 ==== Examples
+
+To clarify the above import rules, suppose the module `A` exports `x` and `y`.
+Then this table shows what names are brought into scope by the specified import statement:
+
+#align(center)[
+  #table(
+    columns: 2,
+    align: (left, left),
+    stroke: none,
+    table.vline(x: 0),
+    table.vline(x: 2),
+    table.hline(),
+    [Import declaration],[Names brought into scope],
+    table.hline(),
+    [`import A`], [`x`, `y`, `A.x`, `A.y`],
+    [`import A()`], [(nothing)],
+    [`import A(x)`], [`x`, `A.x`],
+    [`import qualified A`], [`A.x`, `A.y`],
+    [`import qualified A()`], [(nothing)],
+    [`import qualified A(x)`], [`A.x`],
+    [`import A hiding ()`], [`x`, `y`, `A.x`, `A.y`],
+    [`import A hiding (x)`], [`y`, `A.y`],
+    [`import qualified A hiding ()`], [`A.x`, `A.y`],
+    [`import qualified A hiding (x)`], [`A.y`],
+    [`import A as B`], [`x`, `y`, `B.x`, `B.y`],
+    [`import A as B(x)`], [`x`,`B.x`],
+    [`import qualified A as B`], [`B.x`, `B.y`],
+    table.hline(),
+  )
+]
+
+In all cases, all instance declarations in scope in module `A` are imported
+(Section~\ref{import-instances}).
+
 === Importing and Exporting Instance Declarations
+
+Instance declarations cannot be explicitly named on import or export
+lists.  All instances in scope within a module are _always_
+exported and any import brings _all_ instances in from the
+imported module.  Thus, an
+instance declaration is in scope if and only if a chain of `import`
+declarations leads to the module containing the instance declaration.
+
+For example, `import M()` does not bring
+any new names in scope from module `M`, but does bring in any instances
+visible in `M`.  A module whose only purpose is to provide instance
+declarations can have an empty export list.  For example
+```haskell
+module MyInstances() where
+instance Show (a -> b) where
+  show fn = "<<function>>"
+instance Show (IO a) where
+  show io = "<<IO action>>"
+```
+
 === Name Clashes and Closure
 ==== Qualified names
 ==== Name clashes
