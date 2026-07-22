@@ -17,23 +17,23 @@ what it is bound to.
   stroke: none,
   align: (left, center, left, left),
   // exp
-  $nonterminaldef("exp")$, $->$, $nonterminal("infixexp") terminal("::") [italic("context") terminal("=>")] italic("type")$, [(expression type signature)],
+  $italic("exp")$, $->$, $nonterminal("infixexp") terminal("::") [italic("context") terminal("=>")] italic("type")$, [(expression type signature)],
   [],$|$, $nonterminal("infixexp")$,[],
   // infixexp
-  $nonterminaldef("infixexp")$, $->$, $nonterminal("lexp") italic("qop") nonterminal("infixexp")$, [],
+  $italic("infixexp")$, $->$, $nonterminal("lexp") italic("qop") nonterminal("infixexp")$, [],
   [], $|$, $terminal("-") nonterminal("infixexp")$, [(prefix negation)],
   [], $|$, $nonterminal("lexp")$, [],
   // lexp
-  $nonterminaldef("lexp")$, $->$, $terminal("\\") italic("apat")_1 dots italic("apat")_n terminal("->") nonterminal("exp")$, [(lambda abstraction, $n >= 1$)],
+  $italic("lexp")$, $->$, $terminal("\\") italic("apat")_1 dots italic("apat")_n terminal("->") nonterminal("exp")$, [(lambda abstraction, $n >= 1$)],
   [], $|$, $terminal("let") italic("decls") terminal("in") nonterminal("exp")$, [(let expression)],
   [], $|$, $terminal("if") nonterminal("exp") [terminal(";")] terminal("then") nonterminal("exp") [terminal(";")] terminal("else") nonterminal("exp")$, [(conditional)],
   [], $|$, $terminal("case") nonterminal("exp") terminal("of") terminal("{") italic("alts") terminal("}")$, [(case expression)],
   [], $|$, $terminal("do") terminal("{") italic("stmts") terminal("}")$, [(do expression)],
   [], $|$, $nonterminal("fexp")$, [],
   // fexp
-  $nonterminaldef("fexp")$, $->$, $[nonterminal("fexp")] nonterminal("aexp")$, [(function application)],
+  $italic("fexp")$, $->$, $[nonterminal("fexp")] nonterminal("aexp")$, [(function application)],
   // aexp
-  $nonterminaldef("aexp")$, $->$, $italic("qvar")$, [(variable)],
+  $italic("aexp")$, $->$, $italic("qvar")$, [(variable)],
   [], $|$, $italic("gcon")$, [(general constructor)],
   [], $|$, $nonterminal("literal")$, [],
   [], $|$, $terminal("(") nonterminal("exp") terminal(")")$, [(parenthesized expression)],

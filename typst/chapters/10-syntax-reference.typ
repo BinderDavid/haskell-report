@@ -479,8 +479,8 @@ these two styles in the same file.
   $nonterminaldef("topdecl")$, $->$, $terminal("type") nonterminal("simpletype") terminal("=") nonterminal("type")$, $$,
   $$, $|$, $terminal("data") [nonterminal("context") terminal("=>")] nonterminal("simpletype") [terminal("=") nonterminal("constrs")] [nonterminal("deriving")]$, $$,
   $$, $|$, $terminal("newtype") [nonterminal("context") terminal("=>")] nonterminal("simpletype") terminal("=") nonterminal("newconstr") [nonterminal("deriving")]$, $$,
-  $$, $|$, $terminal("class") [nonterminal("scontext") terminal("=>")] italic("tycls") italic("tyvar") [terminal("where") nonterminal("cdecls")]$, $$,
-  $$, $|$, $terminal("instance") [nonterminal("scontext") terminal("=>")] italic("qtycls") nonterminal("inst") [terminal("where") nonterminal("idecls")]$, $$,
+  $$, $|$, $terminal("class") [nonterminal("scontext") terminal("=>")] nonterminal("tycls") nonterminal("tyvar") [terminal("where") nonterminal("cdecls")]$, $$,
+  $$, $|$, $terminal("instance") [nonterminal("scontext") terminal("=>")] nonterminal("qtycls") nonterminal("inst") [terminal("where") nonterminal("idecls")]$, $$,
   $$, $|$, $terminal("default") terminal("(") nonterminal("type")_1 terminal(",") dots terminal(",") nonterminal("type")_n terminal(")")$, $(n >= 0)$,
   $$, $|$, $terminal("foreign") nonterminal("fdecl")$, $$,
   $$, $|$, $nonterminal("decl")$, $$,
@@ -488,16 +488,16 @@ these two styles in the same file.
   $nonterminaldef("decls")$, $->$, $terminal("{") nonterminal("decl")_1 terminal(";") dots terminal(";") nonterminal("decl")_n terminal("}")$, $(n >= 0)$,
   // decl
   $nonterminaldef("decl")$, $->$, $nonterminal("gendecl")$, $$,
-  $$,$|$, $(italic("funlhs") | italic("pat")) italic("rhs")$,$$,
+  $$,$|$, $(nonterminal("funlhs") | italic("pat")) nonterminal("rhs")$,$$,
   // cdecls
   $nonterminaldef("cdecls")$, $->$, $terminal("{") nonterminal("cdecl")_1 terminal(";") dots terminal(";") nonterminal("cdecl")_n terminal("}")$, $(n >= 0)$,
   // cdecl
   $nonterminaldef("cdecl")$, $->$, $nonterminal("gendecl")$, $$,
-  $$,$|$, $(italic("funlhs") | italic("var")) italic("rhs")$,$$,
+  $$,$|$, $(nonterminal("funlhs") | italic("var")) nonterminal("rhs")$,$$,
   // idecls
   $nonterminaldef("idecls")$, $->$, $terminal("{") nonterminal("idecl")_1 terminal(";") dots terminal(";") nonterminal("idecl")_n terminal("}")$, $(n >= 0)$,
   // idecl
-  $nonterminaldef("idecl")$, $->$, $(italic("funlhs") | italic("var")) italic("rhs")$, $$,
+  $nonterminaldef("idecl")$, $->$, $(nonterminal("funlhs") | italic("var")) nonterminal("rhs")$, $$,
   $$, $|$, $$, [(empty)],
   // gendecl
   $nonterminaldef("gendecl")$, $->$, $nonterminal("vars") terminal("::") [nonterminal("context") terminal("=>")] nonterminal("type")$, [(type signature)],
@@ -560,8 +560,70 @@ these two styles in the same file.
   $$,$|$,$terminal("[") nonterminal("tyvar") terminal("]")$,$$,
   $$,$|$,$terminal("(") nonterminal("tyvar")_1 terminal("->") nonterminal("tyvar")_2 terminal(")")$,[($italic("tyvar")_1$ and $italic("tyvar")_2$ distinct)],
   // fdecl
-  $nonterminaldef("fdecl")$, $->$, $terminal("import") italic("callconv") [italic("safety")] italic("impent") italic("var") terminal("::") italic("ftype")$, [(define variable)],
-  $$,$|$,$terminal("export") italic("callconv") italic("expent") italic("var") terminal("::") italic("ftype")$,[(expose variable)],
+  $nonterminaldef("fdecl")$, $->$, $terminal("import") nonterminal("callconv") [nonterminal("safety")] nonterminal("impent") italic("var") terminal("::") nonterminal("ftype")$, [(define variable)],
+  $$,$|$,$terminal("export") nonterminal("callconv") nonterminal("expent") italic("var") terminal("::") nonterminal("ftype")$,[(expose variable)],
+  // callconv
+  $nonterminaldef("callconv")$, $->$, $terminal("ccall") | terminal("stdcall") | terminal("cplusplus")$, [(calling convention)],
+  $$,$|$,$terminal("jvm") | terminal("dotnet")$,$$,
+  $$,$|$,[*system-specific calling conventions*],[],
+  // impent
+  $nonterminaldef("impent")$, $->$, $[nonterminal("string")]$, [See Section X],
+  // expent
+  $nonterminaldef("expent")$, $->$, $[nonterminal("string")]$, [See Section X],
+  // safety
+  $nonterminaldef("safety")$, $->$, $terminal("unsafe") | terminal("safe")$, $$,
+  // ftype
+  $nonterminaldef("ftype")$, $->$, $nonterminal("frtype")$, $$,
+  $$,$|$,$nonterminal("fatype") terminal("->") nonterminal("ftype")$,$$,
+  // frtype
+  $nonterminaldef("frtype")$, $->$, $nonterminal("fatype")$, $$,
+  $$,$|$,$terminal("()")$,$$,
+  // fatype
+  $nonterminaldef("fatype")$, $->$, $nonterminal("qtycon") nonterminal("atype")_1 dots nonterminal("atype")_k$, $(k >= 0)$,
+  // funlhs
+  $nonterminaldef("funlhs")$, $->$, $italic("var") italic("apat") { italic("apat") }$, $$,
+  $$,$|$,$italic("pat") italic("varop") italic("pat")$,$$,
+  $$,$|$,$terminal("(") nonterminal("funlhs") terminal(")") italic("apat") { italic("apat")}$,$$,
+  // rhs
+  $nonterminaldef("rhs")$, $->$, $terminal("=") nonterminal("exp") [terminal("where") nonterminal("decls")]$, $$,
+  $$,$|$,$nonterminal("gdrhs") [terminal("where") nonterminal("decls")]$,$$,
+  // gdrhs
+  $nonterminaldef("gdrhs")$, $->$, $nonterminal("guards") terminal("=") nonterminal("exp") [nonterminal("gdrhs")]$, $$,
+  // guards
+  $nonterminaldef("guards")$, $->$, $terminal("|") nonterminal("guard")_1 terminal(",") dots terminal(",") nonterminal("guard")_n$, $(n >= 1)$,
+  // guard
+  $nonterminaldef("guard")$, $->$, $italic("pat") terminal("<-") nonterminal("infixexp")$, [(pattern guard)],
+  $$,$|$,$terminal("let") nonterminal("decls")$,[(local declaration)],
+  $$,$|$,$nonterminal("infixexp")$,$$,
+  // exp
+  $nonterminaldef("exp")$, $->$, $nonterminal("infixexp") terminal("::") [nonterminal("context") terminal("=>")] nonterminal("type")$, [(expression type signature)],
+  [],$|$, $nonterminal("infixexp")$,[],
+  // infixexp
+  $nonterminaldef("infixexp")$, $->$, $nonterminal("lexp") italic("qop") nonterminal("infixexp")$, [],
+  [], $|$, $terminal("-") nonterminal("infixexp")$, [(prefix negation)],
+  [], $|$, $nonterminal("lexp")$, [],
+  // lexp
+  $nonterminaldef("lexp")$, $->$, $terminal("\\") italic("apat")_1 dots italic("apat")_n terminal("->") nonterminal("exp")$, [(lambda abstraction, $n >= 1$)],
+  [], $|$, $terminal("let") nonterminal("decls") terminal("in") nonterminal("exp")$, [(let expression)],
+  [], $|$, $terminal("if") nonterminal("exp") [terminal(";")] terminal("then") nonterminal("exp") [terminal(";")] terminal("else") nonterminal("exp")$, [(conditional)],
+  [], $|$, $terminal("case") nonterminal("exp") terminal("of") terminal("{") italic("alts") terminal("}")$, [(case expression)],
+  [], $|$, $terminal("do") terminal("{") italic("stmts") terminal("}")$, [(do expression)],
+  [], $|$, $nonterminal("fexp")$, [],
+  // fexp
+  $nonterminaldef("fexp")$, $->$, $[nonterminal("fexp")] nonterminal("aexp")$, [(function application)],
+  // aexp
+  $nonterminaldef("aexp")$, $->$, $italic("qvar")$, [(variable)],
+  [], $|$, $italic("gcon")$, [(general constructor)],
+  [], $|$, $nonterminal("literal")$, [],
+  [], $|$, $terminal("(") nonterminal("exp") terminal(")")$, [(parenthesized expression)],
+  [], $|$, $terminal("(") nonterminal("exp")_1 terminal(",") dots terminal(",") nonterminal("exp")_k terminal(")")$, [(tuple, $k>=2$)],
+  [], $|$, $terminal("[") nonterminal("exp")_1 terminal(",") dots terminal(",") nonterminal("exp")_k terminal("]")$, [(list, $k>=1$)],
+  [], $|$, $terminal("[") nonterminal("exp")_1 [terminal(",") nonterminal("exp")_2] terminal("..") [nonterminal("exp")_3] terminal("]")$, [(arithmetic sequence)],
+  [], $|$, $terminal("[") nonterminal("exp") terminal("|") italic("qual")_1 terminal(",") dots terminal(",") italic("qual")_n terminal("]")$, [(list comprehension, $n>=1$)],
+  [], $|$, $terminal("(") nonterminal("infixexp") nonterminal("qop") terminal(")")$, [(left section)],
+  [], $|$, $terminal("(") nonterminal("qop")_(chevron.l terminal("-") chevron.r) nonterminal("infixexp") terminal(")")$, [(right section)],
+  [], $|$, $italic("qcon") terminal("{") italic("fbind")_1 terminal(",") dots terminal(",") italic("fbind")_n terminal("}")$, [(labeled construction, $n>=0$)],
+  [], $|$, $nonterminal("aexp")_(chevron.l italic("qcon") chevron.r) terminal("{") italic("fbind")_1 terminal(",") dots terminal(",") italic("fbind")_n terminal("}")$, [(labeled update, $n>=1$)],
 )
 
 === Fixity Resolution <sec:fixity-resolution>
