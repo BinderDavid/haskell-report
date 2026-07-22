@@ -52,83 +52,83 @@ Haskell compilers are expected to make use of new versions of Unicode as they ar
   align: (left, center, left),
   stroke: none,
   // program
-  $nonterminaldef("program")$, $->$, ${ med nonterminal("lexeme") | nonterminal("whitespace") med }$,
+  $italic("program")$, $->$, ${ med nonterminal("lexeme") | nonterminal("whitespace") med }$,
   // lexeme
-  $nonterminaldef("lexeme")$, $->$, $nonterminal("qvarid") | nonterminal("qconid") | nonterminal("qvarsym") | nonterminal("qconsym")$,
+  $italic("lexeme")$, $->$, $nonterminal("qvarid") | nonterminal("qconid") | nonterminal("qvarsym") | nonterminal("qconsym")$,
   [], $|$, $nonterminal("literal") | nonterminal("special") | nonterminal("reservedop") | nonterminal("reservedid")$,
   // literal
-  $nonterminaldef("literal")$, $->$, $nonterminal("integer") | nonterminal("float") | nonterminal("char") | nonterminal("string")$,
+  $italic("literal")$, $->$, $nonterminal("integer") | nonterminal("float") | nonterminal("char") | nonterminal("string")$,
   // special
-  $nonterminaldef("special")$, $->$, $terminal("(") | terminal(")") | terminal(",") | terminal(";") | terminal("[") | terminal("]") | terminal("`") | terminal("{") | terminal("}")$,
+  $italic("special")$, $->$, $terminal("(") | terminal(")") | terminal(",") | terminal(";") | terminal("[") | terminal("]") | terminal("`") | terminal("{") | terminal("}")$,
   // whitespace
-  $nonterminaldef("whitespace")$, $->$, $nonterminal("whitestuff") { nonterminal("whitestuff") }$,
+  $italic("whitespace")$, $->$, $nonterminal("whitestuff") { nonterminal("whitestuff") }$,
   // whitestuff
-  $nonterminaldef("whitestuff")$, $->$, $nonterminal("whitechar") | nonterminal("comment") | nonterminal("ncomment")$,
+  $italic("whitestuff")$, $->$, $nonterminal("whitechar") | nonterminal("comment") | nonterminal("ncomment")$,
   // whitechar
-  $nonterminaldef("whitechar")$, $->$, $nonterminal("newline") | nonterminal("vertab") | nonterminal("space") | nonterminal("tab") | nonterminal("uniWhite")$,
+  $italic("whitechar")$, $->$, $nonterminal("newline") | nonterminal("vertab") | nonterminal("space") | nonterminal("tab") | nonterminal("uniWhite")$,
   // newline
-  $nonterminaldef("newline")$, $->$, $nonterminal("return") nonterminal("linefeed") | nonterminal("return") | nonterminal("linefeed") | nonterminal("formfeed")$,
+  $italic("newline")$, $->$, $nonterminal("return") nonterminal("linefeed") | nonterminal("return") | nonterminal("linefeed") | nonterminal("formfeed")$,
   // return
-  $nonterminaldef("return")$, $->$, $text("a carriage return")$,
+  $italic("return")$, $->$, $text("a carriage return")$,
   // linefeed
-  $nonterminaldef("linefeed")$, $->$, $text("a line feed")$,
+  $italic("linefeed")$, $->$, $text("a line feed")$,
   // vertab
-  $nonterminaldef("vertab")$, $->$, $text("a vertical tab")$,
+  $italic("vertab")$, $->$, $text("a vertical tab")$,
   // formfeed
-  $nonterminaldef("formfeed")$, $->$, $text("a form feed")$,
+  $italic("formfeed")$, $->$, $text("a form feed")$,
   // space
-  $nonterminaldef("space")$, $->$, $text("a space")$,
+  $italic("space")$, $->$, $text("a space")$,
   // tab
-  $nonterminaldef("tab")$, $->$, $text("a horizontal tab")$,
+  $italic("tab")$, $->$, $text("a horizontal tab")$,
   // uniWhite
-  $nonterminaldef("uniWhite")$, $->$, $text("any Unicode character defined as whitespace")$,
+  $italic("uniWhite")$, $->$, $text("any Unicode character defined as whitespace")$,
   // comment
-  $nonterminaldef("comment")$, $->$, $nonterminal("dashes") [nonterminal("any")_(chevron.l nonterminal("symbol") chevron.r) { nonterminal("any") }] nonterminal("newline")$,
+  $italic("comment")$, $->$, $nonterminal("dashes") [nonterminal("any")_(chevron.l nonterminal("symbol") chevron.r) { nonterminal("any") }] nonterminal("newline")$,
   // dashes
-  $nonterminaldef("dashes")$, $->$, $terminal("--") { terminal("-") }$,
+  $italic("dashes")$, $->$, $terminal("--") { terminal("-") }$,
   // opencom
-  $nonterminaldef("opencom")$, $->$, $terminal("{-")$,
+  $italic("opencom")$, $->$, $terminal("{-")$,
   // closecom
-  $nonterminaldef("closecom")$, $->$, $terminal("-}")$,
+  $italic("closecom")$, $->$, $terminal("-}")$,
   // ncomment
-  $nonterminaldef("ncomment")$, $->$, $nonterminal("opencom") nonterminal("ANYseq") { nonterminal("ncomment") nonterminal("ANYseq") } nonterminal("closecom")$,
+  $italic("ncomment")$, $->$, $nonterminal("opencom") nonterminal("ANYseq") { nonterminal("ncomment") nonterminal("ANYseq") } nonterminal("closecom")$,
   // ANYseq
-  $nonterminaldef("ANYseq")$, $->$, ${ med nonterminal("ANY") med }_(chevron.l { med nonterminal("ANY") med } ( nonterminal("opencom") | nonterminal("closecom") ) { med nonterminal("ANY") med } chevron.r)$,
+  $italic("ANYseq")$, $->$, ${ med nonterminal("ANY") med }_(chevron.l { med nonterminal("ANY") med } ( nonterminal("opencom") | nonterminal("closecom") ) { med nonterminal("ANY") med } chevron.r)$,
   // ANY
-  $nonterminaldef("ANY")$, $->$, $nonterminal("graphic") | nonterminal("whitechar")$,
+  $italic("ANY")$, $->$, $nonterminal("graphic") | nonterminal("whitechar")$,
   // any
-  $nonterminaldef("any")$, $->$, $nonterminal("graphic") | nonterminal("space") | nonterminal("tab")$,
+  $italic("any")$, $->$, $nonterminal("graphic") | nonterminal("space") | nonterminal("tab")$,
   // graphic
-  $nonterminaldef("graphic")$, $->$, $nonterminal("small") | nonterminal("large") | nonterminal("symbol") | nonterminal("digit") | nonterminal("special") | terminal("\"") | terminal("'")$,
+  $italic("graphic")$, $->$, $nonterminal("small") | nonterminal("large") | nonterminal("symbol") | nonterminal("digit") | nonterminal("special") | terminal("\"") | terminal("'")$,
   // small
-  $nonterminaldef("small")$, $->$, $nonterminal("ascSmall") | nonterminal("uniSmall") | terminal("_")$,
+  $italic("small")$, $->$, $nonterminal("ascSmall") | nonterminal("uniSmall") | terminal("_")$,
   // ascSmall
-  $nonterminaldef("ascSmall")$, $->$, $terminal("a") | terminal("b") | dots | terminal("z")$,
+  $italic("ascSmall")$, $->$, $terminal("a") | terminal("b") | dots | terminal("z")$,
   // uniSmall
-  $nonterminaldef("uniSmall")$, $->$, $text("any Unicode lowercase letter")$,
+  $italic("uniSmall")$, $->$, $text("any Unicode lowercase letter")$,
   // large
-  $nonterminaldef("large")$, $->$, $nonterminal("ascLarge") | nonterminal("uniLarge")$,
+  $italic("large")$, $->$, $nonterminal("ascLarge") | nonterminal("uniLarge")$,
   // ascLarge
-  $nonterminaldef("ascLarge")$, $->$, $terminal("A") | terminal("B") | dots | terminal("Z")$,
+  $italic("ascLarge")$, $->$, $terminal("A") | terminal("B") | dots | terminal("Z")$,
   // uniLarge
-  $nonterminaldef("uniLarge")$, $->$, $text("any uppercase or titlecase Unicode letter")$,
+  $italic("uniLarge")$, $->$, $text("any uppercase or titlecase Unicode letter")$,
   // symbol
-  $nonterminaldef("symbol")$, $->$, $nonterminal("ascSymbol") | nonterminal("uniSymbol")_(chevron.l nonterminal("special") | terminal("_") | terminal("\"") | terminal("'") chevron.r)$,
+  $italic("symbol")$, $->$, $nonterminal("ascSymbol") | nonterminal("uniSymbol")_(chevron.l nonterminal("special") | terminal("_") | terminal("\"") | terminal("'") chevron.r)$,
   // ascSymbol
-  $nonterminaldef("ascSymbol")$, $->$, $terminal("!") | terminal("#") | terminal("$") | terminal("%") | terminal("&") | terminal("*") | terminal("+") | terminal(".")  | terminal("/") | terminal("<") | terminal("=") | terminal(">") | terminal("?") | terminal("@")$,
+  $italic("ascSymbol")$, $->$, $terminal("!") | terminal("#") | terminal("$") | terminal("%") | terminal("&") | terminal("*") | terminal("+") | terminal(".")  | terminal("/") | terminal("<") | terminal("=") | terminal(">") | terminal("?") | terminal("@")$,
   [], $|$, $terminal("\\") | terminal("^") | terminal("|") | terminal("-") | terminal("~") | terminal(":")$,
   // uniSymbol
-  $nonterminaldef("uniSymbol")$, $->$, $text("any Unicode symbol or punctuation")$,
+  $italic("uniSymbol")$, $->$, $text("any Unicode symbol or punctuation")$,
   // digit
-  $nonterminaldef("digit")$, $->$, $nonterminal("ascDigit") | nonterminal("uniDigit")$,
+  $italic("digit")$, $->$, $nonterminal("ascDigit") | nonterminal("uniDigit")$,
   // ascDigit
-  $nonterminaldef("ascDigit")$, $->$, $terminal("0") | terminal("1") | dots | terminal("9")$,
+  $italic("ascDigit")$, $->$, $terminal("0") | terminal("1") | dots | terminal("9")$,
   // uniDigit
-  $nonterminaldef("uniDigit")$, $->$, $text("any Unicode decimal digit")$,
+  $italic("uniDigit")$, $->$, $text("any Unicode decimal digit")$,
   // octit
-  $nonterminaldef("octit")$, $->$, $terminal("0") | terminal("1") | dots | terminal("7")$,
+  $italic("octit")$, $->$, $terminal("0") | terminal("1") | dots | terminal("7")$,
   // hexit
-  $nonterminaldef("hexit")$, $->$, $nonterminal("digit") | terminal("A") | dots | terminal("F") | terminal("a") | dots | terminal("f")$,
+  $italic("hexit")$, $->$, $nonterminal("digit") | terminal("A") | dots | terminal("F") | terminal("a") | dots | terminal("f")$,
 )
 
 Lexical analysis should use the ``maximal munch'' rule:
@@ -180,11 +180,11 @@ comment in that code will interfere with the nested comments.
   align: (left, center, left),
   stroke: none,
   // varid
-  $nonterminaldef("varid")$, $->$, $(nonterminal("small") {nonterminal("small") | nonterminal("large") | nonterminal("digit") | terminal("'") med })_(chevron.l nonterminal("reservedid") chevron.r)$,
+  $italic("varid")$, $->$, $(nonterminal("small") {nonterminal("small") | nonterminal("large") | nonterminal("digit") | terminal("'") med })_(chevron.l nonterminal("reservedid") chevron.r)$,
   // conid
-  $nonterminaldef("conid")$, $->$, $nonterminal("large") {nonterminal("small") | nonterminal("large") | nonterminal("digit") | terminal("'") med }$,
+  $italic("conid")$, $->$, $nonterminal("large") {nonterminal("small") | nonterminal("large") | nonterminal("digit") | terminal("'") med }$,
   // reservedid
-  $nonterminaldef("reservedid")$, $->$, $terminal("case") | terminal("class") | terminal("data") | terminal("default") | terminal("deriving") | terminal("do") | terminal("else")$,
+  $italic("reservedid")$, $->$, $terminal("case") | terminal("class") | terminal("data") | terminal("default") | terminal("deriving") | terminal("do") | terminal("else")$,
   [], $|$, $terminal("foreign") | terminal("if") | terminal("import") | terminal("in") | terminal("infix") | terminal("infixl")$,
   [], $|$, $terminal("infixr") | terminal("instance") | terminal("let") | terminal("module") | terminal("newtype") | terminal("of")$,
   [], $|$, $terminal("then") | terminal("type") | terminal("where") | terminal("_")$,
@@ -209,11 +209,11 @@ identifiers beginning with underscore.  This allows programmers to use
   align: (left, center, left),
   stroke: none,
   // varsym
-  $nonterminaldef("varsym")$, $->$, $( nonterminal("symbol")_(chevron.l terminal(":") chevron.r) { nonterminal("symbol")})_(chevron.l nonterminal("reservedop") | nonterminal("dashes") chevron.r)$,
+  $italic("varsym")$, $->$, $( nonterminal("symbol")_(chevron.l terminal(":") chevron.r) { nonterminal("symbol")})_(chevron.l nonterminal("reservedop") | nonterminal("dashes") chevron.r)$,
   // consym
-  $nonterminaldef("consym")$, $->$, $(terminal(":") { nonterminal("symbol") })_(chevron.l nonterminal("reservedop") chevron.r)$,
+  $italic("consym")$, $->$, $(terminal(":") { nonterminal("symbol") })_(chevron.l nonterminal("reservedop") chevron.r)$,
   // reservedop
-  $nonterminaldef("reservedop")$, $->$, $terminal("..") | terminal(":") | terminal("::") | terminal("=") | terminal("\\") | terminal("|") | terminal("<-") | terminal("->") | terminal("@") | terminal("~") | terminal("=>")$,
+  $italic("reservedop")$, $->$, $terminal("..") | terminal(":") | terminal("::") | terminal("=") | terminal("\\") | terminal("|") | terminal("<-") | terminal("->") | terminal("@") | terminal("~") | terminal("=>")$,
 )
 
 _Operator symbols_
@@ -246,13 +246,13 @@ names will be used:
   // conid
   $nonterminal("conid")$,[],[],[(constructors)],
   // tyvar
-  $nonterminaldef("tyvar")$, $->$, $nonterminal("varid")$, [(type variables)],
+  $italic("tyvar")$, $->$, $nonterminal("varid")$, [(type variables)],
   // tycon
-  $nonterminaldef("tycon")$, $->$, $nonterminal("conid")$, [(type constructors)],
+  $italic("tycon")$, $->$, $nonterminal("conid")$, [(type constructors)],
   // tycls
-  $nonterminaldef("tycls")$, $->$, $nonterminal("conid")$, [(type classes)],
+  $italic("tycls")$, $->$, $nonterminal("conid")$, [(type classes)],
   // modid
-  $nonterminaldef("modid")$, $->$, ${ nonterminal("conid") terminal(".")} nonterminal("conid")$, [(modules)],
+  $italic("modid")$, $->$, ${ nonterminal("conid") terminal(".")} nonterminal("conid")$, [(modules)],
 )
 
 Variables and type variables are represented by identifiers beginning
@@ -273,17 +273,17 @@ names are discussed in detail in @chapter:modules[Chapter]
   align: (left, center, left),
   stroke: none,
   // qvarid
-  $nonterminaldef("qvarid")$, $->$, $[nonterminal("modid") terminal(".")] nonterminal("varid")$,
+  $italic("qvarid")$, $->$, $[nonterminal("modid") terminal(".")] nonterminal("varid")$,
   // qconid
-  $nonterminaldef("qconid")$, $->$, $[nonterminal("modid") terminal(".")] nonterminal("conid")$,
+  $italic("qconid")$, $->$, $[nonterminal("modid") terminal(".")] nonterminal("conid")$,
   // qtycon
-  $nonterminaldef("qtycon")$, $->$, $[nonterminal("modid") terminal(".")] nonterminal("tycon")$,
+  $italic("qtycon")$, $->$, $[nonterminal("modid") terminal(".")] nonterminal("tycon")$,
   // qtycls
-  $nonterminaldef("qtycls")$, $->$, $[nonterminal("modid") terminal(".")] nonterminal("tycls")$,
+  $italic("qtycls")$, $->$, $[nonterminal("modid") terminal(".")] nonterminal("tycls")$,
   // qvarysm
-  $nonterminaldef("qvarsym")$, $->$, $[nonterminal("modid") terminal(".")] nonterminal("varsym")$,
+  $italic("qvarsym")$, $->$, $[nonterminal("modid") terminal(".")] nonterminal("varsym")$,
   // qconsym
-  $nonterminaldef("qconsym")$, $->$, $[nonterminal("modid") terminal(".")] nonterminal("consym")$,
+  $italic("qconsym")$, $->$, $[nonterminal("modid") terminal(".")] nonterminal("consym")$,
 
 )
 
@@ -323,20 +323,20 @@ definition of `+` in the Prelude (Section~\ref{fixity}).
   align: (left, center, left),
   stroke: none,
   // decimal
-  $nonterminaldef("decimal")$, $->$, $nonterminal("digit"){nonterminal("digit")}$,
+  $italic("decimal")$, $->$, $nonterminal("digit"){nonterminal("digit")}$,
   // octal
-  $nonterminaldef("octal")$, $->$, $nonterminal("octit"){nonterminal("octit")}$,
+  $italic("octal")$, $->$, $nonterminal("octit"){nonterminal("octit")}$,
   // hexadecimal
-  $nonterminaldef("hexadecimal")$, $->$, $nonterminal("hexit"){nonterminal("hexit")}$,
+  $italic("hexadecimal")$, $->$, $nonterminal("hexit"){nonterminal("hexit")}$,
   // integer
-  $nonterminaldef("integer")$, $->$, $nonterminal("decimal")$,
+  $italic("integer")$, $->$, $nonterminal("decimal")$,
   [], $|$, $terminal("0o") nonterminal("octal") | terminal("0O") nonterminal("octal")$,
   [], $|$, $terminal("0x") nonterminal("hexadecimal") | terminal("0X") nonterminal("hexadecimal")$,
   // float
-  $nonterminaldef("float")$, $->$, $nonterminal("decimal") terminal(".") nonterminal("decimal") [ nonterminal("exponent")]$,
+  $italic("float")$, $->$, $nonterminal("decimal") terminal(".") nonterminal("decimal") [ nonterminal("exponent")]$,
   [], $|$, $nonterminal("decimal") nonterminal("exponent")$,
   // exponent
-  $nonterminaldef("exponent")$, $->$, $(terminal("e") | terminal("E")) [terminal("+") | terminal("-")] nonterminal("decimal")$,
+  $italic("exponent")$, $->$, $(terminal("e") | terminal("E")) [terminal("+") | terminal("-")] nonterminal("decimal")$,
 )
 
 There are two distinct kinds of numeric literals: integer and
@@ -357,22 +357,22 @@ is discussed in @sec:numeric-literals
   align: (left, center, left),
   stroke: none,
   // char
-  $nonterminaldef("char")$, $->$, $terminal("'") (nonterminal("graphic")_(chevron.l terminal("'") | terminal("\\") chevron.r) | nonterminal("space") | nonterminal("escape")_(chevron.l terminal("\&") chevron.r)) terminal("'")$,
+  $italic("char")$, $->$, $terminal("'") (nonterminal("graphic")_(chevron.l terminal("'") | terminal("\\") chevron.r) | nonterminal("space") | nonterminal("escape")_(chevron.l terminal("\&") chevron.r)) terminal("'")$,
   // string
-  $nonterminaldef("string")$, $->$, $terminal("\"") {nonterminal("graphic")_(chevron.l terminal("\"") | terminal("\\") chevron.r) | nonterminal("space") | nonterminal("escape") | nonterminal("gap") } terminal("\"")$,
+  $italic("string")$, $->$, $terminal("\"") {nonterminal("graphic")_(chevron.l terminal("\"") | terminal("\\") chevron.r) | nonterminal("space") | nonterminal("escape") | nonterminal("gap") } terminal("\"")$,
   // escape
-  $nonterminaldef("escape")$, $->$, $terminal("\\") (nonterminal("charesc") | nonterminal("ascii") | nonterminal("decimal") | terminal("o") nonterminal("octal") | terminal("x") nonterminal("hexadecimal"))$,
+  $italic("escape")$, $->$, $terminal("\\") (nonterminal("charesc") | nonterminal("ascii") | nonterminal("decimal") | terminal("o") nonterminal("octal") | terminal("x") nonterminal("hexadecimal"))$,
   // charesc
-  $nonterminaldef("charesc")$, $->$, $terminal("a") | terminal("b") | terminal("f") | terminal("n") | terminal("r") | terminal("t") | terminal("v") | terminal("\\") | terminal("\"") | terminal("'") | terminal("&")$,
+  $italic("charesc")$, $->$, $terminal("a") | terminal("b") | terminal("f") | terminal("n") | terminal("r") | terminal("t") | terminal("v") | terminal("\\") | terminal("\"") | terminal("'") | terminal("&")$,
   // ascii
-  $nonterminaldef("ascii")$, $->$, $terminal("^") nonterminal("cntrl") | terminal("NUL") | terminal("SOH") | terminal("STX") | terminal("ETX") | terminal("EOT") | terminal("ENQ") | terminal("ACK")$,
+  $italic("ascii")$, $->$, $terminal("^") nonterminal("cntrl") | terminal("NUL") | terminal("SOH") | terminal("STX") | terminal("ETX") | terminal("EOT") | terminal("ENQ") | terminal("ACK")$,
   [], $|$, $terminal("BEL") | terminal("BS") | terminal("HT") | terminal("LF") | terminal("VT") | terminal("FF") | terminal("CR") | terminal("SO") | terminal("SI") | terminal("DLE")$,
   [], $|$, $terminal("DC1") | terminal("DC2") | terminal("DC3") | terminal("DC4") | terminal("NAK") | terminal("SYN") | terminal("ETB") | terminal("CAN")$,
   [], $|$, $terminal("EM") | terminal("SUB") | terminal("ESC") | terminal("FS") | terminal("GS") | terminal("RS") | terminal("US") | terminal("SP") | terminal("DEL")$,
   // cntrl
-  $nonterminaldef("cntrl")$, $->$, $nonterminal("ascLarge") | terminal("@") | terminal("[") | terminal("\\") | terminal("]") | terminal("^") | terminal("_")$,
+  $italic("cntrl")$, $->$, $nonterminal("ascLarge") | terminal("@") | terminal("[") | terminal("\\") | terminal("]") | terminal("^") | terminal("_")$,
   // gap
-  $nonterminaldef("gap")$, $->$, $terminal("\\") nonterminal("whitechar") { med nonterminal("whitechar") med } terminal("\\")$,
+  $italic("gap")$, $->$, $terminal("\\") nonterminal("whitechar") { med nonterminal("whitechar") med } terminal("\\")$,
 )
 
 Character literals are written between single quotes, as in `'a'`, and strings between double quotes, as in `"Hello"`.
