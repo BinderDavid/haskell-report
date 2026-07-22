@@ -441,6 +441,129 @@ these two styles in the same file.
 
 === Context-Free Syntax
 
+#table(
+  columns: 4,
+  align: (left, center, left, left),
+  stroke: none,
+  // module
+  $nonterminaldef("module")$, $->$, $terminal("module") nonterminal("modid") [ nonterminal("exports")] terminal("where") nonterminal("body")$,$$,
+  $$, $|$, $nonterminal("body")$, $$,
+  // body
+  $nonterminaldef("body")$, $->$, $terminal("{") nonterminal("impdecls") terminal(";") nonterminal("topdecls") terminal("}")$, $$,
+  $$, $|$, $terminal("{") nonterminal("impdecls") terminal("}")$, $$,
+  $$, $|$, $terminal("{") nonterminal("topdecls") terminal("}")$, $$,
+  // impdecls
+  $nonterminaldef("impdecls")$, $->$, $nonterminal("impdecl")_1 terminal(";") dots terminal(";") nonterminal("impdecl")_n$, $(n >= 1)$,
+  // exports
+  $nonterminaldef("exports")$, $->$, $terminal("(") nonterminal("export")_1 terminal(",") dots terminal(",") nonterminal("export")_n [terminal(",")]terminal(")")$, $(n >= 0)$,
+  // export
+  $nonterminaldef("export")$, $->$, $italic("qvar")$, $$,
+  $$, $|$, $italic("qtycon") [ terminal("(..)") | terminal("(") nonterminal("cname")_1 terminal(",") dots terminal(",") nonterminal("cname")_n terminal(")")]$, $(n >= 0)$,
+  $$, $|$, $italic("qtycls") [ terminal("(..)") | terminal("(") italic("var")_1 terminal(",") dots terminal(",") italic("var")_n terminal(")")]$, $(n >= 0)$,
+  $$, $|$, $terminal("module") nonterminal("modid")$, $$,
+  // impdecl
+  $nonterminaldef("impdecl")$, $->$, $terminal("import") [terminal("qualified")] nonterminal("modid") [terminal("as") nonterminal("modid")] [nonterminal("impspec")]$, $$,
+  $$, $|$, $$, [(empty declaration)],
+  // impspec
+  $nonterminaldef("impspec")$, $->$, $terminal("(") nonterminal("import")_1 terminal(",") dots terminal(",") nonterminal("import")_n [terminal(",")] terminal(")")$, $(n >= 0)$,
+  $$, $|$, $terminal("hiding") terminal("(") nonterminal("import")_1 terminal(",") dots terminal(",") nonterminal("import")_n [terminal(",")] terminal(")")$, $(n >= 0)$,
+  // import
+  $nonterminaldef("import")$, $->$, $italic("var")$, $$,
+  $$, $|$, $italic("tycon") [ terminal("(..)") | terminal("(") nonterminal("cname")_1 terminal(",") dots terminal(",") nonterminal("cname")_n terminal(")")]$, $(n >= 0)$,
+  $$, $|$, $italic("tycls") [ terminal("(..)") | terminal("(") italic("var")_1 terminal(",") dots terminal(",") italic("var")_n terminal(")")]$, $(n >= 0)$,
+  // cname
+  $nonterminaldef("cname")$, $->$, $ italic("var") | italic("con")$, $$,
+  // topdecls
+  $nonterminaldef("topdecls")$, $->$, $nonterminal("topdecl")_1 terminal(";") dots terminal(";") nonterminal("topdecl")_n$, $(n >= 1)$,
+  // topdecl
+  $nonterminaldef("topdecl")$, $->$, $terminal("type") nonterminal("simpletype") terminal("=") nonterminal("type")$, $$,
+  $$, $|$, $terminal("data") [nonterminal("context") terminal("=>")] nonterminal("simpletype") [terminal("=") nonterminal("constrs")] [nonterminal("deriving")]$, $$,
+  $$, $|$, $terminal("newtype") [nonterminal("context") terminal("=>")] nonterminal("simpletype") terminal("=") nonterminal("newconstr") [nonterminal("deriving")]$, $$,
+  $$, $|$, $terminal("class") [nonterminal("scontext") terminal("=>")] italic("tycls") italic("tyvar") [terminal("where") nonterminal("cdecls")]$, $$,
+  $$, $|$, $terminal("instance") [nonterminal("scontext") terminal("=>")] italic("qtycls") nonterminal("inst") [terminal("where") nonterminal("idecls")]$, $$,
+  $$, $|$, $terminal("default") terminal("(") nonterminal("type")_1 terminal(",") dots terminal(",") nonterminal("type")_n terminal(")")$, $(n >= 0)$,
+  $$, $|$, $terminal("foreign") nonterminal("fdecl")$, $$,
+  $$, $|$, $nonterminal("decl")$, $$,
+  // decls
+  $nonterminaldef("decls")$, $->$, $terminal("{") nonterminal("decl")_1 terminal(";") dots terminal(";") nonterminal("decl")_n terminal("}")$, $(n >= 0)$,
+  // decl
+  $nonterminaldef("decl")$, $->$, $nonterminal("gendecl")$, $$,
+  $$,$|$, $(italic("funlhs") | italic("pat")) italic("rhs")$,$$,
+  // cdecls
+  $nonterminaldef("cdecls")$, $->$, $terminal("{") nonterminal("cdecl")_1 terminal(";") dots terminal(";") nonterminal("cdecl")_n terminal("}")$, $(n >= 0)$,
+  // cdecl
+  $nonterminaldef("cdecl")$, $->$, $nonterminal("gendecl")$, $$,
+  $$,$|$, $(italic("funlhs") | italic("var")) italic("rhs")$,$$,
+  // idecls
+  $nonterminaldef("idecls")$, $->$, $terminal("{") nonterminal("idecl")_1 terminal(";") dots terminal(";") nonterminal("idecl")_n terminal("}")$, $(n >= 0)$,
+  // idecl
+  $nonterminaldef("idecl")$, $->$, $(italic("funlhs") | italic("var")) italic("rhs")$, $$,
+  $$, $|$, $$, [(empty)],
+  // gendecl
+  $nonterminaldef("gendecl")$, $->$, $nonterminal("vars") terminal("::") [nonterminal("context") terminal("=>")] nonterminal("type")$, [(type signature)],
+  $$, $|$, $nonterminal("fixity") [nonterminal("integer")] nonterminal("ops")$, [(fixity declaration)],
+  $$, $|$, $$, [(empty declaration)],
+  // ops
+  $nonterminaldef("ops")$, $->$, $italic("op")_1 terminal(",") dots terminal(",") italic("op")_n$, $(n >= 1)$,
+  // vars
+  $nonterminaldef("vars")$, $->$, $italic("var")_1 terminal(",") dots terminal(",") italic("var")_n$, $(n >= 1)$,
+  // fixity
+  $nonterminaldef("fixity")$, $->$, $terminal("infixl") | terminal("infixr") | terminal("infix")$, $$,
+  // type
+  $nonterminaldef("type")$, $->$, $nonterminal("btype") [terminal("->") nonterminal("type")]$, [(function type)],
+  // btype
+  $nonterminaldef("btype")$, $->$, $[nonterminal("btype")] nonterminal("atype")$, [(type application)],
+  // atype
+  $nonterminaldef("atype")$, $->$, $nonterminal("gtycon")$, $$,
+  $$,$|$, $nonterminal("tyvar")$, $$,
+  $$,$|$, $terminal("(") nonterminal("type")_1 terminal(",") dots terminal(",") nonterminal("type")_k terminal(")")$, [(tuple type, $k >= 2$)],
+  $$,$|$, $terminal("[") nonterminal("type") terminal("]")$, [(list type)],
+  $$,$|$, $terminal("(") nonterminal("type") terminal(")")$, [(parenthesized constructor)],
+  // gtycon
+  $nonterminaldef("gtycon")$, $->$, $nonterminal("qtycon")$, $$,
+  $$,$|$,$terminal("()")$, [(unit type)],
+  $$,$|$,$terminal("[]")$, [(list constructor)],
+  $$,$|$,$terminal("(->)")$, [(function constructor)],
+  $$,$|$,$terminal("(,") {terminal(",")} terminal(")")$, [(tupling constructors)],
+  // context
+  $nonterminaldef("context")$, $->$, $nonterminal("class")$, $$,
+  $$,$|$,$terminal("(") nonterminal("class")_1 terminal(",") dots terminal(",") nonterminal("class")_n terminal(")")$,$(n >= 0)$,
+  // class
+  $nonterminaldef("class")$, $->$, $nonterminal("qtycls") nonterminal("tyvar")$, $$,
+  $$,$|$,$nonterminal("qtycls") terminal("(") nonterminal("tyvar") nonterminal("atype")_1 dots nonterminal("atype")_n terminal(")")$,$(n >= 1)$,
+  // scontext
+  $nonterminaldef("scontext")$, $->$, $nonterminal("simpleclass")$, $$,
+  $$,$|$,$terminal("(") nonterminal("simpleclass")_1 terminal(",") dots terminal(",") nonterminal("simpleclass")_n terminal(")")$,$(n >= 0)$,
+  // simpleclass
+  $nonterminaldef("simpleclass")$, $->$, $nonterminal("qtycls") nonterminal("tyvar")$, $$,
+  // simpletype
+  $nonterminaldef("simpletype")$, $->$, $nonterminal("tycon") nonterminal("tyvar")_1 dots nonterminal("tyvar")_k$, $(k >= 0)$,
+  // constrs
+  $nonterminaldef("constrs")$, $->$, $nonterminal("constr")_1 terminal("|") dots terminal("|") nonterminal("constr")_n$, $(n >= 1)$,
+  // constr
+  $nonterminaldef("constr")$, $->$, $italic("con") [terminal("!")] nonterminal("atype")_1 dots [terminal("!")] nonterminal("atype")_k$, [(arity $italic("con") = k$, $k >= 0$)],
+  $$,$|$,$(nonterminal("btype") | terminal("!") nonterminal("atype")) italic("conop") (nonterminal("btype") | terminal("!") nonterminal("atype"))$,[(infix $italic("conop")$)],
+  $$,$|$,$italic("con") terminal("{") italic("fielddecl")_1 terminal(",") dots terminal(",") italic("fielddecl")_n terminal("}")$,$(n >= 0)$,
+  // newconstr
+  $nonterminaldef("newconstr")$, $->$, $italic("con") nonterminal("atype")$, $$,
+  $$,$|$,$italic("con") terminal("{") italic("var") terminal("::") nonterminal("type") terminal("}")$,$$,
+  // fielddecl
+  $nonterminaldef("fielddecl")$, $->$, $nonterminal("vars") terminal("::") (nonterminal("type") | terminal("!") nonterminal("atype"))$, $$,
+  // deriving
+  $nonterminaldef("deriving")$, $->$, $terminal("deriving") ( nonterminal("dclass") | terminal("(") nonterminal("dclass")_1 terminal(",") dots terminal(",") nonterminal("dclass")_n terminal(")"))$, $(n >= 0)$,
+  // dclass
+  $nonterminaldef("dclass")$, $->$, $nonterminal("qtycls")$, $$,
+  // inst
+  $nonterminaldef("inst")$, $->$, $nonterminal("gtycon")$, $$,
+  $$,$|$,$terminal("(")nonterminal("gtycon") nonterminal("tyvar")_1 dots nonterminal("tyvar")_k terminal(")")$,[($k >= 0$, $italic("tyvars")$ distinct)],
+  $$,$|$,$terminal("(") nonterminal("tyvar")_1 terminal(",") dots terminal(",") nonterminal("tyvar")_k terminal(")")$,[($k >= 2$, $italic("tyvars")$ distinct)],
+  $$,$|$,$terminal("[") nonterminal("tyvar") terminal("]")$,$$,
+  $$,$|$,$terminal("(") nonterminal("tyvar")_1 terminal("->") nonterminal("tyvar")_2 terminal(")")$,[($italic("tyvar")_1$ and $italic("tyvar")_2$ distinct)],
+  // fdecl
+  $nonterminaldef("fdecl")$, $->$, $terminal("import") italic("callconv") [italic("safety")] italic("impent") italic("var") terminal("::") italic("ftype")$, [(define variable)],
+  $$,$|$,$terminal("export") italic("callconv") italic("expent") italic("var") terminal("::") italic("ftype")$,[(expose variable)],
+)
+
 === Fixity Resolution <sec:fixity-resolution>
 
 The following is an example implementation of fixity resolution for
