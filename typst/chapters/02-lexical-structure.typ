@@ -26,10 +26,12 @@ whitespace is expressed explicitly; there is no
 implicit space between juxtaposed symbols.  BNF-like syntax is used
 throughout, with productions having the form:
 
-$
-  italic("nonterm") -> italic("alt₁") | italic("alt₂") | dots | italic("altₙ")
-$
-
+#table(
+  columns: 3,
+  align: (left, center, left),
+  stroke: none,
+  $italic("nonterm")$, $->$, $italic("alt₁") | italic("alt₂") | dots | italic("altₙ")$
+)
 
 Care must be taken in distinguishing metalogical syntax such as $|$
 and $[dots]$ from concrete terminal syntax (given in typewriter font)
