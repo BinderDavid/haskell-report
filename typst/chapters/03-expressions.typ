@@ -162,7 +162,7 @@ pattern fails to match, then the result is $bot$.
   $italic("infixexp")$, $->$, $nonterminal("lexp") med nonterminal("qop") med nonterminal("infixexp")$, [],
   [], $|$, $terminal("-") nonterminal("infixexp")$, [(prefix negation)],
   [], $|$, nonterminal("lexp"), [],
-  $nonterminaldef("qop")$, $->$, $italic("qvarop") | italic("qconop")$, [(qualified operator)],
+  $italic("qop")$, $->$, $italic("qvarop") | italic("qconop")$, [(qualified operator)],
 )
 
 The form $e_1 italic("qop") e_2$ is the infix application of binary operator $italic("qop")$ to expressions $e_1$ and $e_2$.

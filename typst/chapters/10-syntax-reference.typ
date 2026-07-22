@@ -457,9 +457,9 @@ these two styles in the same file.
   // exports
   $nonterminaldef("exports")$, $->$, $terminal("(") nonterminal("export")_1 terminal(",") dots terminal(",") nonterminal("export")_n [terminal(",")]terminal(")")$, $(n >= 0)$,
   // export
-  $nonterminaldef("export")$, $->$, $italic("qvar")$, $$,
-  $$, $|$, $italic("qtycon") [ terminal("(..)") | terminal("(") nonterminal("cname")_1 terminal(",") dots terminal(",") nonterminal("cname")_n terminal(")")]$, $(n >= 0)$,
-  $$, $|$, $italic("qtycls") [ terminal("(..)") | terminal("(") italic("var")_1 terminal(",") dots terminal(",") italic("var")_n terminal(")")]$, $(n >= 0)$,
+  $nonterminaldef("export")$, $->$, $nonterminal("qvar")$, $$,
+  $$, $|$, $nonterminal("qtycon") [ terminal("(..)") | terminal("(") nonterminal("cname")_1 terminal(",") dots terminal(",") nonterminal("cname")_n terminal(")")]$, $(n >= 0)$,
+  $$, $|$, $nonterminal("qtycls") [ terminal("(..)") | terminal("(") nonterminal("var")_1 terminal(",") dots terminal(",") nonterminal("var")_n terminal(")")]$, $(n >= 0)$,
   $$, $|$, $terminal("module") nonterminal("modid")$, $$,
   // impdecl
   $nonterminaldef("impdecl")$, $->$, $terminal("import") [terminal("qualified")] nonterminal("modid") [terminal("as") nonterminal("modid")] [nonterminal("impspec")]$, $$,
@@ -468,11 +468,11 @@ these two styles in the same file.
   $nonterminaldef("impspec")$, $->$, $terminal("(") nonterminal("import")_1 terminal(",") dots terminal(",") nonterminal("import")_n [terminal(",")] terminal(")")$, $(n >= 0)$,
   $$, $|$, $terminal("hiding") terminal("(") nonterminal("import")_1 terminal(",") dots terminal(",") nonterminal("import")_n [terminal(",")] terminal(")")$, $(n >= 0)$,
   // import
-  $nonterminaldef("import")$, $->$, $italic("var")$, $$,
-  $$, $|$, $italic("tycon") [ terminal("(..)") | terminal("(") nonterminal("cname")_1 terminal(",") dots terminal(",") nonterminal("cname")_n terminal(")")]$, $(n >= 0)$,
-  $$, $|$, $italic("tycls") [ terminal("(..)") | terminal("(") italic("var")_1 terminal(",") dots terminal(",") italic("var")_n terminal(")")]$, $(n >= 0)$,
+  $nonterminaldef("import")$, $->$, $nonterminal("var")$, $$,
+  $$, $|$, $nonterminal("tycon") [ terminal("(..)") | terminal("(") nonterminal("cname")_1 terminal(",") dots terminal(",") nonterminal("cname")_n terminal(")")]$, $(n >= 0)$,
+  $$, $|$, $nonterminal("tycls") [ terminal("(..)") | terminal("(") nonterminal("var")_1 terminal(",") dots terminal(",") nonterminal("var")_n terminal(")")]$, $(n >= 0)$,
   // cname
-  $nonterminaldef("cname")$, $->$, $ italic("var") | italic("con")$, $$,
+  $nonterminaldef("cname")$, $->$, $ nonterminal("var") | nonterminal("con")$, $$,
   // topdecls
   $nonterminaldef("topdecls")$, $->$, $nonterminal("topdecl")_1 terminal(";") dots terminal(";") nonterminal("topdecl")_n$, $(n >= 1)$,
   // topdecl
@@ -488,25 +488,25 @@ these two styles in the same file.
   $nonterminaldef("decls")$, $->$, $terminal("{") nonterminal("decl")_1 terminal(";") dots terminal(";") nonterminal("decl")_n terminal("}")$, $(n >= 0)$,
   // decl
   $nonterminaldef("decl")$, $->$, $nonterminal("gendecl")$, $$,
-  $$,$|$, $(nonterminal("funlhs") | italic("pat")) nonterminal("rhs")$,$$,
+  $$,$|$, $(nonterminal("funlhs") | nonterminal("pat")) nonterminal("rhs")$,$$,
   // cdecls
   $nonterminaldef("cdecls")$, $->$, $terminal("{") nonterminal("cdecl")_1 terminal(";") dots terminal(";") nonterminal("cdecl")_n terminal("}")$, $(n >= 0)$,
   // cdecl
   $nonterminaldef("cdecl")$, $->$, $nonterminal("gendecl")$, $$,
-  $$,$|$, $(nonterminal("funlhs") | italic("var")) nonterminal("rhs")$,$$,
+  $$,$|$, $(nonterminal("funlhs") | nonterminal("var")) nonterminal("rhs")$,$$,
   // idecls
   $nonterminaldef("idecls")$, $->$, $terminal("{") nonterminal("idecl")_1 terminal(";") dots terminal(";") nonterminal("idecl")_n terminal("}")$, $(n >= 0)$,
   // idecl
-  $nonterminaldef("idecl")$, $->$, $(nonterminal("funlhs") | italic("var")) nonterminal("rhs")$, $$,
+  $nonterminaldef("idecl")$, $->$, $(nonterminal("funlhs") | nonterminal("var")) nonterminal("rhs")$, $$,
   $$, $|$, $$, [(empty)],
   // gendecl
   $nonterminaldef("gendecl")$, $->$, $nonterminal("vars") terminal("::") [nonterminal("context") terminal("=>")] nonterminal("type")$, [(type signature)],
   $$, $|$, $nonterminal("fixity") [nonterminal("integer")] nonterminal("ops")$, [(fixity declaration)],
   $$, $|$, $$, [(empty declaration)],
   // ops
-  $nonterminaldef("ops")$, $->$, $italic("op")_1 terminal(",") dots terminal(",") italic("op")_n$, $(n >= 1)$,
+  $nonterminaldef("ops")$, $->$, $nonterminal("op")_1 terminal(",") dots terminal(",") nonterminal("op")_n$, $(n >= 1)$,
   // vars
-  $nonterminaldef("vars")$, $->$, $italic("var")_1 terminal(",") dots terminal(",") italic("var")_n$, $(n >= 1)$,
+  $nonterminaldef("vars")$, $->$, $nonterminal("var")_1 terminal(",") dots terminal(",") nonterminal("var")_n$, $(n >= 1)$,
   // fixity
   $nonterminaldef("fixity")$, $->$, $terminal("infixl") | terminal("infixr") | terminal("infix")$, $$,
   // type
@@ -541,12 +541,12 @@ these two styles in the same file.
   // constrs
   $nonterminaldef("constrs")$, $->$, $nonterminal("constr")_1 terminal("|") dots terminal("|") nonterminal("constr")_n$, $(n >= 1)$,
   // constr
-  $nonterminaldef("constr")$, $->$, $italic("con") [terminal("!")] nonterminal("atype")_1 dots [terminal("!")] nonterminal("atype")_k$, [(arity $italic("con") = k$, $k >= 0$)],
-  $$,$|$,$(nonterminal("btype") | terminal("!") nonterminal("atype")) italic("conop") (nonterminal("btype") | terminal("!") nonterminal("atype"))$,[(infix $italic("conop")$)],
-  $$,$|$,$italic("con") terminal("{") italic("fielddecl")_1 terminal(",") dots terminal(",") italic("fielddecl")_n terminal("}")$,$(n >= 0)$,
+  $nonterminaldef("constr")$, $->$, $nonterminal("con") [terminal("!")] nonterminal("atype")_1 dots [terminal("!")] nonterminal("atype")_k$, [(arity $italic("con") = k$, $k >= 0$)],
+  $$,$|$,$(nonterminal("btype") | terminal("!") nonterminal("atype")) nonterminal("conop") (nonterminal("btype") | terminal("!") nonterminal("atype"))$,[(infix $italic("conop")$)],
+  $$,$|$,$nonterminal("con") terminal("{") nonterminal("fielddecl")_1 terminal(",") dots terminal(",") nonterminal("fielddecl")_n terminal("}")$,$(n >= 0)$,
   // newconstr
-  $nonterminaldef("newconstr")$, $->$, $italic("con") nonterminal("atype")$, $$,
-  $$,$|$,$italic("con") terminal("{") italic("var") terminal("::") nonterminal("type") terminal("}")$,$$,
+  $nonterminaldef("newconstr")$, $->$, $nonterminal("con") nonterminal("atype")$, $$,
+  $$,$|$,$nonterminal("con") terminal("{") nonterminal("var") terminal("::") nonterminal("type") terminal("}")$,$$,
   // fielddecl
   $nonterminaldef("fielddecl")$, $->$, $nonterminal("vars") terminal("::") (nonterminal("type") | terminal("!") nonterminal("atype"))$, $$,
   // deriving
@@ -560,8 +560,8 @@ these two styles in the same file.
   $$,$|$,$terminal("[") nonterminal("tyvar") terminal("]")$,$$,
   $$,$|$,$terminal("(") nonterminal("tyvar")_1 terminal("->") nonterminal("tyvar")_2 terminal(")")$,[($italic("tyvar")_1$ and $italic("tyvar")_2$ distinct)],
   // fdecl
-  $nonterminaldef("fdecl")$, $->$, $terminal("import") nonterminal("callconv") [nonterminal("safety")] nonterminal("impent") italic("var") terminal("::") nonterminal("ftype")$, [(define variable)],
-  $$,$|$,$terminal("export") nonterminal("callconv") nonterminal("expent") italic("var") terminal("::") nonterminal("ftype")$,[(expose variable)],
+  $nonterminaldef("fdecl")$, $->$, $terminal("import") nonterminal("callconv") [nonterminal("safety")] nonterminal("impent") nonterminal("var") terminal("::") nonterminal("ftype")$, [(define variable)],
+  $$,$|$,$terminal("export") nonterminal("callconv") nonterminal("expent") nonterminal("var") terminal("::") nonterminal("ftype")$,[(expose variable)],
   // callconv
   $nonterminaldef("callconv")$, $->$, $terminal("ccall") | terminal("stdcall") | terminal("cplusplus")$, [(calling convention)],
   $$,$|$,$terminal("jvm") | terminal("dotnet")$,$$,
@@ -581,9 +581,9 @@ these two styles in the same file.
   // fatype
   $nonterminaldef("fatype")$, $->$, $nonterminal("qtycon") nonterminal("atype")_1 dots nonterminal("atype")_k$, $(k >= 0)$,
   // funlhs
-  $nonterminaldef("funlhs")$, $->$, $italic("var") italic("apat") { italic("apat") }$, $$,
-  $$,$|$,$italic("pat") italic("varop") italic("pat")$,$$,
-  $$,$|$,$terminal("(") nonterminal("funlhs") terminal(")") italic("apat") { italic("apat")}$,$$,
+  $nonterminaldef("funlhs")$, $->$, $nonterminal("var") nonterminal("apat") { nonterminal("apat") }$, $$,
+  $$,$|$,$nonterminal("pat") nonterminal("varop") nonterminal("pat")$,$$,
+  $$,$|$,$terminal("(") nonterminal("funlhs") terminal(")") nonterminal("apat") { nonterminal("apat")}$,$$,
   // rhs
   $nonterminaldef("rhs")$, $->$, $terminal("=") nonterminal("exp") [terminal("where") nonterminal("decls")]$, $$,
   $$,$|$,$nonterminal("gdrhs") [terminal("where") nonterminal("decls")]$,$$,
@@ -592,38 +592,86 @@ these two styles in the same file.
   // guards
   $nonterminaldef("guards")$, $->$, $terminal("|") nonterminal("guard")_1 terminal(",") dots terminal(",") nonterminal("guard")_n$, $(n >= 1)$,
   // guard
-  $nonterminaldef("guard")$, $->$, $italic("pat") terminal("<-") nonterminal("infixexp")$, [(pattern guard)],
+  $nonterminaldef("guard")$, $->$, $nonterminal("pat") terminal("<-") nonterminal("infixexp")$, [(pattern guard)],
   $$,$|$,$terminal("let") nonterminal("decls")$,[(local declaration)],
   $$,$|$,$nonterminal("infixexp")$,$$,
   // exp
   $nonterminaldef("exp")$, $->$, $nonterminal("infixexp") terminal("::") [nonterminal("context") terminal("=>")] nonterminal("type")$, [(expression type signature)],
   [],$|$, $nonterminal("infixexp")$,[],
   // infixexp
-  $nonterminaldef("infixexp")$, $->$, $nonterminal("lexp") italic("qop") nonterminal("infixexp")$, [],
+  $nonterminaldef("infixexp")$, $->$, $nonterminal("lexp") nonterminal("qop") nonterminal("infixexp")$, [],
   [], $|$, $terminal("-") nonterminal("infixexp")$, [(prefix negation)],
   [], $|$, $nonterminal("lexp")$, [],
   // lexp
-  $nonterminaldef("lexp")$, $->$, $terminal("\\") italic("apat")_1 dots italic("apat")_n terminal("->") nonterminal("exp")$, [(lambda abstraction, $n >= 1$)],
+  $nonterminaldef("lexp")$, $->$, $terminal("\\") nonterminal("apat")_1 dots nonterminal("apat")_n terminal("->") nonterminal("exp")$, [(lambda abstraction, $n >= 1$)],
   [], $|$, $terminal("let") nonterminal("decls") terminal("in") nonterminal("exp")$, [(let expression)],
   [], $|$, $terminal("if") nonterminal("exp") [terminal(";")] terminal("then") nonterminal("exp") [terminal(";")] terminal("else") nonterminal("exp")$, [(conditional)],
-  [], $|$, $terminal("case") nonterminal("exp") terminal("of") terminal("{") italic("alts") terminal("}")$, [(case expression)],
-  [], $|$, $terminal("do") terminal("{") italic("stmts") terminal("}")$, [(do expression)],
+  [], $|$, $terminal("case") nonterminal("exp") terminal("of") terminal("{") nonterminal("alts") terminal("}")$, [(case expression)],
+  [], $|$, $terminal("do") terminal("{") nonterminal("stmts") terminal("}")$, [(do expression)],
   [], $|$, $nonterminal("fexp")$, [],
   // fexp
   $nonterminaldef("fexp")$, $->$, $[nonterminal("fexp")] nonterminal("aexp")$, [(function application)],
   // aexp
-  $nonterminaldef("aexp")$, $->$, $italic("qvar")$, [(variable)],
-  [], $|$, $italic("gcon")$, [(general constructor)],
+  $nonterminaldef("aexp")$, $->$, $nonterminal("qvar")$, [(variable)],
+  [], $|$, $nonterminal("gcon")$, [(general constructor)],
   [], $|$, $nonterminal("literal")$, [],
   [], $|$, $terminal("(") nonterminal("exp") terminal(")")$, [(parenthesized expression)],
   [], $|$, $terminal("(") nonterminal("exp")_1 terminal(",") dots terminal(",") nonterminal("exp")_k terminal(")")$, [(tuple, $k>=2$)],
   [], $|$, $terminal("[") nonterminal("exp")_1 terminal(",") dots terminal(",") nonterminal("exp")_k terminal("]")$, [(list, $k>=1$)],
   [], $|$, $terminal("[") nonterminal("exp")_1 [terminal(",") nonterminal("exp")_2] terminal("..") [nonterminal("exp")_3] terminal("]")$, [(arithmetic sequence)],
-  [], $|$, $terminal("[") nonterminal("exp") terminal("|") italic("qual")_1 terminal(",") dots terminal(",") italic("qual")_n terminal("]")$, [(list comprehension, $n>=1$)],
+  [], $|$, $terminal("[") nonterminal("exp") terminal("|") nonterminal("qual")_1 terminal(",") dots terminal(",") nonterminal("qual")_n terminal("]")$, [(list comprehension, $n>=1$)],
   [], $|$, $terminal("(") nonterminal("infixexp") nonterminal("qop") terminal(")")$, [(left section)],
   [], $|$, $terminal("(") nonterminal("qop")_(chevron.l terminal("-") chevron.r) nonterminal("infixexp") terminal(")")$, [(right section)],
-  [], $|$, $italic("qcon") terminal("{") italic("fbind")_1 terminal(",") dots terminal(",") italic("fbind")_n terminal("}")$, [(labeled construction, $n>=0$)],
-  [], $|$, $nonterminal("aexp")_(chevron.l italic("qcon") chevron.r) terminal("{") italic("fbind")_1 terminal(",") dots terminal(",") italic("fbind")_n terminal("}")$, [(labeled update, $n>=1$)],
+  [], $|$, $nonterminal("qcon") terminal("{") nonterminal("fbind")_1 terminal(",") dots terminal(",") nonterminal("fbind")_n terminal("}")$, [(labeled construction, $n>=0$)],
+  [], $|$, $nonterminal("aexp")_(chevron.l nonterminal("qcon") chevron.r) terminal("{") nonterminal("fbind")_1 terminal(",") dots terminal(",") nonterminal("fbind")_n terminal("}")$, [(labeled update, $n>=1$)],
+  // qual
+  $nonterminaldef("qual")$, $->$, $nonterminal("pat") terminal("<-") nonterminal("exp")$, [(generator)],
+  $$, $|$, $terminal("let") nonterminal("decls")$, [(local declaration)],
+  $$, $|$, $nonterminal("exp")$, [(guard)],
+  // alts
+  $nonterminaldef("alts")$,$->$,$dots$,$$,
+  // alt
+  $nonterminaldef("alt")$,$->$,$dots$,$$,
+  // gdpat
+  $nonterminaldef("gdpat")$,$->$,$dots$,$$,
+  // stmts
+  $nonterminaldef("stmts")$,$->$,$dots$,$$,
+  // stmt
+  $nonterminaldef("stmt")$,$->$,$dots$,$$,
+  // fbind
+  $nonterminaldef("fbind")$,$->$,$dots$,$$,
+  // pat
+  $nonterminaldef("pat")$,$->$,$dots$,$$,
+  // lpat
+  $nonterminaldef("lpat")$,$->$,$dots$,$$,
+  // apat
+  $nonterminaldef("apat")$,$->$,$dots$,$$,
+  // fpat
+  $nonterminaldef("fpat")$,$->$,$dots$,$$,
+  // gcon
+  $nonterminaldef("gcon")$,$->$,$dots$,$$,
+  // var
+  $nonterminaldef("var")$,$->$,$dots$,$$,
+  // qvar
+  $nonterminaldef("qvar")$,$->$,$dots$,$$,
+  // con
+  $nonterminaldef("con")$,$->$,$dots$,$$,
+  // qcon
+  $nonterminaldef("qcon")$,$->$,$dots$,$$,
+  // varop
+  $nonterminaldef("varop")$,$->$,$dots$,$$,
+  // qvarop
+  $nonterminaldef("qvarop")$,$->$,$dots$,$$,
+  // conop
+  $nonterminaldef("conop")$,$->$,$dots$,$$,
+  // qconop
+  $nonterminaldef("qconop")$,$->$,$dots$,$$,
+  // op
+  $nonterminaldef("op")$,$->$,$dots$,$$,
+  // qop
+  $nonterminaldef("qop")$,$->$,$dots$,$$,
+  // gconsym
+  $nonterminaldef("gconsym")$,$->$,$dots$,$$,
 )
 
 === Fixity Resolution <sec:fixity-resolution>
