@@ -629,49 +629,68 @@ these two styles in the same file.
   $$, $|$, $terminal("let") nonterminal("decls")$, [(local declaration)],
   $$, $|$, $nonterminal("exp")$, [(guard)],
   // alts
-  $nonterminaldef("alts")$,$->$,$dots$,$$,
+  $nonterminaldef("alts")$,$->$,$nonterminal("alt")_1 terminal(";") dots terminal(";") nonterminal("alt")_n$,$(n >= 1)$,
   // alt
-  $nonterminaldef("alt")$,$->$,$dots$,$$,
+  $nonterminaldef("alt")$,$->$,$nonterminal("pat") terminal("->") nonterminal("exp") [terminal("where") nonterminal("decls")]$,$$,
+  $$,$|$,$nonterminal("pat") nonterminal("gdpat") [terminal("where") nonterminal("decls")]$,$$,
+  $$,$|$,$$,[(empty alternative)],
   // gdpat
-  $nonterminaldef("gdpat")$,$->$,$dots$,$$,
+  $nonterminaldef("gdpat")$,$->$,$nonterminal("guards") terminal("->") nonterminal("exp") [nonterminal("gdpat")]$,$$,
   // stmts
-  $nonterminaldef("stmts")$,$->$,$dots$,$$,
+  $nonterminaldef("stmts")$,$->$,$nonterminal("stmt")_1 dots nonterminal("stmt")_n nonterminal("exp") [terminal(";")]$,$(n >= 0)$,
   // stmt
-  $nonterminaldef("stmt")$,$->$,$dots$,$$,
+  $nonterminaldef("stmt")$,$->$,$nonterminal("exp") terminal(";")$,$$,
+  $$,$|$,$nonterminal("pat") terminal("<-") nonterminal("exp") terminal(";")$,$$,
+  $$,$|$,$terminal("let") nonterminal("decls") terminal(";")$,$$,
+  $$,$|$,$terminal(";")$,[(empty statement)],
   // fbind
-  $nonterminaldef("fbind")$,$->$,$dots$,$$,
+  $nonterminaldef("fbind")$,$->$,$nonterminal("qvar") terminal("=") nonterminal("exp")$,$$,
   // pat
-  $nonterminaldef("pat")$,$->$,$dots$,$$,
+  $nonterminaldef("pat")$,$->$,$nonterminal("lpat") nonterminal("qconop") nonterminal("pat")$,[(infix constructor)],
+  $$,$|$,$nonterminal("lpat")$,$$,
   // lpat
-  $nonterminaldef("lpat")$,$->$,$dots$,$$,
+  $nonterminaldef("lpat")$,$->$,$nonterminal("apat")$,$$,
+  $$,$|$,$terminal("-") (nonterminal("integer") | nonterminal("float"))$,[(negative literal)],
+  $$,$|$,$nonterminal("gcon") nonterminal("apat")_1 dots nonterminal("apat")_k $,[(arity $italic("gcon") = k$, $k >= 1$)],
   // apat
-  $nonterminaldef("apat")$,$->$,$dots$,$$,
+  $nonterminaldef("apat")$,$->$,$nonterminal("var") [terminal("@") nonterminal("apat")]$,[(as pattern)],
+  $$,$|$,$nonterminal("gcon")$,[(arity $italic("gcon") = 0$)],
+  $$,$|$,$nonterminal("qcon") terminal("{") nonterminal("fpat")_1 terminal(",") dots terminal(",") nonterminal("fpat")_k terminal("}")$,[(labeled pattern, $k >= 0$)],
+  $$,$|$,$nonterminal("literal")$,[],
+  $$,$|$,$terminal("_")$,[(wildcard)],
+  $$,$|$,$terminal("(") nonterminal("pat") terminal(")")$,[(parenthesized pattern)],
+  $$,$|$,$terminal("(") nonterminal("pat")_1 terminal(",") dots terminal(",") nonterminal("pat") terminal(")")$, [(tuple pattern, $k >= 2$)],
+  $$,$|$,$terminal("[") nonterminal("pat")_1 terminal(",") dots terminal(",") nonterminal("pat") terminal("]")$, [(list pattern, $k >= 1$)],
+  $$,$|$,$terminal("~") nonterminal("apat")$,[(irrefutable pattern)],
   // fpat
-  $nonterminaldef("fpat")$,$->$,$dots$,$$,
+  $nonterminaldef("fpat")$,$->$,$nonterminal("qvar") terminal("=") nonterminal("pat")$,$$,
   // gcon
-  $nonterminaldef("gcon")$,$->$,$dots$,$$,
+  $nonterminaldef("gcon")$,$->$,$terminal("()")$,$$,
+  $$,$|$,$terminal("[]")$,$$,
+  $$,$|$,$terminal("(,") { terminal(",")}terminal(")")$,$$,
+  $$,$|$,$nonterminal("qcon")$,$$,
   // var
-  $nonterminaldef("var")$,$->$,$dots$,$$,
+  $nonterminaldef("var")$,$->$,$nonterminal("varid") | terminal("(") nonterminal("varsym") terminal(")")$,[(variable)],
   // qvar
-  $nonterminaldef("qvar")$,$->$,$dots$,$$,
+  $nonterminaldef("qvar")$,$->$,$nonterminal("qvarid") | terminal("(") nonterminal("qvarsym") terminal(")")$,[(qualified variable)],
   // con
-  $nonterminaldef("con")$,$->$,$dots$,$$,
+  $nonterminaldef("con")$,$->$,$nonterminal("conid") | terminal("(") nonterminal("consym") terminal(")")$,[(constructor)],
   // qcon
-  $nonterminaldef("qcon")$,$->$,$dots$,$$,
+  $nonterminaldef("qcon")$,$->$,$nonterminal("qconid") | terminal("(") nonterminal("qconsym") terminal(")")$,[(qualified constructor)],
   // varop
-  $nonterminaldef("varop")$,$->$,$dots$,$$,
+  $nonterminaldef("varop")$,$->$,$nonterminal("varsym") | terminal("`") nonterminal("varid") terminal("`")$,[(variable operator)],
   // qvarop
-  $nonterminaldef("qvarop")$,$->$,$dots$,$$,
+  $nonterminaldef("qvarop")$,$->$,$nonterminal("qvarsym") | terminal("`") nonterminal("qvarid") terminal("`")$,[(qualified variable operator)],
   // conop
-  $nonterminaldef("conop")$,$->$,$dots$,$$,
+  $nonterminaldef("conop")$,$->$,$nonterminal("consym") | terminal("`") nonterminal("conid") terminal("`")$,[(constructor operator)],
   // qconop
-  $nonterminaldef("qconop")$,$->$,$dots$,$$,
+  $nonterminaldef("qconop")$,$->$,$nonterminal("gconsym") | terminal("`") nonterminal("qconid") terminal("`")$,[(qualified constructor operator)],
   // op
-  $nonterminaldef("op")$,$->$,$dots$,$$,
+  $nonterminaldef("op")$,$->$,$nonterminal("varop") | nonterminal("conop")$,[(operator)],
   // qop
-  $nonterminaldef("qop")$,$->$,$dots$,$$,
+  $nonterminaldef("qop")$,$->$,$nonterminal("qvarop") | nonterminal("qconop")$,[(qualified operator)],
   // gconsym
-  $nonterminaldef("gconsym")$,$->$,$dots$,$$,
+  $nonterminaldef("gconsym")$,$->$,$terminal(":") | nonterminal("qconsym")$,$$,
 )
 
 === Fixity Resolution <sec:fixity-resolution>
