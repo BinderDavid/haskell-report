@@ -531,7 +531,144 @@ bound by `let` have fully polymorphic types while those defined by
   $italic("lexp")$, $->$, $terminal("let") nonterminal("decls") terminal("in") nonterminal("exp")$
 )
 
+
+_Let expressions_ have the general form $mono("let") { d_1; dots ; d_n} mono("in") e$,
+and introduce a
+nested, lexically-scoped, 
+mutually-recursive list of declarations (`let` is often called `letrec`).  The scope of the declarations is the expression $e$ and the right hand side of the declarations.  Declarations are
+described in Chapter~\ref{declarations}.  Pattern bindings are matched
+lazily; an implicit `~` makes these patterns
+irrefutable.
+For example, 
+$
+  mono("let") (x,y) = mono("undefined in") e
+$
+
+does not cause an execution-time error until `x` or `y` is evaluated.
+
+#translation-box([
+  The dynamic semantics of the expression 
+  $mono("let") { d_1; dots ; d_n} mono("in") e_0$
+  are captured by this translation: After removing all type signatures, each declaration $d_i$ is translated into an equation of the form $p_i = e_i$, where $p_i$ and $e_i$ are patterns and expressions
+  respectively, using the translation in
+  Section~\ref{function-bindings}.  Once done, these identities
+  hold, which may be used as a translation into the kernel:
+  #align(center)[
+    #table(
+      columns: 3,
+      align: (left, center, left),
+      stroke: none,
+      $mono("let") { p_1 = e_1 ; dots ; p_n = e_n} mono("in") e_0$, $=$, $mono("let")(~p_1, dots,~p_n) = (e_1, dots, e_n) mono("in") e_0$,
+      $mono("let") p = e_1 mono("in") e_0$, $=$, $mono("case") e_1 mono("of") ~p mono("->") e_0$,
+      $$, $$, [where no variable in $p$ appears free in $e_1$],
+      $mono("let") p = e_1 mono("in") e_0$, $=$, $mono("let") p = mono("fix") (\\ ~p mono("->") e_1) mono("in") e_0$
+    )
+  ]
+  where `fix` is the least fixpoint operator.  Note the use of the irrefutable patterns `~p`.
+  This translation
+  does not preserve the static semantics because the use of `case` precludes a fully polymorphic typing of the bound variables.
+  The static semantics of the bindings in a `let` expression are described in 
+  Section~\ref{pattern-bindings}.
+])
+
 === Case Expressions
+
+#table(
+  columns: 4,
+  align: (left, center, left, left),
+  stroke: none,
+  $italic("lexp")$, $->$, $terminal("case") nonterminal("exp") terminal("of {") nonterminal("alts") terminal("}")$,$$,
+  $italic("alts")$, $->$, $nonterminal("alt")_1 terminal(";") dots terminal(";") nonterminal("alt")_n$, $(n >= 1)$,
+  $italic("alt")$, $->$,$nonterminal("pat") terminal("->") nonterminal("exp") [terminal("where") nonterminal("decls")]$,$$,
+  $$,$|$,$nonterminal("pat") nonterminal("gdpat") [terminal("where") nonterminal("decls")]$,[],
+  $$,$|$,$$,[(empty alternative)],
+  $italic("gdpat")$, $->$,$nonterminal("guards") terminal("->") nonterminal("exp") [ nonterminal("gdpat")]$,$$,
+  $italic("guards")$, $->$,$terminal("|") nonterminal("guard")_1 terminal(",") dots terminal(",") nonterminal("guard")_n$,$(n >= 1)$,
+  $italic("guard")$, $->$,$nonterminal("pat") terminal("<-") nonterminal("infixexp")$,[(pattern guard)],
+  $$,$|$,$terminal("let") nonterminal("decls")$,[(local declaration)],
+  $$,$|$,$nonterminal("infixexp")$, [(boolean guard)]
+)
+
+A _case expression_ has the general form
+$
+  mono("case") e mono("of") { p_1 italic("match")_1 ; dots ; p_n italic("match")_n}
+$
+where each $italic("match")_i$ is of the general form
+$
+  &| italic("gs")_(i 1) mono("->") e_(i 1) \
+  & dots \
+  &| italic("gs")_(i m_i) mono("->") e_(i m_i) \
+  &mono("where") italic("decls")_i
+$
+(Notice that in the syntax rule for $italic("guards")$, the "`|`" is a terminal symbol, not the syntactic metasymbol for alternation.)
+Each alternative $p_i italic("match")_i$ consists of a 
+pattern $p_i$ and its matches, $italic("match")_i$.
+Each match in turn
+consists of a sequence of pairs of guards $italic("gs")_(italic("ij"))$ and bodies $e_(italic("ij"))$ (expressions), followed by
+optional bindings ($italic("decls")_i$) that scope over all of the guards and expressions of the alternative.
+
+A _guard_ has one of the following forms:
+
+- _pattern guards_ are of the form $p mono("<-") e$, where
+  $p$ is a 
+  pattern (see Section~\ref{pattern-matching}) of type $t$ and $e$ is an
+  expression type $t$#footnote[Note that the syntax of a pattern guard is the same as that of a generator in a list comprehension. 
+  The contextual difference is that, in a list comprehension, a pattern of type $t$ goes with an expression of type $[t]$.].
+  They succeed if the expression $e$ matches the pattern $p$, and introduce the bindings of the pattern to the environment.
+- _local bindings_ are of the form $mono("let") italic("decls")$.
+  They always succeed, and they introduce the names defined in $italic("decls")$ to the environment.
+- _boolean guards_ are arbitrary expressions of
+  type `Bool`.  They succeed if the expression evaluates to `True`, and they do not introduce new names to the environment.  A boolean guard, $g$, is semantically equivalent to the pattern guard $mono("True <-") g$.
+
+An alternative of the form
+$
+  italic("pat") mono("->") italic("exp") mono("where") italic("decls")
+$
+is treated as shorthand for:
+$
+  &italic("pat") | mono("True ->") italic("exp") \
+  &mono("where") italic("decls")
+$
+
+A case expression must have at least one alternative and each alternative must
+have at least one body.  Each body must have the same type, and the
+type of the whole expression is that type.
+
+A case expression is evaluated by pattern matching the expression $e$
+against the individual alternatives.  The alternatives are tried
+sequentially, from top to bottom.  If $e$ matches the pattern of an
+alternative, then the guarded expressions for that alternative are
+tried sequentially from top to bottom in the environment of the case
+expression extended first by the bindings created during the matching
+of the pattern, and then by the $italic("decls")_i$ in the `where` clause associated with that alternative.
+
+For each guarded expression, the comma-separated guards are tried
+sequentially from left to right.  If all of them succeed, then the
+corresponding expression is evaluated in the environment extended with
+the bindings introduced by the guards.  That is, the bindings that are
+introduced by a guard (either by using a let clause or a pattern
+guard) are in scope in the following guards and the corresponding
+expression.  If any of the guards fail, then this guarded expression
+fails and the next guarded expression is tried.
+
+If none of the guarded expressions for a given alternative succeed,
+then matching continues with the next alternative.  If no alternative
+succeeds, then the result is $bot$.  Pattern matching is described in
+Section~\ref{pattern-matching}, with the formal semantics of case
+expressions in Section~\ref{case-semantics}.
+
+_A note about parsing._
+The expression
+```haskell
+  case x of { (a,_) | let b = not a in b :: Bool -> a }
+```
+is tricky to parse correctly.  It has a single unambiguous parse, namely
+```haskell
+  case x of { (a,_) | (let b = not a in b :: Bool) -> a }
+```
+However, the phrase `Bool -> a` is syntactically valid as a type, and parsers with limited lookahead may incorrectly commit to this choice, and hence reject the program.
+Programmers are advised, therefore, to avoid guards that
+end with a type signature --- indeed that is why a $italic("guard")$ contains an $italic("infixexp")$ not an $italic("exp")$.
 
 === Do Expressions
 
