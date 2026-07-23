@@ -157,7 +157,7 @@ information when an error occurs.
 )
 
 Haskell provides special syntax to support infix notation.
-An _operator_ is a function that can be applied using infix 
+An _operator_ is a function that can be applied using infix
 syntax (Section~\ref{operators}), or partially applied using a
 _section_ (Section~\ref{sections}).
 
@@ -453,7 +453,7 @@ The _arithmetic sequence_ $[e_1, e_2 .. e_3]$ denotes a list of values of type $
   where `enumFrom`, `enumFromThen`, `enumFromTo`, and `enumFromThenTo` are class methods in the class `Enum` as defined in the Prelude (see Figure~\ref{standard-classes}).
 ])
 
-The semantics of arithmetic sequences therefore depends entirely on the instance declaration for the type `t`.  
+The semantics of arithmetic sequences therefore depends entirely on the instance declaration for the type `t`.
 See Section~\ref{enum-class} for more details of which `Prelude` types are in `Enum` and their semantics.
 
 === List Comprehensions <sec:list-comprehensions>
@@ -487,11 +487,11 @@ qualifier list.  Binding of variables occurs according to the normal
 pattern matching rules (see Section~\ref{pattern-matching}), and if a
 match fails then that element of the list is simply skipped over.  Thus:
 ```haskell
-[ x |  xs   <- [ [(1,2),(3,4)], [(5,4),(3,2)] ], 
+[ x |  xs   <- [ [(1,2),(3,4)], [(5,4),(3,2)] ],
       (3,x) <- xs ]
 ```
 yields the list `[4,2]`.  If a qualifier is a boolean guard, it must evaluate
-to `True` for the previous pattern match to succeed.  
+to `True` for the previous pattern match to succeed.
 As usual, bindings in list comprehensions can shadow those in outer scopes; for example:
 $
   [x | x mono("<-") x, x mono("<-") x] = [z | y mono("<-") x, z mono("<-") y]
@@ -534,12 +534,12 @@ bound by `let` have fully polymorphic types while those defined by
 
 _Let expressions_ have the general form $mono("let") { d_1; dots ; d_n} mono("in") e$,
 and introduce a
-nested, lexically-scoped, 
+nested, lexically-scoped,
 mutually-recursive list of declarations (`let` is often called `letrec`).  The scope of the declarations is the expression $e$ and the right hand side of the declarations.  Declarations are
 described in Chapter~\ref{declarations}.  Pattern bindings are matched
 lazily; an implicit `~` makes these patterns
 irrefutable.
-For example, 
+For example,
 $
   mono("let") (x,y) = mono("undefined in") e
 $
@@ -547,7 +547,7 @@ $
 does not cause an execution-time error until `x` or `y` is evaluated.
 
 #translation-box([
-  The dynamic semantics of the expression 
+  The dynamic semantics of the expression
   $mono("let") { d_1; dots ; d_n} mono("in") e_0$
   are captured by this translation: After removing all type signatures, each declaration $d_i$ is translated into an equation of the form $p_i = e_i$, where $p_i$ and $e_i$ are patterns and expressions
   respectively, using the translation in
@@ -567,7 +567,7 @@ does not cause an execution-time error until `x` or `y` is evaluated.
   where `fix` is the least fixpoint operator.  Note the use of the irrefutable patterns `~p`.
   This translation
   does not preserve the static semantics because the use of `case` precludes a fully polymorphic typing of the bound variables.
-  The static semantics of the bindings in a `let` expression are described in 
+  The static semantics of the bindings in a `let` expression are described in
   Section~\ref{pattern-bindings}.
 ])
 
@@ -601,7 +601,7 @@ $
   &mono("where") italic("decls")_i
 $
 (Notice that in the syntax rule for $italic("guards")$, the "`|`" is a terminal symbol, not the syntactic metasymbol for alternation.)
-Each alternative $p_i italic("match")_i$ consists of a 
+Each alternative $p_i italic("match")_i$ consists of a
 pattern $p_i$ and its matches, $italic("match")_i$.
 Each match in turn
 consists of a sequence of pairs of guards $italic("gs")_(italic("ij"))$ and bodies $e_(italic("ij"))$ (expressions), followed by
@@ -610,9 +610,9 @@ optional bindings ($italic("decls")_i$) that scope over all of the guards and ex
 A _guard_ has one of the following forms:
 
 - _pattern guards_ are of the form $p mono("<-") e$, where
-  $p$ is a 
+  $p$ is a
   pattern (see Section~\ref{pattern-matching}) of type $t$ and $e$ is an
-  expression type $t$#footnote[Note that the syntax of a pattern guard is the same as that of a generator in a list comprehension. 
+  expression type $t$#footnote[Note that the syntax of a pattern guard is the same as that of a generator in a list comprehension.
   The contextual difference is that, in a list comprehension, a pattern of type $t$ goes with an expression of type $[t]$.].
   They succeed if the expression $e$ matches the pattern $p$, and introduce the bindings of the pattern to the environment.
 - _local bindings_ are of the form $mono("let") italic("decls")$.
@@ -685,9 +685,9 @@ end with a type signature --- indeed that is why a $italic("guard")$ contains an
 )
 
 A _do expression_ provides a more conventional syntax for monadic programming.
-It allows an expression such as 
+It allows an expression such as
 ```haskell
-  putStr "x: "    >> 
+  putStr "x: "    >>
   getLine         >>= \l ->
   return (words l)
 ```
@@ -718,7 +718,7 @@ to be written in a more traditional way as:
   passed to `fail`, preferably giving some indication of the location
   of the pattern-match failure;
   the functions `>>`, `>>=`, and `fail` are operations in the class `Monad`,
-  as defined in the Prelude; and `ok` is a fresh identifier. 
+  as defined in the Prelude; and `ok` is a fresh identifier.
 ])
 
 As indicated by the translation of `do`, variables bound by `let` have fully polymorphic types while those defined by `<-` are lambda bound and are thus monomorphic.
@@ -727,7 +727,7 @@ As indicated by the translation of `do`, variables bound by `let` have fully pol
 
 A datatype declaration may optionally define field labels
 (see Section~\ref{datatype-decls}).
-These field labels can be used to 
+These field labels can be used to
 construct, select from, and update fields in a manner
 that is independent of the overall structure of the datatype.
 
@@ -740,7 +740,7 @@ constructors. To illustrate the last point, consider:
   data S = S1 { x :: Int } | S2 { x :: Int }   -- OK
   data T = T1 { y :: Int } | T2 { y :: Bool }  -- BAD
 ```
-Here `S` is legal but `T` is not, because `y` is given 
+Here `S` is legal but `T` is not, because `y` is given
 inconsistent typings in the latter.
 
 ==== Field Selection
@@ -755,11 +755,11 @@ inconsistent typings in the latter.
 Field labels are used as selector functions.
 When used as a variable, a field label serves as a function that extracts the field from an object.
 Selectors are top level bindings and so they
-may be shadowed by local variables but cannot conflict with 
+may be shadowed by local variables but cannot conflict with
 other top level bindings of the same name.  This shadowing only
-affects selector functions; in record construction (Section~\ref{record-construction}) 
+affects selector functions; in record construction (Section~\ref{record-construction})
 and update (Section~\ref{record-update}), field labels
-cannot be confused with ordinary variables. 
+cannot be confused with ordinary variables.
 
 #translation-box([
   A field label $f$ introduces a selector function defined as:
@@ -783,7 +783,7 @@ are used to type an expression explicitly
 and may be used to resolve ambiguous typings due to overloading (see
 Section~\ref{default-decls}).  The value of the expression is just that of
 $italic("exp")$.  As with normal type signatures (see
-Section~\ref{type-signatures}), the declared type may be more specific than 
+Section~\ref{type-signatures}), the declared type may be more specific than
 the principal type derivable from $italic("exp")$, but it is an error to give a type that is more general than, or not comparable to, the principal type.
 
 #translation-box([
@@ -803,7 +803,7 @@ the principal type derivable from $italic("exp")$, but it is an error to give a 
 
 _Patterns_ appear in lambda abstractions, function definitions, pattern
 bindings, list comprehensions, do expressions, and case expressions.
-However, the 
+However, the
 first five of these ultimately translate into case expressions, so
 defining the semantics of pattern matching for case expressions is sufficient.
 
@@ -864,5 +864,137 @@ case e of { [x,y,z]  ->  if x==0 then True else False }
 ```
 
 ==== Informal Semantics of Pattern Matching
+
+Patterns are matched against values.  Attempting to match a pattern
+can have one of three results: it may _fail_; it may _succeed_, returning a binding for each variable in the pattern; or it
+may _diverge_ (i.e.~return $bot$).  Pattern matching proceeds from left to right, and outside to inside, according to the following rules:
+
+1. Matching the pattern $italic("var")$ against a value $v$ always succeeds and binds $italic("var")$ to $v$.
+2. Matching the pattern $~ italic("apat")$ against a value $v$ always succeeds.
+   The free variables in $italic("apat")$ are bound to the appropriate values if matching
+   $italic("apat")$ against $v$ would otherwise succeed, and to $bot$ if matching
+   $italic("apat")$ against $v$ fails or diverges.  (Binding does _not_ imply evaluation.)
+
+   Operationally, this means that no matching is done on a
+   $~italic("apat")$ pattern until one of the variables in $italic("apat")$ is used.
+   At that point the entire pattern is matched against the value, and if
+   the match fails or diverges, so does the overall computation.
+3. Matching the wildcard pattern `_` against any value always succeeds, and no binding is done.
+4. Matching the pattern $italic("con") italic("pat")$ against a value, where $italic("con")$ is a
+   constructor defined by `newtype`, depends on the value:
+   - If the value is of the form $italic("con") v$, then $italic("pat")$ is matched against $v$.
+   - If the value is $bot$, then $italic("pat")$ is matched against $bot$.
+   That is, constructors associated with
+   `newtype` serve only to change the type of a value.
+5. Matching the pattern $italic("con") italic("pat")_1 dots italic("pat")_n$ against a value, where $italic("con")$ is a
+   constructor defined by `data`, depends on the value:
+   - If the value is of the form $italic("con") v_1 dots v_n$,
+     sub-patterns are matched left-to-right against the components of the data value;
+     if all matches succeed, the overall match
+     succeeds; the first to fail or diverge causes the overall match to
+     fail or diverge, respectively.
+   - If the value is of the form $italic("con")' v_1 dots v_m$, where $italic("con")$ is a different
+     constructor to $italic("con")'$, the match fails.
+   - If the value is $bot$, the match diverges.
+6. Matching against a constructor using labeled fields is the same as
+   matching ordinary constructor patterns except that the fields are
+   matched in the order they are named in the field list.  All fields
+   listed must be declared by the constructor; fields may not be named
+   more than once.  Fields not named by the pattern are ignored (matched
+   against `_`).
+7. Matching a numeric, character, or string literal pattern $k$ against a value $v$
+   succeeds if $v mono("==") k$, where `==`
+   is overloaded based on the type of the pattern.  The match diverges if this test diverges.
+
+   The interpretation of numeric literals is exactly as described in Section~\ref{vars-and-lits};
+   that is, the overloaded function `fromInteger` or `fromRational` is
+   applied to an `Integer` or `Rational` literal (resp)
+   to convert it to the appropriate type.
+8. Matching an as-pattern $italic("var")mono("@")italic("apat")$ against a value $v$ is
+   the result of matching $italic("apat")$ against $v$, augmented with the binding of
+   $italic("var")$ to $v$.  If the match of $italic("apat")$ against $v$ fails or diverges,
+   then so does the overall match.
+
+Aside from the obvious static type constraints (for
+example, it is a static error to match a character against a
+boolean), the following static class constraints hold: 
+\begin{itemize}
+\item An integer
+literal pattern
+\index{integer literal pattern}
+can only be matched against a value in the class
+\mbox{\tt Num}.
+\item A floating literal pattern
+\index{floating literal pattern}
+can only be matched against a value
+in the class \mbox{\tt Fractional}.
+\end{itemize}
+
+It is sometimes helpful to distinguish two kinds of
+patterns.  Matching an _irrefutable pattern_
+is non-strict: the pattern matches even if the value to be matched is $bot$.
+Matching a _refutable_ pattern is strict: if the value to be matched
+is $bot$ the match diverges.
+The irrefutable patterns are as follows:
+a variable, a wildcard, $N italic("apat")$ where $N$ is a constructor
+defined by `newtype` and $italic("apat")$ is irrefutable (see Section~\ref{datatype-renaming}), 
+$italic("var")mono("@")italic("apat")$ where $italic("apat")$ is irrefutable,
+or of the form $~italic("apat")$ (whether or not $italic("apat")$ is irrefutable).
+All other patterns are _refutable_.
+
+Here are some examples:
+
+1. If the pattern `['a','b']` is matched against $['x',bot]$, then `'a'` _fails_ to match against `'x'`, and the result is a failed match.  But
+   if `['a','b']` is matched against $[bot,'x']$, then attempting to match `'a'` against $bot$ causes the match to _diverge_.
+2. These examples demonstrate refutable vs.~irrefutable
+   matching:
+
+   #table(
+    columns: 3,
+    align: (left, center, left),
+    stroke: none,
+    [`(\ ~(x,y) -> 0)` $bot$], $=>$, $0$,
+    [`(\  (x,y) -> 0)` $bot$], $=>$, $bot$,
+    [`(\ ~[x] -> 0) []`], $=>$, $0$,
+    [`(\ ~[x] -> x) []`], $=>$, $bot$,
+    [`(\ ~[x, ~(a,b)] -> x` $[(0,1), bot]$], $=>$, $(0,1)$,
+    [`(\ ~[x,  (a,b)] -> x` $[(0,1), bot]$], $=>$, $bot$,
+    [`(\ (x:xs) -> x:x:xs)` $bot$], $=>$, $bot$,
+    [`(\ ~(x:xs) -> x:x:xs)` $bot$], $=>$, $bot : bot : bot$,
+   )
+
+
+3. Consider the following declarations:
+   ```haskell
+   newtype N = N Bool
+   data    D = D !Bool
+   ```
+   These examples illustrate the difference in pattern matching
+   between types defined by `data` and `newtype`:
+   #table(
+    columns: 3,
+    align: (left, center, left),
+    stroke: none,
+    [`(\ (N True) -> True)` $bot$], $=>$, $bot$,
+    [`(\ (D True) -> True)` $bot$], $=>$, $bot$,
+    [`(\ ~(D True) -> True)` $bot$], $=>$, [`True`],
+   )
+
+   Additional examples may be found in Section~\ref{datatype-renaming}.
+
+Top level patterns in case expressions and the set of top level
+patterns in function or pattern bindings may have zero or more
+associated _guards_.  See
+Section~\ref{case} for the syntax and semantics of guards.
+
+The guard semantics have an influence on the
+strictness characteristics of a function or case expression.  In
+particular, an otherwise irrefutable pattern
+may be evaluated because of a guard.  For example, in
+```haskell
+f :: (Int,Int,Int) -> [Int] -> Int
+f ~(x,y,z) [a] | (a == y) = 1
+```
+both `a` and `y` will be evaluated by `==` in the guard.
 
 ==== Formal Semantics of Pattern Matching <subsec:formal-semantics-pattern-matching>
