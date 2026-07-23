@@ -155,6 +155,44 @@ information when an error occurs.
   // gconsym
   $italic("gconsym")$, $->$, $terminal(":") | nonterminal("qconsym")$, [],
 )
+
+Haskell provides special syntax to support infix notation.
+An _operator_ is a function that can be applied using infix 
+syntax (Section~\ref{operators}), or partially applied using a
+_section_ (Section~\ref{sections}).
+
+An _operator_ is either an _operator symbol_, such as `+` or `$$`,
+or is an ordinary identifier enclosed in grave accents (backquotes), such
+as #raw("`op`").  For example, instead of writing the prefix application
+`op x y`, one can write the infix application #raw("x `op` y").
+If no fixity declaration is given for `op` then it defaults
+to highest precedence and left associativity
+(see Section~\ref{fixity}).
+
+Dually, an operator symbol can be converted to an ordinary identifier
+by enclosing it in parentheses.  For example, `(+) x y` is equivalent
+to `x + y`, and `foldr (*) 1 xs` is equivalent to `foldr (\x y -> x*y) xs`.
+
+Special syntax is used to name some constructors for some of the
+built-in types, as found
+in the production for $italic("gcon")$ and $italic("literal")$.  These are described
+in Section~\ref{basic-types}.
+
+An integer literal represents the
+application of the function `fromInteger` to the
+appropriate value of type `Integer`.
+Similarly, a floating point literal stands for an application of `fromRational` to a value of type `Rational` (that is, `Ratio Integer`).
+
+#translation-box([
+  The integer literal $i$ is equivalent to $mono("fromInteger") i$,
+  where `fromInteger` is a method in class `Num` (see Section \ref{numeric-literals}).
+
+  The floating point literal $f$ is equivalent to $mono("fromRational") (n mono("Ratio.%") d)$, where `fromRational` is a method in class `Fractional` `Ratio.%` constructs a rational from two integers, as defined in
+the `Ratio` library.
+The integers $n$ and $d$ are chosen so that $n \/ d = f$.
+])
+
+
 === Curried Applications and Lambda Abstractions
 
 #table(
