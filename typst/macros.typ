@@ -22,3 +22,10 @@
   inset: 10pt,
   [*Translation:* #x]
 )
+
+#let monomorphism-box(x) = box(
+  stroke: black,
+  width: 1fr,
+  inset: 10pt,
+  [*The monomorphism restriction*\ #x]
+)
