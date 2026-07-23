@@ -773,7 +773,121 @@ cannot be confused with ordinary variables.
 
 ==== Construction Using Field Labels
 
+#table(
+  columns: 4,
+  align: (left, center, left, left),
+  stroke: none,
+  $italic("aexp")$, $->$, $nonterminal("qcon") terminal("{") nonterminal("fbind")_1 terminal(",") dots terminal(",") nonterminal("fbind")_n terminal("}")$, [(labeled construction, $n >= 0$)],
+  $italic("fbind")$, $->$, $nonterminal("qvar") terminal("=") nonterminal("exp")$,[],
+)
+
+A constructor with labeled fields may be used to construct a value 
+in which the components are specified by name rather than by position.
+Unlike the braces used in declaration lists, these are not subject to
+layout; the `{` and `}` characters must be explicit. 
+(This is also true of field updates and field patterns.)
+Construction using field labels is subject to the following constraints:
+
+- Only field labels declared with the specified constructor may be mentioned. 
+- A field label may not be mentioned more than once.
+- Fields not mentioned are initialized to $bot$.
+- A compile-time error occurs when any strict fields (fields
+  whose declared types are prefixed by `!`) are omitted during
+  construction.  Strict fields are discused in Section~\ref{strictness-flags}.
+
+The expression `F {}`, where `F` is a data constructor, is legal 
+_whether or not `F` was declared with record syntax_ (provided `F` has no strict fields --- see the fourth bullet above); 
+it denotes $F bot_1 dots bot_n$, where $n$ is the arity of `F`.
+
+#translation-box([
+  In the binding $f = v$, the field $f$ labels $v$.
+  #align(center)[
+    #table(
+      columns: 3,
+      align: (left, center, left),
+      stroke: none,
+      $C { italic("bs") }$, $=$, $C (italic("pick")^C_1 italic("bs") mono("undefined")) dots (italic("pick")^C_k italic("bs") mono("undefined"))$,
+    )
+  ]
+  where $k$ is the arity of $C$.
+
+  The auxiliary function $italic("pick")^C_i italic("bs") d$ is defined as follows:
+  #quote(block: true)[
+    If the $i$th component of a constructor $C$ has the
+    field label $f$, and if $f = v$ appears in the binding list $italic("bs")$
+    , then $italic("pick")^C_i italic("bs") d$ is $v$.  Otherwise, $italic("pick")^C_i italic("bs") d$ is
+    the default value $d$.
+  ]
+])
 ==== Updates Using Field Labels
+
+#table(
+  columns: 4,
+  align: (left, center, left, left),
+  stroke: none,
+  $italic("aexp")$, $->$, $nonterminal("aexp")_(chevron.l nonterminal("qcon") chevron.r) terminal("{") nonterminal("fbind")_1 terminal(",") dots terminal(",") nonterminal("fbind")_n terminal("}")$, [(labeled update, $n >= 1$)]
+)
+
+Values belonging to a datatype with field labels may be
+non-destructively updated.  This creates a new value in which the
+specified field values replace those in the existing value.  
+Updates are restricted in the following ways:
+
+- All labels must be taken from the same datatype.
+- At least one constructor must define all of the labels
+  mentioned in the update.
+- No label may be mentioned more than once.
+- An execution error occurs when the value being updated does
+  not contain all of the specified labels.
+
+#translation-box([
+  Using the prior definition of $italic("pick")$,
+  #align(center)[
+    #table(
+      columns: 3,
+      align: (left, center, left),
+      stroke: none,
+      $e {italic("bs")}$, $=$, $mono("case") e mono("of")$,
+      $$, $$,$quad C_1 v_1 dots v_(k_1) mono("->") C_1 (italic("pick")^(C_1)_1 italic("bs") v_1) dots (italic("pick")^(C_1)_(k_1) italic("bs") v_(k_1))$,
+      $$, $$, $quad quad dots$,
+      $$, $$,$quad C_j v_1 dots v_(k_j) mono("->") C_j (italic("pick")^(C_j)_1 italic("bs") v_1) dots (italic("pick")^(C_j)_(k_j) italic("bs") v_(k_j))$,
+      $$, $$,$quad mono("_ -> error \"Update error\"")$
+    )
+  ]
+  where ${ C_1, dots, C_j}$ is the set of constructors containing all labels in $italic("bs")$, and $k_i$ is the arity of $C_i$.
+
+])
+
+Here are some examples using labeled fields:
+```haskell
+data T    = C1 {f1,f2 :: Int}
+          | C2 {f1 :: Int,
+                f3,f4 :: Char}
+```
+
+#table(
+  columns: 2,
+  align: (left, left),
+  stroke: none,
+  table.vline(x: 0),
+  table.vline(x: 1),
+  table.vline(x: 2),
+  table.hline(),
+  table.header([Expression], [Translation]),
+  table.hline(),
+  [`C1 {f1 = 3}`],[`C1 3 undefined`],
+  [`C2 {f1 = 1, f4 = 'A', f3 = 'B'}`],[`C2 1 'B' 'A'`],
+  [`x {f1 = 1}`],[`case x of C1 _ f2    -> C1 1 f2`],
+  [],[`          C2 _ f3 f4 -> C2 1 f3 f4`],
+  table.hline(),
+)
+
+The field `f1` is common to both constructors in T.  This
+example translates expressions using constructors in field-label
+notation into equivalent expressions using the same constructors
+without field labels. 
+A compile-time error will result if no single constructor
+defines the set of field labels used in an update, such as `x {f2 = 1, f3 = 'x'}`.
 
 === Expression Type-Signatures
 
