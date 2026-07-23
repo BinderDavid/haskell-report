@@ -467,6 +467,61 @@ See Section~\ref{enum-class} for more details of which `Prelude` types are in `E
   $$, $|$, $terminal("let") nonterminal("decls")$, [(local declaration)],
   $$, $|$, $nonterminal("exp")$, [(boolean guard)],
 )
+
+A _list comprehension_ has the form $[e | q_1, dots, q_n]$, $n >= 1$,
+where the $q_i$ qualifiers are either
+
+- _generators_ of the form $p mono("<-") e$, where $p$ is a
+  pattern (see Section~\ref{pattern-matching}) of type $t$ and $e$ is an
+  expression of type $[t]$
+- _local bindings_ that provide new definitions for use in
+  the generated expression $e$ or subsequent boolean guards and generators
+- _boolean guards_, which are arbitrary expressions of
+  type `Bool`.
+
+
+Such a list comprehension returns the list of elements
+produced by evaluating $e$ in the successive environments
+created by the nested, depth-first evaluation of the generators in the
+qualifier list.  Binding of variables occurs according to the normal
+pattern matching rules (see Section~\ref{pattern-matching}), and if a
+match fails then that element of the list is simply skipped over.  Thus:
+```haskell
+[ x |  xs   <- [ [(1,2),(3,4)], [(5,4),(3,2)] ], 
+      (3,x) <- xs ]
+```
+yields the list `[4,2]`.  If a qualifier is a boolean guard, it must evaluate
+to `True` for the previous pattern match to succeed.  
+As usual, bindings in list comprehensions can shadow those in outer scopes; for example:
+$
+  [x | x mono("<-") x, x mono("<-") x] = [z | y mono("<-") x, z mono("<-") y]
+$
+#translation-box([
+  List comprehensions satisfy these identities, which may be used as a translation into the kernel:
+  #align(center)[
+    #table(
+      columns: 3,
+      align: (left, center, left),
+      stroke: none,
+      $[e | mono("True")]$,$=$, $[e]$,
+      $[e | q]$,$=$,$[e | q, mono("True")]$,
+      $[e | b, Q]$, $=$, $mono("if") b mono("then") [e, Q] mono("else") []$,
+      $[e | p mono("<-") l, Q]$, $=$, $mono("let ok") = [e | Q]$,
+      $$, $$, $mono("      ok") \_ = []$,
+      $$, $$, $mono("in concatMap ok") l$,
+      $[e | mono("let") italic("decls"), Q]$, $=$, $mono("let") italic("decls") mono("in") [e | Q]$
+    )
+  ]
+  where $e$ ranges over expressions, $p$ over
+  patterns, $l$ over list-valued expressions, $b$ over
+  boolean expressions, $italic("decls")$ over declaration lists, $q$ over qualifiers, and $Q$ over sequences of qualifiers.  `ok` is a fresh variable.
+  The function `concatMap`, and boolean value `True`, are defined in the Prelude.
+])
+
+As indicated by the translation of list comprehensions, variables
+bound by `let` have fully polymorphic types while those defined by
+`<-` are lambda bound and are thus monomorphic (see Section \ref{monomorphism}).
+
 === Let Expressions
 
 #table(
