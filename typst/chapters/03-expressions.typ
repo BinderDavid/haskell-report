@@ -672,9 +672,104 @@ end with a type signature --- indeed that is why a $italic("guard")$ contains an
 
 === Do Expressions
 
+#table(
+  columns: 4,
+  align: (left, center, left, left),
+  stroke: none,
+  $italic("lexp")$, $->$, $terminal("do {") nonterminal("stmts") terminal("}")$, [(do expression)],
+  $italic("stmts")$, $->$, $nonterminal("stmt")_1 dots nonterminal("stmt")_n nonterminal("exp") [terminal(";")]$, $(n >= 0)$,
+  $italic("stmt")$, $->$, $nonterminal("exp") terminal(";")$, [],
+  $$,$|$,$nonterminal("pat") terminal("<-") nonterminal("exp") terminal(";")$,[],
+  $$,$|$,$terminal("let") nonterminal("decls") terminal(";")$,[],
+  $$,$|$,$terminal(";")$,[(empty statement)],
+)
+
+A _do expression_ provides a more conventional syntax for monadic programming.
+It allows an expression such as 
+```haskell
+  putStr "x: "    >> 
+  getLine         >>= \l ->
+  return (words l)
+```
+to be written in a more traditional way as:
+```haskell
+  do putStr "x: "
+     l <- getLine
+     return (words l)
+```
+
+#translation-box([
+  Do expressions satisfy these identities, which may be
+  used as a translation into the kernel, after eliminating empty $italic("stmts")$:
+  #align(center)[
+    #table(
+      columns: 3,
+      align: (left, center, left),
+      stroke: none,
+      $mono("do") {e}$, $=$, $e$,
+      $mono("do") {e ; italic("stmts")}$, $=$, $e mono(">>") mono("do") {italic("stmts")}$,
+      $mono("do") {p mono("<-") e; italic("stmts")}$, $=$,$mono("let ok") p = mono("do") { italic("stmts")}$,
+      $$,$$,$mono("      ok") \_ = mono("fail \"...\"")$,
+      $$,$$,$mono("in") e mono(">>=") mono("ok")$,
+      $mono("do") {mono("let") italic("decls"); italic("stmts")}$, $=$,$mono("let") italic("decls") mono("in do") { italic("stmts")}$
+    )
+  ]
+  The ellipsis "`...`" stands for a compiler-generated error message,
+  passed to `fail`, preferably giving some indication of the location
+  of the pattern-match failure;
+  the functions `>>`, `>>=`, and `fail` are operations in the class `Monad`,
+  as defined in the Prelude; and `ok` is a fresh identifier. 
+])
+
+As indicated by the translation of `do`, variables bound by `let` have fully polymorphic types while those defined by `<-` are lambda bound and are thus monomorphic.
+
 === Datatypes with Field Labels
 
+A datatype declaration may optionally define field labels
+(see Section~\ref{datatype-decls}).
+These field labels can be used to 
+construct, select from, and update fields in a manner
+that is independent of the overall structure of the datatype.
+
+Different datatypes cannot share common field labels in the same scope.
+A field label can be used at most once in a constructor.
+Within a datatype, however, a field label can be used in more
+than one constructor provided the field has the same typing in all
+constructors. To illustrate the last point, consider:
+```haskell
+  data S = S1 { x :: Int } | S2 { x :: Int }   -- OK
+  data T = T1 { y :: Int } | T2 { y :: Bool }  -- BAD
+```
+Here `S` is legal but `T` is not, because `y` is given 
+inconsistent typings in the latter.
+
 ==== Field Selection
+
+#table(
+  columns: 3,
+  align: (left, center, left),
+  stroke: none,
+  $italic("aexp")$, $->$, $nonterminal("qvar")$
+)
+
+Field labels are used as selector functions.
+When used as a variable, a field label serves as a function that extracts the field from an object.
+Selectors are top level bindings and so they
+may be shadowed by local variables but cannot conflict with 
+other top level bindings of the same name.  This shadowing only
+affects selector functions; in record construction (Section~\ref{record-construction}) 
+and update (Section~\ref{record-update}), field labels
+cannot be confused with ordinary variables. 
+
+#translation-box([
+  A field label $f$ introduces a selector function defined as:
+  $
+    f x = mono("case") x mono("of") { C_1 p_(11) dots p_(1k) mono("->") e_1 ; dots ; C_n p_(n 1) dots p_(n k) mono("->") e_n}
+  $
+  where $C_1 dots C_n$ are all the constructors of the datatype containing a
+  field labeled with $f$, $p_(i j)$ is $y$ when $f$ labels the $j$th
+  component of $C_i$ or $\_$ otherwise, and $e_i$ is $y$ when some field in $C_i$ has a label of $f$ or `undefined` otherwise.
+])
 
 ==== Construction Using Field Labels
 
@@ -682,9 +777,91 @@ end with a type signature --- indeed that is why a $italic("guard")$ contains an
 
 === Expression Type-Signatures
 
+
+_Expression type-signatures_ have the form $e mono("::") t$, where $e$ is an expression and $t$ is a type (Section~\ref{type-syntax}); they
+are used to type an expression explicitly
+and may be used to resolve ambiguous typings due to overloading (see
+Section~\ref{default-decls}).  The value of the expression is just that of
+$italic("exp")$.  As with normal type signatures (see
+Section~\ref{type-signatures}), the declared type may be more specific than 
+the principal type derivable from $italic("exp")$, but it is an error to give a type that is more general than, or not comparable to, the principal type.
+
+#translation-box([
+  #align(center)[
+    #table(
+      columns: 3,
+      align: (left, center, left),
+      stroke: none,
+      $e mono("::") t$, $=$, $mono("let") { v mono("::") t; v = e} mono("in") v$
+    )
+  ]
+])
+
+
+
 === Pattern Matching
 
+_Patterns_ appear in lambda abstractions, function definitions, pattern
+bindings, list comprehensions, do expressions, and case expressions.
+However, the 
+first five of these ultimately translate into case expressions, so
+defining the semantics of pattern matching for case expressions is sufficient.
+
 ==== Patterns
+
+Patterns have this syntax:
+#table(
+  columns: 4,
+  align: (left, center, left, left),
+  stroke: none,
+  // pat
+  $italic("pat")$,$->$,$nonterminal("lpat") nonterminal("qconop") nonterminal("pat")$,[(infix constructor)],
+  $$,$|$,$nonterminal("lpat")$,$$,
+  // lpat
+  $italic("lpat")$,$->$,$nonterminal("apat")$,$$,
+  $$,$|$,$terminal("-") (nonterminal("integer") | nonterminal("float"))$,[(negative literal)],
+  $$,$|$,$nonterminal("gcon") nonterminal("apat")_1 dots nonterminal("apat")_k $,[(arity $italic("gcon") = k$, $k >= 1$)],
+  // apat
+  $italic("apat")$,$->$,$nonterminal("var") [terminal("@") nonterminal("apat")]$,[(as pattern)],
+  $$,$|$,$nonterminal("gcon")$,[(arity $italic("gcon") = 0$)],
+  $$,$|$,$nonterminal("qcon") terminal("{") nonterminal("fpat")_1 terminal(",") dots terminal(",") nonterminal("fpat")_k terminal("}")$,[(labeled pattern, $k >= 0$)],
+  $$,$|$,$nonterminal("literal")$,[],
+  $$,$|$,$terminal("_")$,[(wildcard)],
+  $$,$|$,$terminal("(") nonterminal("pat") terminal(")")$,[(parenthesized pattern)],
+  $$,$|$,$terminal("(") nonterminal("pat")_1 terminal(",") dots terminal(",") nonterminal("pat") terminal(")")$, [(tuple pattern, $k >= 2$)],
+  $$,$|$,$terminal("[") nonterminal("pat")_1 terminal(",") dots terminal(",") nonterminal("pat") terminal("]")$, [(list pattern, $k >= 1$)],
+  $$,$|$,$terminal("~") nonterminal("apat")$,[(irrefutable pattern)],
+  // fpat
+  $italic("fpat")$,$->$,$nonterminal("qvar") terminal("=") nonterminal("pat")$,$$,
+)
+
+All patterns must be _linear_---no variable may appear more than once.
+For example, this definition is illegal:
+```haskell
+f (x,x) = x     -- ILLEGAL; x used twice in pattern
+```
+Patterns of the form $italic("var")mono("@")italic("pat")$ are called _as-patterns_,
+and allow one to use $italic("var")$
+as a name for the value being matched by $italic("pat")$.  For example,
+```haskell
+case e of { xs@(x:rest) -> if x==0 then rest else xs }
+```
+is equivalent to:
+```haskell
+let { xs = e } in
+  case xs of { (x:rest) -> if x==0 then rest else xs }
+```
+
+Patterns of the form `_` are _wildcards_ and are useful when some part of a pattern
+is not referenced on the right-hand-side.  It is as if an
+identifier not used elsewhere were put in its place.  For example,
+```haskell
+case e of { [x,_,_]  ->  if x==0 then True else False }
+```
+is equivalent to:
+```haskell
+case e of { [x,y,z]  ->  if x==0 then True else False }
+```
 
 ==== Informal Semantics of Pattern Matching
 
