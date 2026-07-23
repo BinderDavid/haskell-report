@@ -17,34 +17,34 @@ what it is bound to.
   stroke: none,
   align: (left, center, left, left),
   // exp
-  $italic("exp")$, $->$, $nonterminal("infixexp") terminal("::") [italic("context") terminal("=>")] italic("type")$, [(expression type signature)],
+  $italic("exp")$, $->$, $nonterminal("infixexp") terminal("::") [nonterminal("context") terminal("=>")] nonterminal("type")$, [(expression type signature)],
   [],$|$, $nonterminal("infixexp")$,[],
   // infixexp
-  $italic("infixexp")$, $->$, $nonterminal("lexp") italic("qop") nonterminal("infixexp")$, [],
+  $italic("infixexp")$, $->$, $nonterminal("lexp") nonterminal("qop") nonterminal("infixexp")$, [],
   [], $|$, $terminal("-") nonterminal("infixexp")$, [(prefix negation)],
   [], $|$, $nonterminal("lexp")$, [],
   // lexp
-  $italic("lexp")$, $->$, $terminal("\\") italic("apat")_1 dots italic("apat")_n terminal("->") nonterminal("exp")$, [(lambda abstraction, $n >= 1$)],
-  [], $|$, $terminal("let") italic("decls") terminal("in") nonterminal("exp")$, [(let expression)],
+  $italic("lexp")$, $->$, $terminal("\\") nonterminal("apat")_1 dots nonterminal("apat")_n terminal("->") nonterminal("exp")$, [(lambda abstraction, $n >= 1$)],
+  [], $|$, $terminal("let") nonterminal("decls") terminal("in") nonterminal("exp")$, [(let expression)],
   [], $|$, $terminal("if") nonterminal("exp") [terminal(";")] terminal("then") nonterminal("exp") [terminal(";")] terminal("else") nonterminal("exp")$, [(conditional)],
-  [], $|$, $terminal("case") nonterminal("exp") terminal("of") terminal("{") italic("alts") terminal("}")$, [(case expression)],
-  [], $|$, $terminal("do") terminal("{") italic("stmts") terminal("}")$, [(do expression)],
+  [], $|$, $terminal("case") nonterminal("exp") terminal("of") terminal("{") nonterminal("alts") terminal("}")$, [(case expression)],
+  [], $|$, $terminal("do") terminal("{") nonterminal("stmts") terminal("}")$, [(do expression)],
   [], $|$, $nonterminal("fexp")$, [],
   // fexp
   $italic("fexp")$, $->$, $[nonterminal("fexp")] nonterminal("aexp")$, [(function application)],
   // aexp
-  $italic("aexp")$, $->$, $italic("qvar")$, [(variable)],
-  [], $|$, $italic("gcon")$, [(general constructor)],
+  $italic("aexp")$, $->$, $nonterminal("qvar")$, [(variable)],
+  [], $|$, $nonterminal("gcon")$, [(general constructor)],
   [], $|$, $nonterminal("literal")$, [],
   [], $|$, $terminal("(") nonterminal("exp") terminal(")")$, [(parenthesized expression)],
   [], $|$, $terminal("(") nonterminal("exp")_1 terminal(",") dots terminal(",") nonterminal("exp")_k terminal(")")$, [(tuple, $k>=2$)],
   [], $|$, $terminal("[") nonterminal("exp")_1 terminal(",") dots terminal(",") nonterminal("exp")_k terminal("]")$, [(list, $k>=1$)],
   [], $|$, $terminal("[") nonterminal("exp")_1 [terminal(",") nonterminal("exp")_2] terminal("..") [nonterminal("exp")_3] terminal("]")$, [(arithmetic sequence)],
-  [], $|$, $terminal("[") nonterminal("exp") terminal("|") italic("qual")_1 terminal(",") dots terminal(",") italic("qual")_n terminal("]")$, [(list comprehension, $n>=1$)],
+  [], $|$, $terminal("[") nonterminal("exp") terminal("|") nonterminal("qual")_1 terminal(",") dots terminal(",") nonterminal("qual")_n terminal("]")$, [(list comprehension, $n>=1$)],
   [], $|$, $terminal("(") nonterminal("infixexp") nonterminal("qop") terminal(")")$, [(left section)],
   [], $|$, $terminal("(") nonterminal("qop")_(chevron.l terminal("-") chevron.r) nonterminal("infixexp") terminal(")")$, [(right section)],
-  [], $|$, $italic("qcon") terminal("{") italic("fbind")_1 terminal(",") dots terminal(",") italic("fbind")_n terminal("}")$, [(labeled construction, $n>=0$)],
-  [], $|$, $nonterminal("aexp")_(chevron.l italic("qcon") chevron.r) terminal("{") italic("fbind")_1 terminal(",") dots terminal(",") italic("fbind")_n terminal("}")$, [(labeled update, $n>=1$)],
+  [], $|$, $nonterminal("qcon") terminal("{") nonterminal("fbind")_1 terminal(",") dots terminal(",") nonterminal("fbind")_n terminal("}")$, [(labeled construction, $n>=0$)],
+  [], $|$, $nonterminal("aexp")_(chevron.l nonterminal("qcon") chevron.r) terminal("{") nonterminal("fbind")_1 terminal(",") dots terminal(",") nonterminal("fbind")_n terminal("}")$, [(labeled update, $n>=1$)],
 )
 
 
@@ -119,6 +119,42 @@ information when an error occurs.
 
 === Variables, Constructors, Operators, and Literals
 
+#table(
+  columns: 4,
+  align: (left, center, left, left),
+  stroke: none,
+  // aexp
+  $italic("aexp")$, $->$, $nonterminal("qvar")$, [(variable)],
+  $$,$|$,$nonterminal("gcon")$,[(general constructor)],
+  $$,$|$,$nonterminal("literal")$,[],
+  // gcon
+  $italic("gcon")$, $->$, $terminal("()")$, [],
+  $$,$|$,$terminal("[]")$,[],
+  $$,$|$,$terminal("(,") {terminal(",")} terminal(")")$,[],
+  $$,$|$,$nonterminal("qcon")$,[],
+  // var
+  $italic("var")$, $->$, $nonterminal("varid") | terminal("(") nonterminal("varsym") terminal(")")$, [(variable)],
+  // qvar
+  $italic("qvar")$, $->$, $nonterminal("qvarid") | terminal("(") nonterminal("qvarsym") terminal(")")$, [(qualified variable)],
+  // con
+  $italic("con")$, $->$, $nonterminal("conid") | terminal("(") nonterminal("consym") terminal(")")$, [(constructor)],
+  // qcon
+  $italic("qcon")$, $->$, $nonterminal("qconid") | terminal("(") nonterminal("gconsym") terminal(")")$, [(qualified constructor)],
+  // varop
+  $italic("varop")$, $->$, $nonterminal("varsym") | terminal("`") nonterminal("varid") terminal("`")$, [(variable operator)],
+  // qvarop
+  $italic("qvarop")$, $->$, $nonterminal("qvarsym") | terminal("`") nonterminal("qvarid") terminal("`")$, [(qualified variable operator)],
+  // conop
+  $italic("conop")$, $->$, $nonterminal("consym") | terminal("`") nonterminal("conid") terminal("`")$, [(constructor operator)],
+  // qconop
+  $italic("qconop")$, $->$, $nonterminal("gconsym") | terminal("`") nonterminal("qconid") terminal("`")$, [(qualified constructor operator)],
+  // op
+  $italic("op")$, $->$, $nonterminal("varop") | nonterminal("conop")$, [(operator)],
+  // qop
+  $italic("qop")$, $->$, $nonterminal("qvarop") | nonterminal("qconop")$, [(qualified operator)],
+  // gconsym
+  $italic("gconsym")$, $->$, $terminal(":") | nonterminal("qconsym")$, [],
+)
 === Curried Applications and Lambda Abstractions
 
 #table(
@@ -126,7 +162,7 @@ information when an error occurs.
   align: (left, center, left, left),
   stroke: none,
   $italic("fexp")$, $->$, $[nonterminal("fexp")] nonterminal("aexp")$, [(function application)],
-  $italic("lexp")$, $->$, $terminal("\\") italic("apat")_1 med dots med italic("apat")_n terminal("->") nonterminal("exp")$, [(lambda abstraction $n>=1$)]
+  $italic("lexp")$, $->$, $terminal("\\") nonterminal("apat")_1 med dots med nonterminal("apat")_n terminal("->") nonterminal("exp")$, [(lambda abstraction $n>=1$)]
 )
 
 _Function application_ is written $e_1 med e_2$.
@@ -162,7 +198,7 @@ pattern fails to match, then the result is $bot$.
   $italic("infixexp")$, $->$, $nonterminal("lexp") med nonterminal("qop") med nonterminal("infixexp")$, [],
   [], $|$, $terminal("-") nonterminal("infixexp")$, [(prefix negation)],
   [], $|$, nonterminal("lexp"), [],
-  $italic("qop")$, $->$, $italic("qvarop") | italic("qconop")$, [(qualified operator)],
+  $italic("qop")$, $->$, $nonterminal("qvarop") | nonterminal("qconop")$, [(qualified operator)],
 )
 
 The form $e_1 italic("qop") e_2$ is the infix application of binary operator $italic("qop")$ to expressions $e_1$ and $e_2$.
@@ -201,9 +237,7 @@ Similarly, `(-)` is syntax for `\x y -> x-y`, as with any infix operator, and do
   $italic("aexp")$, $->$, $terminal("(") nonterminal("infixexp") med nonterminal("qop") terminal(")")$, [(left section)],
   [], $|$, $terminal("(") nonterminal("qop")_(chevron.l terminal("-") chevron.r) nonterminal("infixexp") terminal(")")$, [(right section)]
 )
-$
-  &|  && text("")
-$
+
 
 _Sections_ are written as $(italic("op") e)$ or $(e italic("op"))$, where
 $italic("op")$ is a binary operator and $e$ is an expression.
@@ -279,19 +313,19 @@ value of $e_1$ is `True`, $e_3$ if $e_1$ is `False`, and $bot$ otherwise.
   align: (left, center, left, left),
   stroke: none,
   // infixexp
-  $italic("infixexp")$, $->$, $nonterminal("exp")_1 italic("qop") nonterminal("exp")_2$, [],
+  $italic("infixexp")$, $->$, $nonterminal("exp")_1 nonterminal("qop") nonterminal("exp")_2$, [],
   // aexp
   $italic("aexp")$, $->$, $terminal("[") nonterminal("exp")_1 terminal(",") dots terminal(",") nonterminal("exp")_k terminal("]")$, $(k >= 1)$,
-  $$, $|$, $italic("gcon")$, [],
+  $$, $|$, $nonterminal("gcon")$, [],
   // gcon
   $italic("gcon")$, $->$, $terminal("[]")$, [],
-  [], $|$, $italic("qcon")$, [],
+  [], $|$, $nonterminal("qcon")$, [],
   // qcon
-  $italic("qcon")$, $->$, $terminal("(") italic("gconsym") terminal(")")$, [],
+  $italic("qcon")$, $->$, $terminal("(") nonterminal("gconsym") terminal(")")$, [],
   // qop
-  $italic("qop")$, $->$, $italic("qconop")$, [],
+  $italic("qop")$, $->$, $nonterminal("qconop")$, [],
   // qconop
-  $italic("qconop")$, $->$, $italic("gconsym")$,[],
+  $italic("qconop")$, $->$, $nonterminal("gconsym")$,[],
   // gconsym
   $italic("gconsym")$, $->$, $terminal(":")$, [],
 )
@@ -321,7 +355,7 @@ It is a right-associative operator, with precedence level 5 (Section~\ref{fixity
   align: (left, center, left, left),
   stroke: none,
   $italic("aexp")$, $->$, $terminal("(") nonterminal("exp")_1 terminal(",") dots terminal(",") nonterminal("exp")_k terminal(")")$, $(k >= 2)$,
-  [], $|$, $italic("qcon")$, [],
+  [], $|$, $nonterminal("qcon")$, [],
   $italic("qcon")$, $->$, $terminal("(") terminal(","){ terminal(",")}terminal(")")$, []
 )
 
@@ -345,7 +379,7 @@ in the Prelude (see Section~\ref{basic-tuples} and @chapter:standard-prelude[Cha
   columns: 3,
   align: (left, center, left),
   stroke: none,
-  $italic("aexp")$, $->$, $italic("gcon")$,
+  $italic("aexp")$, $->$, $nonterminal("gcon")$,
   [], $|$, $terminal("(") nonterminal("exp") terminal(")")$,
   $italic("gcon")$, $->$, $terminal("()")$
 )
@@ -390,9 +424,9 @@ See Section~\ref{enum-class} for more details of which `Prelude` types are in `E
   columns: 4,
   align: (left, center, left, left),
   stroke: none,
-  $italic("aexp")$, $->$, $terminal("[") nonterminal("exp") terminal("|") italic("qual")_1 terminal(",") dots terminal(",") italic("qual")_n terminal("]")$, [(list comprehension, $n >= 1$)],
-  $italic("qual")$, $->$, $italic("pat") terminal("<-") nonterminal("exp")$, [(generator)],
-  $$, $|$, $terminal("let") italic("decls")$, [(local declaration)],
+  $italic("aexp")$, $->$, $terminal("[") nonterminal("exp") terminal("|") nonterminal("qual")_1 terminal(",") dots terminal(",") nonterminal("qual")_n terminal("]")$, [(list comprehension, $n >= 1$)],
+  $italic("qual")$, $->$, $nonterminal("pat") terminal("<-") nonterminal("exp")$, [(generator)],
+  $$, $|$, $terminal("let") nonterminal("decls")$, [(local declaration)],
   $$, $|$, $nonterminal("exp")$, [(boolean guard)],
 )
 === Let Expressions
@@ -401,7 +435,7 @@ See Section~\ref{enum-class} for more details of which `Prelude` types are in `E
   columns: 3,
   align: (left, center, left),
   stroke: none,
-  $italic("lexp")$, $->$, $terminal("let") italic("decls") terminal("in") nonterminal("exp")$
+  $italic("lexp")$, $->$, $terminal("let") nonterminal("decls") terminal("in") nonterminal("exp")$
 )
 
 === Case Expressions
