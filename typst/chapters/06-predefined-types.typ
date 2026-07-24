@@ -7,7 +7,7 @@ the Prelude.
 Most functions are not described in detail here as they
 can easily be understood from their definitions as given in @chapter:standard-prelude[Chapter]
 Other predefined types such as arrays, complex numbers, and rationals
-are defined in @part:libraries[Part]
+are defined in part:libraries[Part]
 
 === Standard Haskell Types
 
@@ -125,7 +125,7 @@ classes.  @chapter:basic-input-output[Chapter] describes I/O operations.
 operations.  It is an instance of `Show` and `Eq`.  Values of this type
 are constructed by the various I/O functions and are not presented in
 any further detail in this report.  The Prelude contains a few
-I/O functions (defined in Section~\ref{preludeio}), and @part:libraries[Part]
+I/O functions (defined in Section~\ref{preludeio}), and part:libraries[Part]
 contains many more.
 
 ==== Other Types

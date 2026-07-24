@@ -109,65 +109,6 @@
 
 #include "chapters/12-compiler-pragmas.typ"
 
-= The Haskell 2010 Libraries <part:libraries>
-
-== Control.Monad <chapter:control.monad>
-
-== Data.Array
-
-== Data.Bits
-
-== Data.Char
-
-== Data.Complex
-
-== Data.Int
-
-== Data.Ix
-
-== Data.List
-
-== Data.Maybe
-
-== Data.Ratio
-
-== Data.Word
-
-== Foreign
-
-== Foreign.C
-
-== Foreign.C.Error
-
-== Foreign.C.String
-
-== Foreign.C.Types
-
-== Foreign.ForeignPtr
-
-== Foreign.Marshal
-
-== Foreign.Marshal.Alloc
-
-== Foreign.Marshal.Array
-
-== Foreign.Marshal.Utils
-
-== Foreign.Ptr
-
-== Foreign.StablePtr
-
-== Foreign.Storable
-
-== Numeric
-
-== System.Environment
-
-== System.Exit
-
-== System.IO
-
-== System.IO.Error
 
 #pagebreak()
 
