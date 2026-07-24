@@ -7,7 +7,13 @@
   (editor)
 ]
 
-#v(15cm)
+#v(7cm)
+
+#align(center)[
+  #text(size: 30pt)[DRAFT]
+]
+
+#v(6cm)
 
 #align(center)[
   #text(style: "italic")[Copyright notice.]

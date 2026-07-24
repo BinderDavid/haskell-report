@@ -1,13 +1,13 @@
 Haskell is a general purpose, purely functional
 programming language incorporating many recent innovations in
-programming language design.  Haskell provides
-higher-order functions,
+programming language design.
+Haskell provides higher-order functions,
 non-strict semantics, static polymorphic typing, user-defined
 algebraic datatypes, pattern-matching, list comprehensions, a module
 system, a monadic I/O system, and a rich set of primitive datatypes,
 including lists,
 arrays, arbitrary and fixed precision integers, and floating-point
-numbers.  Haskell is both the culmination
+numbers. Haskell is both the culmination
 and solidification of many years of research on non-strict functional
 languages.
 
@@ -15,7 +15,7 @@ This report defines the syntax for Haskell programs and an
 informal abstract semantics for the meaning of such
 programs.
 We leave as implementation dependent the ways in which Haskell programs are to be
-manipulated, interpreted, compiled, etc.  This includes such issues as
+manipulated, interpreted, compiled, etc. This includes such issues as
 the nature of programming environments and
 the error messages returned for undefined programs
 (i.e.~programs that formally evaluate to $bot$).
@@ -26,22 +26,22 @@ In this section, we describe the abstract syntactic and semantic structure of
 Haskell, as well as how it relates to the organization of the
 rest of the report.
 
-+ At the topmost level a Haskell program is a set of _modules_, described in @chapter:modules[Chapter]
++ At the topmost level a Haskell program is a set of _modules_, described in @chapter:modules.
   Modules provide a way to control namespaces and to re-use software in large programs.
 + The top level of a module consists of a collection of
-  _declarations_, of which there are several kinds, all described in @chapter:declarations[Chapter]Declarations define things such as ordinary values, datatypes, type classes, and fixity information.
+  _declarations_, of which there are several kinds, all described in @chapter:declarations.
+  Declarations define things such as ordinary values, datatypes, type classes, and fixity information.
 
-+ At the next lower level are _expressions_, described
-  in @chapter:expressions[Chapter]
++ At the next lower level are _expressions_, described in @chapter:expressions.
   An expression denotes a _value_ and has a _static type_; expressions are at the heart of Haskell programming "in the small."
 
-+ At the bottom level is Haskell's _lexical structure_, defined in @chapter:lexical-structure[Chapter]
++ At the bottom level is Haskell's _lexical structure_, defined in @chapter:lexical-structure.
   The lexical structure captures the concrete representation of Haskell programs in text files.
 
 This report proceeds bottom-up with respect to Haskell's syntactic structure.
 
-The chapters not mentioned above are @chapter:predefined-types[Chapter], which
-describes the standard built-in datatypes and classes in Haskell, and @chapter:basic-input-output[Chapter], which discusses the I/O facility in Haskell
+The chapters not mentioned above are @chapter:predefined-types, which
+describes the standard built-in datatypes and classes in Haskell, and @chapter:basic-input-output, which discusses the I/O facility in Haskell
 (i.e.~how Haskell programs communicate with the outside world).
 Also, there are several chapters describing the Prelude,
 the concrete syntax, literate programming, the specification of derived
@@ -91,7 +91,7 @@ from nontermination, so the language includes no mechanism
 for detecting or acting upon errors.  However, implementations
 will probably try to provide useful information about
 errors.
-See @sec:expressions:errors
+See @sec:expressions:errors.
 
 == Namespaces <sec:namespaces>
 

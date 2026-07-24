@@ -16,6 +16,7 @@
 
 // Chapter Headings
 #show heading.where(level: 1): set text(24pt)
+#show heading.where(level: 1): set heading(supplement: [Chapter])
 #show heading.where(level: 1): it => {
   if it.body == [Preface] or it.body == [Preface to the Revised Report] or it.body == [Contents] or it.body == [Bibliography] {pagebreak(weak: true) + it + v(1cm)}
   else {
