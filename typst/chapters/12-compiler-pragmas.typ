@@ -12,7 +12,7 @@ being used in practice.
 Lexically, pragmas appear as comments, except that the enclosing
 syntax is `{-# #-}`.
 
-=== Inlining
+== Inlining
 
 $
   italic("decl") &-> mono("{-# INLINE ") italic("qvars") mono("#-}") \
@@ -23,7 +23,7 @@ $
 The `INLINE` pragma instructs the compiler to inline the specified variables at their use sites.
 Compilers will often automatically inline simple expressions.  This may be prevented by the `NOINLINE` pragma.
 
-=== Specialization
+== Specialization
 
 $
   italic("decl") &-> mono("{-# SPECIALIZE ") italic("spec")_1, dots, italic("spec")_k mono("#-}") (k >= 1)\
@@ -44,7 +44,7 @@ parameter is either `Int` or `Integer` will
 use specialized versions of `factorial` which do not involve
 overloaded numeric operations.
 
-=== Language extensions
+== Language extensions
 
 The `LANGUAGE` pragma is a file-header pragma. A file-header pragma must
 precede the module keyword in a source file. There can be as many

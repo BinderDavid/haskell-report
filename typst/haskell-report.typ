@@ -2,33 +2,30 @@
   title: [Haskell 2010 \ Revised Language Report]
 )
 
-#let chapter-count = counter("chapter counter")
-#show heading.where(level: 2): it => {
-  if it.body == [Preface] or it.body == [Preface to the Revised Report] {it}
-  else {chapter-count.step() + it}
-}
+
 #set heading(numbering: (..nums) => {
-  if nums.pos().len() == 1 {
-    numbering("I.", ..nums) // Part
+ if nums.pos().len() == 1 {
+    numbering("1", ..nums)
   } else if nums.pos().len() == 2 {
-    numbering("1.", chapter-count.get().first() + 1) // Chapter
+    numbering("1.1", ..nums)
   } else {
-    numbering("1.", ..chapter-count.get(), ..nums.pos().slice(2))
+    numbering("1.1", ..nums)
   }
 })
 
+
+// Chapter Headings
+#show heading.where(level: 1): set text(24pt)
 #show heading.where(level: 1): it => {
-  if it.body == [Contents] or it.body == [Bibliography] { it }
+  if it.body == [Preface] or it.body == [Preface to the Revised Report] or it.body == [Contents] or it.body == [Bibliography] {pagebreak(weak: true) + it + v(1cm)}
   else {
-    set align(center + horizon)
-    set text(36pt)
-    pagebreak(weak: true) + [Part #it]
+    pagebreak(weak: true) + [Chapter #counter(heading).display("1") #v(1cm) #it.body #v(1cm)]
   }
 }
-#show heading.where(level: 2): set text(22pt)
-#show heading.where(level: 2): it => pagebreak(weak: true) + [Chapter #it]
 
-#show heading.where(level: 3): set text(18pt)
+// Section Headings
+#show heading.where(level: 2): set text(18pt)
+
 
 #set par(
   justify: true,
@@ -50,62 +47,61 @@
 #counter(page).update(1)
 #set page(numbering: "1")
 
-#heading(level: 2, numbering: none)[Preface]
+#heading(level: 1, numbering: none)[Preface]
 
 #include "other/preface.typ"
 
-#heading(level: 2, numbering: none)[Preface to the Revised Report]
+#heading(level: 1, numbering: none)[Preface to the Revised Report]
 
 #include "other/preface_revised.typ"
 
-= The Haskell 2010 Language
 
-== Introduction <chapter:intro>
+= Introduction <chapter:intro>
 
 
 #include "chapters/01-intro.typ"
 
-== Lexical Structure <chapter:lexical-structure>
+= Lexical Structure <chapter:lexical-structure>
 
 #include "chapters/02-lexical-structure.typ"
 
-== Expressions <chapter:expressions>
+= Expressions <chapter:expressions>
 
 #include "chapters/03-expressions.typ"
 
-== Declarations and Bindings <chapter:declarations>
+= Declarations and Bindings <chapter:declarations>
 
 #include "chapters/04-declarations.typ"
 
-== Modules <chapter:modules>
+= Modules <chapter:modules>
 
 #include "chapters/05-modules.typ"
 
-== Predefined Types and Classes <chapter:predefined-types>
+= Predefined Types and Classes <chapter:predefined-types>
 
 #include "chapters/06-predefined-types.typ"
 
-== Basic Input/Output <chapter:basic-input-output>
+= Basic Input/Output <chapter:basic-input-output>
 
 #include "chapters/07-basic-input-output.typ"
 
-== Foreign Function Interface <chapter:ffi>
+= Foreign Function Interface <chapter:ffi>
 
 #include "chapters/08-ffi.typ"
 
-== Standard Prelude <chapter:standard-prelude>
+= Standard Prelude <chapter:standard-prelude>
 
 #include "chapters/09-standard-prelude.typ"
 
-== Syntax Reference <chapter:syntax-reference>
+= Syntax Reference <chapter:syntax-reference>
 
 #include "chapters/10-syntax-reference.typ"
 
-== Specification of Derived Instances <chapter:derived-instances>
+= Specification of Derived Instances <chapter:derived-instances>
 
 #include "chapters/11-derived-instances.typ"
 
-== Compiler Pragmas <chapter:compiler-pragmas>
+= Compiler Pragmas <chapter:compiler-pragmas>
 
 #include "chapters/12-compiler-pragmas.typ"
 

@@ -24,7 +24,7 @@ sequentially compose actions,
 corresponding to sequencing operators (such as the semicolon) in imperative
 languages.
 
-=== Standard I/O Functions
+== Standard I/O Functions
 
 Although Haskell provides fairly sophisticated I/O facilities, as
 defined in the `IO` library, it is possible to write many
@@ -121,7 +121,7 @@ to a file.  To write a value of any printable type, as with `print`, use the
 main = appendFile "squares" (show [(x,x*x) | x <- [0,0.1..2]])
 ```
 
-=== Sequencing I/O Functions
+== Sequencing I/O Functions
 
 The type constructor `IO` is an instance of the `Monad` class.
 The two monadic binding functions, methods in the `Monad` class, are
@@ -170,7 +170,7 @@ getLine = do c <- getChar
                                   return (c:s)
 ```
 
-=== Exception Handling in the I/O Monad
+== Exception Handling in the I/O Monad
 
 The I/O monad includes a simple exception handling system.  Any I/O
 operation may raise an exception instead of returning a result.

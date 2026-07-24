@@ -20,7 +20,7 @@ the nature of programming environments and
 the error messages returned for undefined programs
 (i.e.~programs that formally evaluate to $bot$).
 
-=== Program Structure
+== Program Structure
 
 In this section, we describe the abstract syntactic and semantic structure of
 Haskell, as well as how it relates to the organization of the
@@ -57,7 +57,7 @@ in  z+1
 "Holes" in program fragments representing arbitrary pieces of Haskell code are written in italics, as in `if` $e_1$ `then` $e_2$ `else` $e_3$.
 Generally the italicized names are mnemonic, such as $e$ for expressions, $d$ for declarations, $t$ for types, etc.
 
-=== The Haskell Kernel
+== The Haskell Kernel
 
 Haskell has adopted many of the convenient syntactic structures
 that have become popular
@@ -73,7 +73,7 @@ into the kernel is given as the syntax is introduced.  This modular
 design facilitates reasoning about Haskell programs and provides
 useful guidelines for implementors of the language.
 
-=== Values and Types
+== Values and Types
 
 An expression evaluates to a _value_ and has a
 static _type_.  Values and types are not mixed in
@@ -93,7 +93,7 @@ will probably try to provide useful information about
 errors.
 See @sec:expressions:errors
 
-=== Namespaces <sec:namespaces>
+== Namespaces <sec:namespaces>
 
 There are six kinds of names in Haskell: those for _variables_ and
 _constructors_ denote values; those for _type variables_, _type constructors_, and _type classes_ refer to entities related

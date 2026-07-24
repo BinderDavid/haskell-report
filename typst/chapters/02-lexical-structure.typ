@@ -3,7 +3,7 @@
 In this chapter, we describe the low-level lexical structure of Haskell.
 Most of the details may be skipped in a first reading of the report.
 
-=== Notational Conventions
+== Notational Conventions
 
 These notational conventions are used for presenting syntax:
 
@@ -45,7 +45,7 @@ This syntax depends on properties of the Unicode characters as defined
 by the Unicode consortium.
 Haskell compilers are expected to make use of new versions of Unicode as they are made available.
 
-=== Lexical Program Structure
+== Lexical Program Structure
 
 #table(
   columns: 3,
@@ -142,7 +142,7 @@ Any kind of $nonterminal("whitespace")$ is also a proper delimiter for lexemes.
 Characters not in the category $nonterminal("ANY")$ are not valid
 in Haskell programs and should result in a lexing error.
 
-=== Comments
+== Comments
 
 Comments are valid whitespace.
 
@@ -173,7 +173,7 @@ If some code is commented out using a nested comment, then any
 occurrence of `{-` or `-}` within a string or within an end-of-line
 comment in that code will interfere with the nested comments.
 
-=== Identifiers and Operators
+== Identifiers and Operators
 
 #table(
   columns: 3,
@@ -316,7 +316,7 @@ for example, `Prelude.+` is an infix operator with the same fixity as the
 definition of `+` in the Prelude (Section~\ref{fixity}).
 
 
-=== Numeric Literals
+== Numeric Literals
 
 #table(
   columns: 3,
@@ -350,7 +350,7 @@ for another use of the dot character.  Negative numeric literals are
 discussed in @sec:operator-applications.  The typing of numeric literals
 is discussed in @sec:numeric-literals
 
-=== Character and String Literals
+== Character and String Literals
 
 #table(
   columns: 3,
@@ -414,7 +414,7 @@ example,
 String literals are actually abbreviations for lists of characters
 (see Section~\ref{lists}).
 
-=== Layout
+== Layout
 
 Haskell permits the omission of the braces and semicolons used in several
 grammar productions, by

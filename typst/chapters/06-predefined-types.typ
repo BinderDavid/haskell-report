@@ -9,7 +9,7 @@ can easily be understood from their definitions as given in @chapter:standard-pr
 Other predefined types such as arrays, complex numbers, and rationals
 are defined in part:libraries[Part]
 
-=== Standard Haskell Types
+== Standard Haskell Types
 
 These types are defined by the Haskell Prelude.  Numeric types are described in @sec:numbers
 When appropriate, the Haskell
@@ -17,7 +17,7 @@ definition of the type is given.  Some definitions may not be
 completely valid on syntactic grounds but they faithfully convey the
 meaning of the underlying type.
 
-==== Booleans
+=== Booleans
 
 ```haskell
 data  Bool  =  False | True deriving
@@ -29,7 +29,7 @@ The basic boolean functions are `&&` (and), `||` (or), and `not`.
 The name `otherwise` is defined as `True` to make guarded expressions
 more readable.
 
-==== Characters and Strings
+=== Characters and Strings
 
 The character type `Char` is an enumeration whose values represent Unicode characters @Unicode.
 The lexical syntax for
@@ -57,7 +57,7 @@ Section~\ref{lexemes-char}.  For example, `"A string"` abbreviates
 ['A', ' ', 's', 't', 'r', 'i', 'n', 'g']
 ```
 
-==== Lists
+=== Lists
 
 ```haskell
 data  [a]  =  [] | a : [a]  deriving (Eq, Ord)
@@ -77,7 +77,7 @@ Sections~\ref{arithmetic-sequences} and \ref{list-comprehensions},
 respectively.
 Lists are an instance of classes `Read`, `Show`, `Eq`, `Ord`, `Monad`, `Functor`, and `MonadPlus`.
 
-==== Tuples
+=== Tuples
 Tuples are algebraic datatypes with special syntax, as defined
 in Section~\ref{tuples}.  Each tuple type has a single constructor.
 All tuples are instances of `Eq`, `Ord`, `Bounded`, `Read`,
@@ -100,7 +100,7 @@ and `(,,) Int Bool Int` denote the same type.
 The following functions are defined for pairs (2-tuples):
 `fst`, `snd`, `curry`, and `uncurry`.  Similar functions are not predefined for larger tuples.
 
-==== The Unit Datatype
+=== The Unit Datatype
 
 ```haskell
 data  () = () deriving (Eq, Ord, Bounded, Enum, Read, Show)
@@ -108,13 +108,13 @@ data  () = () deriving (Eq, Ord, Bounded, Enum, Read, Show)
 
 The unit datatype `()` has one non-$bot$ member, the nullary constructor `()`.  See also Section~\ref{unit-expression}.
 
-==== Function Types
+=== Function Types
 
 Functions are an abstract type: no constructors directly create
 functional values.  The following simple functions are found in the Prelude:
 `id`, `const`, `(.)`, `flip`, `($)`, and `until`.
 
-==== The IO and IOError Types
+=== The IO and IOError Types
 
 The `IO` type serves as a tag for operations (actions) that interact
 with the outside world.  The `IO` type is abstract: no constructors are
@@ -128,7 +128,7 @@ any further detail in this report.  The Prelude contains a few
 I/O functions (defined in Section~\ref{preludeio}), and part:libraries[Part]
 contains many more.
 
-==== Other Types
+=== Other Types
 
 ```haskell
 data  Maybe a     =  Nothing | Just a  deriving (Eq, Ord, Read, Show)
@@ -141,7 +141,7 @@ The `Maybe` type is an instance of classes `Functor`, `Monad`,
 and `MonadPlus`.  The `Ordering` type is used by `compare` in the class `Ord`. The functions `maybe` and `either` are found in
 the Prelude.
 
-=== Strict Evaluation
+== Strict Evaluation
 
 Function application in Haskell is non-strict; that is, a function
 argument is evaluated only when required.  Sometimes it is desirable to
@@ -183,7 +183,7 @@ f $ g $ h x  =  f (g (h x))
 It is also useful in higher-order situations, such as `map ($ 0) xs`,
 or `zipWith ($) fs xs`.
 
-=== Standard Haskell Classes
+== Standard Haskell Classes
 
 @fig:standard-classes shows the hierarchy of
 Haskell classes defined in the Prelude and the Prelude types that
@@ -294,7 +294,7 @@ must be given to fully specify an instance.
 
 
 
-==== The Eq Class
+=== The Eq Class
 
 ```haskell
 class  Eq a  where
@@ -316,7 +316,7 @@ If one is defined, the default method for the other will make use of
 the one that is defined.  If both are defined, neither default method is used.
 
 
-==== The Ord Class
+=== The Ord Class
 
 ```haskell
 class  (Eq a) => Ord a  where
@@ -356,7 +356,7 @@ The default declarations allow a user to create an `Ord` instance
 either with a type-specific `compare` function or with type-specific
 `==` and `<=` functions.
 
-==== The Read and Show Classes
+=== The Read and Show Classes
 
 ```haskell
 type  ReadS a = String -> [(a,String)]
@@ -428,7 +428,7 @@ empty string.  (Thus `lex ""` = `[("","")]`.)  If there is no legal lexeme at th
 beginning of the input string, `lex` fails (i.e. returns `[]`).
 
 
-==== The Enum Class
+=== The Enum Class
 ```haskell
 class  Enum a  where
     succ, pred     :: a -> a
@@ -509,7 +509,7 @@ $i$, or when they become less than $e_3 + i mono("/") 2$ for negative $i$.
 
 For all four of these Prelude numeric types, all of the `enumFrom` family of functions are strict in all their arguments.
 
-==== The Functor Class
+=== The Functor Class
 
 ```haskell
 class  Functor f  where
@@ -525,7 +525,7 @@ $
 
 All instances of `Functor` defined in the Prelude satisfy these laws.
 
-==== The Monad Class
+=== The Monad Class
 
 ```haskell
 class  Monad m  where
@@ -576,7 +576,7 @@ mapM_     :: Monad m => (a -> m b) -> [a] -> m ()
 (=<<)     :: Monad m => (a -> m b) -> m a -> m b
 ```
 
-==== The Bounded Class
+=== The Bounded Class
 
 ```haskell
 class  Bounded a  where
@@ -594,7 +594,7 @@ in the `data` declaration and `maxBound` is the last. `Bounded` may
 also be derived for single-constructor datatypes whose constituent
 types are in `Bounded`.
 
-=== Numbers <sec:numbers>
+== Numbers <sec:numbers>
 
 Haskell provides several kinds of numbers; the numeric
 types and the operations upon them have been heavily influenced by Common Lisp and Scheme.
@@ -730,7 +730,7 @@ realToFrac   :: (Real a, Fractional b) => a -> b
   ```
 )<fig:basic-numeric-2>
 
-==== Numeric Literals <sec:numeric-literals>
+=== Numeric Literals <sec:numeric-literals>
 
 The syntax of numeric literals is given in
 Section~\ref{lexemes-numeric}.  An integer literal represents the
@@ -748,7 +748,7 @@ Numeric literals are defined in this indirect way so that they may be
 interpreted as values of any appropriate numeric type.
 See Section~\ref{default-decls} for a discussion of overloading ambiguity.
 
-==== Arithmetic and Number-Theoretic Operations
+=== Arithmetic and Number-Theoretic Operations
 
 The infix class methods `(+)`, `(*)`, `(-)`, and the unary function `negate` (which can also be written as a prefix minus sign; see
 section~\ref{operators}) apply to all numbers.  
@@ -782,7 +782,7 @@ multiple functions.  `gcd` $x$ $y$ is the greatest
 
 `lcm` $x$ $y$ is the smallest positive integer that both $x$ and $y$ divide.
 
-==== Exponentiation and Logarithms
+=== Exponentiation and Logarithms
 
 The one-argument exponential function `exp` and the
 logarithm function `log` act on floating-point numbers and
@@ -796,7 +796,7 @@ fractional number to any integer power, and `(**)`
 takes two floating-point arguments.  The value of `x ^ 0` or `x ^^ 0`}
 is `1` for any $x$, including zero; `0**y` is `1` if $y$ is `0`, and `0` otherwise.
 
-==== Magnitude and Sign
+=== Magnitude and Sign
 
 A number has a _magnitude_ and a _sign_.  The functions `abs` and `signum` apply to any number and satisfy the law:
 ```haskell
@@ -812,7 +812,7 @@ signum x | x >  0  = 1
          | x <  0  = -1
 ```
 
-==== Trigonometric Functions
+=== Trigonometric Functions
 
 Class `Floating` provides the
 circular and hyperbolic sine, cosine,
@@ -836,7 +836,7 @@ which in turn follows Penfield's proposal for
 APL @Penfield1981.  See these references for discussions
 of branch cuts, discontinuities, and implementation.
 
-==== Coercions and Component Extraction
+=== Coercions and Component Extraction
 
 The `ceiling`, `floor`, `truncate`, and `round`
 functions each take a real fractional argument and return an integral

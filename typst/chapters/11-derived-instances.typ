@@ -54,7 +54,7 @@ instances for each of the derivable Prelude classes are now given.
 Free variables and constructors used in these translations
 always refer to entities defined by the `Prelude`.
 
-=== Derived instances of Eq and Ord
+== Derived instances of Eq and Ord
 
 The class methods automatically introduced by derived instances
 of `Eq` and `Ord` are `(==)`, `(/=)`, `compare`
@@ -82,7 +82,7 @@ For example, `False <= `$bot$ is $bot$, even though `False` is the first constru
 of the `Bool` type.
 
 
-=== Derived instances of Enum
+== Derived instances of Enum
 
 Derived instance declarations for the class `Enum` are only
 possible for enumerations (data types with only nullary constructors).
@@ -121,7 +121,7 @@ we would have:
   fromEnum Yellow     ==  2
 ```
 
-=== Derived instances of Bounded
+== Derived instances of Bounded
 
 The `Bounded` class introduces the class
 methods `minBound` and `maxBound`,
@@ -140,7 +140,7 @@ would generate the following `Bounded` instance:
     maxBound = Pair maxBound maxBound
 ```
 
-=== Derived instances of Read and Show
+== Derived instances of Read and Show
 
 The class methods automatically introduced by derived instances
 of `Read` and `Show` are `showsPrec`,
@@ -227,7 +227,7 @@ uses.  Some problems include:
 - There is no user control over the printing of types defined in the Prelude.  For example, there is no way to change the
   formatting of floating point numbers.
 
-=== An Example
+== An Example
 
 As a complete example, consider a tree datatype:
 ```haskell

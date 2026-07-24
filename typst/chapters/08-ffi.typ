@@ -6,7 +6,7 @@ other languages such that the source code is portable across different
 implementations of Haskell and non-Haskell systems as well as
 independent of the architecture and operating system.
 
-=== Foreign Languages
+== Foreign Languages
 
 The Haskell FFI currently only specifies the interaction between Haskell
 code and foreign code that follows the C calling convention.  However,
@@ -40,7 +40,7 @@ described in @sec:extent[Section], whereas the marshalling of the basic
 types in dependence on a foreign language is described in
 @sec:marshalling[Section]
 
-=== Contexts
+== Contexts
 
 For a given Haskell system, we define the _Haskell context_ to be the
 execution context of the abstract machine on which the Haskell system is
@@ -57,7 +57,7 @@ contexts and invoke functions that are executed in an external context
 as well as vice versa.  In the rest of this definition, external
 contexts are usually identified by a calling convention.
 
-==== Cross Language Type Consistency
+=== Cross Language Type Consistency
 
 Given that many external languages support static types, the question arises
 whether the consistency of Haskell types with the types of the external
@@ -77,7 +77,7 @@ consistency with foreign types.  Nevertheless, Haskell systems are encouraged
 to provide any cross language consistency checks that can be implemented with
 reasonable effort.
 
-=== Lexical Structure
+== Lexical Structure
 
 The FFI reserves a single keyword `foreign`, and a set of special
 identifiers.  The latter have a special meaning only within foreign
@@ -102,7 +102,7 @@ particular, a file name $italic("chname")$ must end in the suffix `.h`.  The
 lexemes produced by $italic("cid")$ coincide with those allowed as C identifiers,
 as specified in~@Kernighan1988.
 
-=== Foreign Declarations
+== Foreign Declarations
 
 The syntax of foreign declarations is as follows:
 $
@@ -137,7 +137,7 @@ Haskell string lexeme.  The only exception is where this string would be the
 empty string (i.e., be of the form `""`); in this case, the string may be
 omitted in its entirety.
 
-==== Calling Conventions
+=== Calling Conventions
 
 The binary interface to an external entity on a given architecture is
 determined by a calling convention.  It often depends on the programming
@@ -193,7 +193,7 @@ implement for a Haskell compiler generating Java code, whereas for a Haskell
 compiler generating C code, the Java Native Interface (JNI)~@Liang1999
 has to be targeted.
 
-==== Foreign Types
+=== Foreign Types
 
 The following types constitute the set of _basic foreign types_:
 
@@ -268,7 +268,7 @@ _marshallable foreign result type;_ that is, either
   - the constructor $N$ is visible where $T$ is used,
   - $t[t'_1 italic("/") a_1 dots t'_n italic("/") a_n]$ is a marshallable foreign result type
 
-==== Import Declarations
+=== Import Declarations
 
 Generally, an import declaration has the form
 $
@@ -318,7 +318,7 @@ an external entity was called, but before this call returns.  Consequently,
 objects other than stable pointers (cf.\ Section~\ref{module:Foreign.StablePtr}) may be
 moved or garbage collected by the storage manager.
 
-==== Export Declarations
+=== Export Declarations
 
 The general form of export declarations is
 $
@@ -340,7 +340,7 @@ value returns with an exception, the system behaviour is undefined.  Thus,
 Haskell exceptions have to be caught within Haskell and explicitly marshalled
 to the foreign code.
 
-=== Specification of External Entities <sec:extent>
+== Specification of External Entities <sec:extent>
 
 Each foreign declaration has to specify the external entity that is accessed
 or provided by that declaration.  The syntax and semantics of the notation
@@ -381,7 +381,7 @@ semantics for the calling conventions `ccall` and `stdcall`.  Other
 calling conventions from @tab:callconv are expected to be defined
 in future versions of Haskell.
 
-==== Standard C Calls
+=== Standard C Calls
 
 The following defines the structure of external entities for foreign
 declarations under the `ccall` calling convention for both import and
@@ -587,13 +587,13 @@ functions, a Haskell system will, in general, not be able to make use of
 variable argument functions.  Hence, their use is deprecated in portable code.
 
 
-==== Win32 API Calls
+=== Win32 API Calls
 
 The specification of external entities under the `stdcall` calling
 convention is identical to that for standard C calls.  The two calling
 conventions only differ in the generated code.
 
-=== Marshalling <sec:marshalling>
+== Marshalling <sec:marshalling>
 In addition to the language extension discussed in previous sections, the FFI
 includes a set of standard libraries, which ease portable use of foreign
 functions as well as marshalling of compound structures.  Generally, the
@@ -632,7 +632,7 @@ interfaces faithfully in Haskell, for each integral type in C, we need to have
 an integral type in Haskell that is guaranteed to have the same size as the
 corresponding C type.
 
-=== The External C Interface
+== The External C Interface
 
 Every Haskell system that implements the FFI needs to provide a C header file
 named `HsFFI.h` that defines the C symbols listed in

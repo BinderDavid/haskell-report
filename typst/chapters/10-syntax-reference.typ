@@ -1,6 +1,6 @@
 #import "../macros.typ" : *
 
-=== Notational Conventions
+== Notational Conventions
 
 These notational conventions are used for presenting syntax:
 
@@ -35,7 +35,7 @@ syntax, this is the "maximal munch" rule.  In the
 context-free syntax, this means that conditionals, let-expressions, and
 lambda abstractions extend to the right as far as possible.
 
-=== Lexical Syntax
+== Lexical Syntax
 
 #table(
   columns: 3,
@@ -229,7 +229,7 @@ lambda abstractions extend to the right as far as possible.
   $nonterminaldef("gap")$, $->$, $terminal("\\") nonterminal("whitechar") { med nonterminal("whitechar") med } terminal("\\")$,
 )
 
-=== Layout <sec:layout>
+== Layout <sec:layout>
 
 Section~\ref{lexemes-layout} gives an informal discussion of the layout
 rule. This section defines it more precisely.
@@ -366,7 +366,7 @@ let { x = e; y = x } in e'
 ```
 The close brace is inserted due to the parse error rule above.
 
-=== Literate comments
+== Literate comments
 
 The "literate comment"
 convention, first developed by Richard Bird and Philip Wadler for
@@ -439,7 +439,7 @@ main =  print [ (n, product [1..n]) | n <- [1..20]]
 This style uses the same file extension.  It is not advisable to mix
 these two styles in the same file.
 
-=== Context-Free Syntax
+== Context-Free Syntax
 
 #table(
   columns: 4,
@@ -693,7 +693,7 @@ these two styles in the same file.
   $nonterminaldef("gconsym")$,$->$,$terminal(":") | nonterminal("qconsym")$,$$,
 )
 
-=== Fixity Resolution <sec:fixity-resolution>
+== Fixity Resolution <sec:fixity-resolution>
 
 The following is an example implementation of fixity resolution for
 Haskell expressions.

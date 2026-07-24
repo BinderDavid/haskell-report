@@ -89,7 +89,7 @@ Sample parses are shown below.
 
 For the sake of clarity, the rest of this section will assume that expressions involving infix operators have been resolved according to the fixities of the operators.
 
-=== Errors <sec:expressions:errors>
+== Errors <sec:expressions:errors>
 
 Errors during expression evaluation, denoted by $bot$ ("bottom"),
 are indistinguishable by a Haskell program from non-termination.  Since Haskell is a
@@ -117,7 +117,7 @@ The messages passed to the `error` function in these translations are
 only suggestions; implementations may choose to display more or less
 information when an error occurs.
 
-=== Variables, Constructors, Operators, and Literals
+== Variables, Constructors, Operators, and Literals
 
 #table(
   columns: 4,
@@ -193,7 +193,7 @@ The integers $n$ and $d$ are chosen so that $n \/ d = f$.
 ])
 
 
-=== Curried Applications and Lambda Abstractions
+== Curried Applications and Lambda Abstractions
 
 #table(
   columns: 4,
@@ -227,7 +227,7 @@ Given this translation combined with the semantics of case
 expressions and pattern matching described in @subsec:formal-semantics-pattern-matching, if the
 pattern fails to match, then the result is $bot$.
 
-=== Operator Applications <sec:operator-applications>
+== Operator Applications <sec:operator-applications>
 
 #table(
   columns: 4,
@@ -266,7 +266,7 @@ Similarly, `(-)` is syntax for `\x y -> x-y`, as with any infix operator, and do
   ]
 )
 
-=== Sections
+== Sections
 
 #table(
   columns: 4,
@@ -320,7 +320,7 @@ The expression $(+ (- italic("exp")))$ can serve the same purpose.
   where $italic("op")$ is a binary operator, $e$ is an expression, and $x$ is a variable that does not occur free in $e$.
 ])
 
-=== Conditionals
+== Conditionals
 
 #table(
   columns: 3,
@@ -344,7 +344,7 @@ value of $e_1$ is `True`, $e_3$ if $e_1$ is `False`, and $bot$ otherwise.
 ])
 
 
-=== Lists
+== Lists
 
 #table(
   columns: 4,
@@ -386,7 +386,7 @@ Standard operations on lists are given in the Prelude (see Section~\ref{basic-li
 The constructor "`:`" is reserved solely for list construction; like `[]`, it is considered part of the language syntax, and cannot be hidden or redefined.
 It is a right-associative operator, with precedence level 5 (Section~\ref{fixity}).
 
-=== Tuples
+== Tuples
 
 #table(
   columns: 4,
@@ -411,7 +411,7 @@ in the Prelude (see Section~\ref{basic-tuples} and @chapter:standard-prelude[Cha
 
 
 
-=== Unit Expressions and Parenthesized Expressions
+== Unit Expressions and Parenthesized Expressions
 
 #table(
   columns: 3,
@@ -431,7 +431,7 @@ It is the only member of that type apart from $bot$, and can be thought of as th
   $(e)$ is equivalent to $e$.
 ])
 
-=== Arithmetic Sequences <sec:arithmetic-sequences>
+== Arithmetic Sequences <sec:arithmetic-sequences>
 
 #table(
   columns: 3,
@@ -456,7 +456,7 @@ The _arithmetic sequence_ $[e_1, e_2 .. e_3]$ denotes a list of values of type $
 The semantics of arithmetic sequences therefore depends entirely on the instance declaration for the type `t`.
 See Section~\ref{enum-class} for more details of which `Prelude` types are in `Enum` and their semantics.
 
-=== List Comprehensions <sec:list-comprehensions>
+== List Comprehensions <sec:list-comprehensions>
 
 #table(
   columns: 4,
@@ -522,7 +522,7 @@ As indicated by the translation of list comprehensions, variables
 bound by `let` have fully polymorphic types while those defined by
 `<-` are lambda bound and are thus monomorphic (see Section \ref{monomorphism}).
 
-=== Let Expressions
+== Let Expressions
 
 #table(
   columns: 3,
@@ -571,7 +571,7 @@ does not cause an execution-time error until `x` or `y` is evaluated.
   Section~\ref{pattern-bindings}.
 ])
 
-=== Case Expressions
+== Case Expressions
 
 #table(
   columns: 4,
@@ -670,7 +670,7 @@ However, the phrase `Bool -> a` is syntactically valid as a type, and parsers wi
 Programmers are advised, therefore, to avoid guards that
 end with a type signature --- indeed that is why a $italic("guard")$ contains an $italic("infixexp")$ not an $italic("exp")$.
 
-=== Do Expressions
+== Do Expressions
 
 #table(
   columns: 4,
@@ -723,7 +723,7 @@ to be written in a more traditional way as:
 
 As indicated by the translation of `do`, variables bound by `let` have fully polymorphic types while those defined by `<-` are lambda bound and are thus monomorphic.
 
-=== Datatypes with Field Labels
+== Datatypes with Field Labels
 
 A datatype declaration may optionally define field labels
 (see Section~\ref{datatype-decls}).
@@ -743,7 +743,7 @@ constructors. To illustrate the last point, consider:
 Here `S` is legal but `T` is not, because `y` is given
 inconsistent typings in the latter.
 
-==== Field Selection
+=== Field Selection
 
 #table(
   columns: 3,
@@ -771,7 +771,7 @@ cannot be confused with ordinary variables.
   component of $C_i$ or $\_$ otherwise, and $e_i$ is $y$ when some field in $C_i$ has a label of $f$ or `undefined` otherwise.
 ])
 
-==== Construction Using Field Labels
+=== Construction Using Field Labels
 
 #table(
   columns: 4,
@@ -819,7 +819,7 @@ it denotes $F bot_1 dots bot_n$, where $n$ is the arity of `F`.
     the default value $d$.
   ]
 ])
-==== Updates Using Field Labels
+=== Updates Using Field Labels
 
 #table(
   columns: 4,
@@ -889,7 +889,7 @@ without field labels.
 A compile-time error will result if no single constructor
 defines the set of field labels used in an update, such as `x {f2 = 1, f3 = 'x'}`.
 
-=== Expression Type-Signatures
+== Expression Type-Signatures
 
 
 _Expression type-signatures_ have the form $e mono("::") t$, where $e$ is an expression and $t$ is a type (Section~\ref{type-syntax}); they
@@ -913,7 +913,7 @@ the principal type derivable from $italic("exp")$, but it is an error to give a 
 
 
 
-=== Pattern Matching
+== Pattern Matching
 
 _Patterns_ appear in lambda abstractions, function definitions, pattern
 bindings, list comprehensions, do expressions, and case expressions.
@@ -921,7 +921,7 @@ However, the
 first five of these ultimately translate into case expressions, so
 defining the semantics of pattern matching for case expressions is sufficient.
 
-==== Patterns
+=== Patterns
 
 Patterns have this syntax:
 #table(
@@ -977,7 +977,7 @@ is equivalent to:
 case e of { [x,y,z]  ->  if x==0 then True else False }
 ```
 
-==== Informal Semantics of Pattern Matching
+=== Informal Semantics of Pattern Matching
 
 Patterns are matched against values.  Attempting to match a pattern
 can have one of three results: it may _fail_; it may _succeed_, returning a binding for each variable in the pattern; or it
@@ -1111,4 +1111,4 @@ f ~(x,y,z) [a] | (a == y) = 1
 ```
 both `a` and `y` will be evaluated by `==` in the guard.
 
-==== Formal Semantics of Pattern Matching <subsec:formal-semantics-pattern-matching>
+=== Formal Semantics of Pattern Matching <subsec:formal-semantics-pattern-matching>

@@ -1,50 +1,50 @@
 #import "../macros.typ" : *
 
-=== Overview of Types and Classes
+== Overview of Types and Classes
 
-==== Kinds
+=== Kinds
 
-==== Syntax of Types
+=== Syntax of Types
 
-==== Syntax of Class Assertions and Contexts
+=== Syntax of Class Assertions and Contexts
 
-==== Semantics of Types and Classes
+=== Semantics of Types and Classes
 
-=== User-Defined Datatypes
+== User-Defined Datatypes
 
-==== Algebraic Datatype Declarations
+=== Algebraic Datatype Declarations
 
-==== Type Synonym Declarations
+=== Type Synonym Declarations
 
-==== Datatype Renamings
+=== Datatype Renamings
 
-=== Type Classes and Overloading <sec:type-classes>
+== Type Classes and Overloading <sec:type-classes>
 
-==== Class Declarations
+=== Class Declarations
 
-==== Instance Declarations
+=== Instance Declarations
 
-==== Derived Instances
+=== Derived Instances
 
-==== Ambiguous Types, and Defaults for Overloaded Numeric Operations
+=== Ambiguous Types, and Defaults for Overloaded Numeric Operations
 
-=== Nested Declarations
+== Nested Declarations
 
-==== Type Signatures
+=== Type Signatures
 
-==== Fixity Declarations
+=== Fixity Declarations
 
-==== Function and Pattern Bindings
+=== Function and Pattern Bindings
 
-===== Function bindings
+==== Function bindings
 
-===== Pattern bindings
+==== Pattern bindings
 
-=== Static Semantics of Function and Pattern Bindings
+== Static Semantics of Function and Pattern Bindings
 
 The static semantics of the function and pattern bindings of a `let` expression or `where` clause are discussed in this section.
 
-==== Dependency Analysis
+=== Dependency Analysis
 
 In general the static semantics are given by applying the
 normal Hindley-Milner inference
@@ -63,7 +63,7 @@ Hindley-Milner type inference is applied to each declaration group in dependency
 The order of declarations in `where`/`let`
 constructs is irrelevant.
 
-==== Generalization
+=== Generalization
 
 The Hindley-Milner type system assigns types to a let-expression in two stages:
 
@@ -115,7 +115,7 @@ in a declaration group, the contexts of these signatures must be
 identical up to renaming of the type variables.
 
 
-==== Context Reduction Errors
+=== Context Reduction Errors
 
 As mentioned in Section~\ref{type-semantics}, the context of a type
 may constrain only a type variable, or the application of a type variable
@@ -164,7 +164,7 @@ the derived Show instance will produce a context `Show (a b)`, which
 cannot be reduced and is not simple; thus a static error results.
 
 
-==== Monomorphism
+=== Monomorphism
 
 Sometimes it is not possible to generalize over all the type variables
 used in the type of the definition.
@@ -215,13 +215,13 @@ type variables; for example
 ```
 This signature would also cause `x` to have type `Int`.
 
-==== The Monomorphism Restriction
+=== The Monomorphism Restriction
 
 #monomorphism-box([
   / Rule 1.: todo
   / Rule 2.: todo
 ])
-=== Kind Inference
+== Kind Inference
 
 This section describes the rules that are used to perform _kind
 inference_, i.e. to calculate a suitable kind for each type

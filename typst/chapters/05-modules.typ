@@ -82,7 +82,7 @@ all modules by default (see Section~\ref{standard-prelude}), plus a
 set of standard library modules that may be imported as required
 (see Part~\ref{libraries}).
 
-=== Module Structure
+== Module Structure
 
 A module defines a mutually
 recursive scope containing declarations for value bindings, data
@@ -112,7 +112,7 @@ An abbreviated form of module, consisting only
 of the module body, is permitted.  If this is used, the header is assumed to be `module Main(main) where`.
 If the first lexeme in the abbreviated module is not a `{`, then the layout rule applies for the top level of the module.
 
-=== Export Lists
+== Export Lists
 
 #table(
   columns: 4,
@@ -225,7 +225,7 @@ but there are name clashes in the export list between `C.g` and `g`
 can import each other recursively), and between `module B` and `C.f`
 (assuming `B.f` and `C.f` are different entities).
 
-=== Import Declarations
+== Import Declarations
 
 #table(
   columns: 4,
@@ -263,7 +263,7 @@ Lexically, the terminal symbols "`as`", "`qualified`" and
 special significance only in the context of an `import` declaration;
 they may also be used as variables.
 
-==== What is imported
+=== What is imported
 
 Exactly which entities are to be imported can be specified in one
 of the following three ways:
@@ -300,7 +300,7 @@ of the following three ways:
    all the entities exported by the specified module are imported.
 
 
-==== Qualified import
+=== Qualified import
 
 For each entity imported under the rules of Section~\ref{whatisimported},
 the top-level environment is extended.  If the import declaration used
@@ -329,7 +329,7 @@ l1 * l2 = nub (l1 + l2)     -- This * differs from the one in the Prelude
 succ = (Prelude.+ 1)
 ```
 
-==== Local aliases
+=== Local aliases
 
 Imported modules may be assigned a local alias in the importing module
 using the `as` clause.
@@ -357,7 +357,7 @@ import Foo as A(f)
 ```
 This declaration brings into scope `f` and `A.f`.
 
-==== Examples
+=== Examples
 
 To clarify the above import rules, suppose the module `A` exports `x` and `y`.
 Then this table shows what names are brought into scope by the specified import statement:
@@ -392,7 +392,7 @@ Then this table shows what names are brought into scope by the specified import 
 In all cases, all instance declarations in scope in module `A` are imported
 (Section~\ref{import-instances}).
 
-=== Importing and Exporting Instance Declarations
+== Importing and Exporting Instance Declarations
 
 Instance declarations cannot be explicitly named on import or export
 lists.  All instances in scope within a module are _always_
@@ -413,8 +413,8 @@ instance Show (IO a) where
   show io = "<<IO action>>"
 ```
 
-=== Name Clashes and Closure
-==== Qualified names
+== Name Clashes and Closure
+=== Qualified names
 
 A _qualified name_ is written as $italic("modid").italic("name")$ (Section~\ref{ids}).
 A qualified name is brought into scope:
@@ -441,7 +441,7 @@ A qualified name is brought into scope:
   in the references to the imported names.  
 
 
-==== Name clashes
+=== Name clashes
 
 If a module contains a bound occurrence of a name, such as `f` or `A.f`,
 it must be possible unambiguously to resolve which entity is thereby referred to;
@@ -506,7 +506,7 @@ to make it unambiguous which `sin` is meant. However, the unqualified
 name `sin` in the type signature in the first line of `F` unambiguously
 refers to the local declaration for `sin`.
 
-==== Closure
+=== Closure
 
 Every module in a Haskell program must be _closed_.  That is,
 every name explicitly mentioned by the source code
@@ -552,7 +552,7 @@ in scope.  The only reason to export `T` is to allow other modules to
 refer it by name; the type checker finds the definition of `T` if
 needed whether or not it is exported.
 
-=== Standard Prelude
+== Standard Prelude
 
 Many of the features of Haskell are defined in Haskell
 itself as a library of standard datatypes, classes, and
@@ -574,7 +574,7 @@ This means, for example, that a compiler may optimize calls to
 functions in the Prelude without consulting the source code
 of the Prelude.
 
-==== The Prelude Module
+=== The Prelude Module
 
 The `Prelude` module is imported automatically into all modules as if
 by the statement `import Prelude`, if and only if it is not imported
@@ -601,7 +601,7 @@ there to help explain the structure of the `Prelude` module; they
 should be considered part of its implementation, not part of the language
 definition.
 
-==== Shadowing Prelude Names
+=== Shadowing Prelude Names
 
 The rules about the Prelude have been cast so that it is
 possible to use Prelude names for nonstandard purposes; however,
@@ -650,7 +650,7 @@ to `++` imported from `MyPrelude`.
 It is not possible, however, to hide `instance` declarations in the
 `Prelude`.  For example, one cannot define a new instance for `Show Char`.
 
-=== Separate Compilation
+== Separate Compilation
 
 Depending on the Haskell implementation used, separate compilation
 of mutually recursive modules may require that imported modules contain
@@ -660,7 +660,7 @@ necessary to deal with mutual recursion.  The
 precise details of separate compilation are not defined by this
 report. 
 
-=== Abstract Datatypes
+== Abstract Datatypes
 
 The ability to export a datatype without its constructors
 allows the construction of abstract datatypes (ADTs).  For example,
