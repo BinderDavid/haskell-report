@@ -32,7 +32,7 @@
 
 === Type Signatures
 
-=== Fixity Declarations
+=== Fixity Declarations <sec:fixity-declarations>
 
 === Function and Pattern Bindings
 

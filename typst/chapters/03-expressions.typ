@@ -266,7 +266,7 @@ Similarly, `(-)` is syntax for `\x y -> x-y`, as with any infix operator, and do
   ]
 )
 
-== Sections
+== Sections <sec:sections>
 
 #table(
   columns: 4,
@@ -344,7 +344,7 @@ value of $e_1$ is `True`, $e_3$ if $e_1$ is `False`, and $bot$ otherwise.
 ])
 
 
-== Lists
+== Lists <sec:lists>
 
 #table(
   columns: 4,

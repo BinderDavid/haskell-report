@@ -26,6 +26,9 @@
 
 // Section Headings
 #show heading.where(level: 2): set text(18pt)
+#show heading.where(level: 2): it => {
+  v(0.6cm) + it + v(0.8cm)
+}
 
 
 #set par(

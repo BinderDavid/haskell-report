@@ -29,7 +29,7 @@ The basic boolean functions are `&&` (and), `||` (or), and `not`.
 The name `otherwise` is defined as `True` to make guarded expressions
 more readable.
 
-=== Characters and Strings
+=== Characters and Strings <subsec:characters>
 
 The character type `Char` is an enumeration whose values represent Unicode characters @Unicode.
 The lexical syntax for

@@ -166,7 +166,7 @@ In an ordinary comment, the character
 sequences "`{-`" and "`-}`" have no special significance, and, in a
 nested comment, a sequence of dashes has no special significance.
 
-Nested comments are also used for compiler pragmas, as explained in @chapter:compiler-pragmas[Chapter]
+Nested comments are also used for compiler pragmas, as explained in @chapter:compiler-pragmas.
 
 
 If some code is commented out using a nested comment, then any
@@ -192,7 +192,7 @@ comment in that code will interfere with the nested comments.
 
 An identifier consists of a letter followed by zero or more letters,
 digits, underscores, and single quotes.  Identifiers are lexically
-distinguished into two namespaces (@sec:namespaces[Section]): those that begin with a lowercase letter
+distinguished into two namespaces (@sec:namespaces): those that begin with a lowercase letter
 (variable identifiers) and those that begin with an upper-case letter
 (constructor identifiers).  Identifiers are case sensitive: `name`, `naMe`, and `Name` are three distinct identifiers (the first two are
 variable identifiers, the last is a constructor identifier).
@@ -219,7 +219,7 @@ identifiers beginning with underscore.  This allows programmers to use
 _Operator symbols_
 are formed from one or more symbol characters, as
 defined above, and are lexically distinguished into two namespaces
-(@sec:namespaces[Section]):
+(@sec:namespaces):
 
 - An operator symbol starting with a colon is a constructor.
 - An operator symbol starting with any other character is an ordinary identifier.
@@ -229,8 +229,7 @@ as the Haskell list constructor; this makes its treatment uniform with
 other parts of list syntax, such as "`[]`" and "`[a,b]`".
 
 Other than the special syntax for prefix negation, all operators are
-infix, although each infix operator can be used in a _section_ to yield partially applied operators (see
-Section~\ref{sections}).
+infix, although each infix operator can be used in a _section_ to yield partially applied operators (see @sec:sections).
 All of the standard infix operators are just
 predefined symbols and may be rebound.
 
@@ -260,13 +259,13 @@ with small letters, and the others by identifiers beginning with
 capitals; also, variables and constructors have infix forms, the other
 four do not.
 Module names are a dot-separated sequence of $italic("conid")$s.
-Namespaces are also discussed in @sec:namespaces[Section]
+Namespaces are also discussed in @sec:namespaces.
 
 A name may optionally be _qualified_ in certain
 circumstances by prepending them with a module identifier.  This
 applies to variable, constructor, type constructor and type class
 names, but not type variables or module names.  Qualified
-names are discussed in detail in @chapter:modules[Chapter]
+names are discussed in detail in @chapter:modules.
 
 #table(
   columns: 3,
@@ -313,7 +312,7 @@ Sample lexical analyses are shown below.
 
 The qualifier does not change the syntactic treatment of a name;
 for example, `Prelude.+` is an infix operator with the same fixity as the
-definition of `+` in the Prelude (Section~\ref{fixity}).
+definition of `+` in the Prelude (@sec:fixity-declarations).
 
 
 == Numeric Literals
@@ -348,7 +347,7 @@ A floating literal must contain digits both before and after the
 decimal point; this ensures that a decimal point cannot be mistaken
 for another use of the dot character.  Negative numeric literals are
 discussed in @sec:operator-applications.  The typing of numeric literals
-is discussed in @sec:numeric-literals
+is discussed in @sec:numeric-literals.
 
 == Character and String Literals
 
@@ -399,7 +398,7 @@ characters in strings consist of all consecutive digits and may
 be of arbitrary length.  Similarly, the one ambiguous ASCII escape
 code, `"\SOH"`, is parsed as a string of length 1.  The escape
 character `\&` is provided as a "null character" to allow strings
-such as `"\137\&\9"` and `"\SO\&\H"` to be constructed (both of length two).  Thus `"\&"` is equivalent to `""` and the character `\&` is disallowed.  Further equivalences of characters are defined in Section~\ref{characters}.
+such as `"\137\&\9"` and `"\SO\&\H"` to be constructed (both of length two).  Thus `"\&"` is equivalent to `""` and the character `\&` is disallowed.  Further equivalences of characters are defined in @subsec:characters.
 
 A string may include a "gap"---two backslants enclosing
 white characters---which is ignored.
@@ -412,7 +411,7 @@ example,
 ```
 
 String literals are actually abbreviations for lists of characters
-(see Section~\ref{lists}).
+(see @sec:lists).
 
 == Layout
 
@@ -456,7 +455,7 @@ _no_ layout processing is performed for constructs outside the
 braces, even if a line is
 indented to the left of an earlier implicit open brace.
 
-@sec:layout[Section] gives a more precise definition of the layout rules.
+@sec:layout gives a more precise definition of the layout rules.
 
 Given these rules, a single newline may actually terminate several
 layout lists.  Also, these rules permit:
