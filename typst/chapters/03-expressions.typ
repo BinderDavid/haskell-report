@@ -526,7 +526,7 @@ As indicated by the translation of list comprehensions, variables
 bound by `let` have fully polymorphic types while those defined by
 `<-` are lambda bound and are thus monomorphic (see @sec:monomorphism).
 
-== Let Expressions
+== Let Expressions <sec:let-expressions>
 
 #table(
   columns: 3,

@@ -741,7 +741,124 @@ within a `where` or `let` construct.
 
 ==== Function bindings
 
-==== Pattern bindings
+A function binding binds a variable to a function value.  The general
+form of a function binding for variable $x$ is:
+#align(center)[
+  #table(
+    columns: 3,
+    align: (left, left, left),
+    stroke: none,
+    $x$, $p_(11) space dots space p_(1 k)$, $italic("match")_1$,
+    $dots$,$$,$$,
+    $x$, $p_(n 1) space dots space p_(n k)$, $italic("match")_n$
+  )
+]
+where each $p_(i j)$ is a pattern, and where each $italic("match")_i$ is of the general form:
+$
+  = e_i mono("where") { space italic("decls")_i space }
+$
+or
+#align(center)[
+  #table(
+    columns: 2,
+    align: (left, left),
+    stroke: none,
+    $| italic("gs")_(i 1)$, $= e_(i 1)$,
+    $dots$, $$,
+    $| italic("gs")_(i m_i)$, $= e_(i m_i)$,
+    $$, $mono("where") { space italic("decls")_i space }$
+  )
+]
+and where $n >= 1$, $1 <= i <= n$, $m_i >= 1$.  The former is treated
+as shorthand for a particular case of the latter, namely:
+$
+  | mono("True") = e_i mono("where") { space italic("decls")_i space }
+$
+
+Note that all clauses defining a function must be contiguous, and the
+number of patterns in each clause must be the same.  The set of
+patterns corresponding to each match must be _linear_---no variable is
+allowed to appear more than once in the entire set.
+
+Alternative syntax is provided for binding functional values to infix
+operators.  For example, these three function
+definitions are all equivalent:
+```haskell
+plus x y z = x+y+z
+x `plus` y = \ z -> x+y+z
+(x `plus` y) z = x+y+z
+```
+
+Note that fixity resolution applies to the infix variants of the
+function binding in the same way as for expressions
+(@sec:fixity-resolution).  Applying fixity resolution to the
+left side of the equals in a function binding must leave the $italic("varop")$ being defined at the top level.  For example, if we are defining a new
+operator `##` with precedence 6, then this definition would be
+illegal:
+```haskell
+  a ## b : xs = exp
+```
+because `:` has precedence 5, so the left hand side resolves to `(a ## x) : xs`, and this cannot be a pattern binding because `(a ## x)`
+is not a valid pattern.
+
+#translation-box[
+  The general binding form for functions is semantically
+  equivalent to the equation (i.e. simple pattern binding):
+  #table(
+    columns: 2,
+    align: (right, left),
+    stroke: none,
+    $x = mono("\\") x_1 dots x_k mono("-> case") (x_1, dots, x_k) mono("of")$, $(p_(11), dots, p_(1 k)) space italic("match")_1$,
+    $$, $dots$,
+    $$, $(p_(n 1), dots, p_(n k)) space italic("match")_n$,
+  )
+
+  where the $x_i$ are new identifiers.
+]
+
+==== Pattern bindings <sec:pattern-bindings>
+
+A pattern binding binds variables to values.  A _simple_ pattern
+binding has form $p = e$.
+The pattern $p$ is
+matched "lazily" as an irrefutable pattern, as if there were an implicit `~` in front 
+of it.  See the translation in
+Section @sec:let-expressions.
+
+The _general_ form of a pattern binding is $p italic("match")$, where a
+$italic("match")$ is the same structure as for function bindings above; in other
+words, a pattern binding is:
+
+#align(center)[
+  #table(
+    columns: 2,
+    stroke: none,
+    align: (right, left),
+    $p$, $| italic("gs")_1 = e_1$,
+    $$, $| italic("gs")_2 = e_2$,
+    $$, $dots$,
+    $$, $| italic("gs")_m = e_m$,
+    $$, $mono("where") { space italic("decls") space }$
+  )
+]
+
+#translation-box[
+  The pattern binding above is semantically equivalent to this simple pattern binding:
+  #align(center)[
+    #table(
+      columns: 2,
+      align: (right, left),
+      stroke: none,
+      $p space =$, $mono("let") italic("decls") mono("in")$,
+      $$, $mono("case") () mono("of")$,
+      $$, $quad () | italic("gs")_1 -> e_1$,
+      $$, $quad quad | italic("gs")_2 -> e_2 $,
+      $$, $quad quad quad dots$,
+      $$, $quad quad | italic("gs")_m -> e_m$,
+      $$, $mono("_") -> mono("error \"Unmatched pattern\"")$
+    )
+  ]
+]
 
 == Static Semantics of Function and Pattern Bindings
 
@@ -920,10 +1037,141 @@ This signature would also cause `x` to have type `Int`.
 
 === The Monomorphism Restriction
 
+Haskell places certain extra restrictions on the generalization
+step, beyond the standard Hindley-Milner restriction described above,
+which further reduces polymorphism in particular cases.
+
+The monomorphism restriction depends on the binding syntax of a
+variable.  Recall that a variable is bound by either a _function
+binding_ or a _pattern binding_, and that a _simple_ pattern
+binding is a pattern binding in which the pattern consists of only a
+single variable (@subsec:function-and-pattern-bindings).
+
+The following two rules define the monomorphism restriction:
+
 #monomorphism-box([
-  / Rule 1.: todo
-  / Rule 2.: todo
+  / Rule 1.: We say that a given declaration group
+    is _unrestricted_ if and only if:
+    / (a): every variable in the group is bound by a function binding or a simple
+      pattern binding (@sec:pattern-bindings), _and_
+    / (b):
+      an explicit type signature is given for every variable in the group
+      that is bound by simple pattern binding.
+    The usual Hindley-Milner restriction on polymorphism is that
+    only type variables that do not occur free in the environment may be generalized.
+    In addition, _the constrained type variables of
+    a restricted declaration group may not be generalized_
+    in the generalization step for that group.
+    (Recall that a type variable is constrained if it must belong
+    to some type class; see @sec:generalization.)
+  / Rule 2.: Any monomorphic type variables that remain when type inference for
+    an entire module is complete, are considered _ambiguous_,
+    and are resolved to particular types using the defaulting 
+    rules (@sec:default-decls).
 ])
+
+*Motivation* Rule 1 is required for two reasons, both of which are fairly subtle.
+
+- _Rule 1 prevents computations from being unexpectedly repeated._
+  For example, `genericLength` is a standard function (in library `Data.List`) whose type is given by
+  ```haskell
+  genericLength :: Num a => [b] -> a
+  ```
+  Now consider the following expression:
+  ```haskell
+  let { len = genericLength xs } in (len, len)
+  ```
+  It looks as if `len` should be computed only once, but without Rule 1 it might
+  be computed twice, once at each of two different overloadings.  If the 
+  programmer does actually wish the computation to be repeated, an explicit
+  type signature may be added:
+  ```haskell
+  let { len :: Num a => a; len = genericLength xs } in (len, len)
+  ```
+- _Rule 1 prevents ambiguity._
+  For example, consider the declaration group
+  ```haskell
+  [(n,s)] = reads t
+  ```
+  Recall that `reads` is a standard function whose type is given by the signature
+  ```haskell
+  reads :: (Read a) => String -> [(a,String)]
+  ```
+  Without Rule~1, `n` would be assigned the 
+  type $forall a. mono("Read") a => a -> a$ 
+  and `s` the type $forall a. mono("Read") a => mono("String")$.
+  The latter is an invalid type, because it is inherently ambiguous.
+  It is not possible to determine at what overloading to use `s`, nor
+  can this be solved by adding a type signature for `s`.
+  Hence, when _non-simple_ pattern bindings
+  are used (@sec:pattern-bindings), the types inferred are 
+  always monomorphic in their constrained type variables, irrespective of whether
+  a type signature is provided.
+  In this case, both `n` and `s` are monomorphic in $a$.
+
+  The same constraint applies to pattern-bound functions.  For example, in
+  ```haskell
+  (f,g) = ((+),(-))
+  ```
+  both `f` and `g` are monomorphic regardless of any type
+  signatures supplied for `f` or `g`.
+
+Rule~2 is required because there is no way to enforce monomorphic use
+of an _exported_ binding, except by performing type inference on modules
+outside the current module.  Rule~2 states that the exact types of all
+the variables bound in a module must be determined by that module alone, and not
+by any modules that import it.
+```haskell
+  module M1(len1) where
+    default( Int, Double )
+    len1 = genericLength "Hello"
+
+  module M2 where
+    import M1(len1)
+    len2 = (2*len1) :: Rational
+```
+When type inference on module `M1` is complete, `len1` has the 
+monomorphic type `Num a => a` (by Rule 1).  Rule 2 now states that
+the monomorphic type variable `a` is ambiguous, and must be resolved using
+the defaulting rules of @sec:default-decls.
+Hence, `len1` gets type `Int`, and its use in `len2` is type-incorrect.
+(If the above code is actually what is wanted, a type signature on
+`len1` would solve the problem.)
+
+This issue does not arise for nested bindings, because their entire scope is visible to the compiler.
+
+*Consequences* The monomorphism rule has a number of consequences for the programmer.
+Anything defined with function syntax usually
+generalizes as a function is expected to.  Thus in
+```haskell
+  f x y = x+y
+```
+the function `f` may be used at any overloading in class `Num`.
+There is no danger of recomputation here.  However, the same function
+defined with pattern syntax:
+```haskell
+  f = \x -> \y -> x+y
+```
+requires a type signature if `f` is to be fully overloaded.
+Many functions are most naturally defined using simple pattern
+bindings; the user must be careful to affix these with type signatures
+to retain full overloading.  The standard prelude contains many
+examples of this:
+```haskell
+  sum  :: (Num a) => [a] -> a
+  sum  =  foldl (+) 0  
+```
+
+Rule~1 applies to both top-level and nested definitions.  Consider
+```haskell
+  module M where
+    len1 = genericLength "Hello"
+    len2 = (2*len1) :: Rational
+```
+Here, type inference finds that `len1` has the monomorphic type (`Num a => a`);
+and the type variable `a` is resolved to `Rational` when performing type
+inference on `len2`.
+
 == Kind Inference <sec:kind-inference>
 
 This section describes the rules that are used to perform _kind
