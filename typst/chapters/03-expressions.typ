@@ -1141,20 +1141,66 @@ These identities all preserve the static semantics.  Rules~(d), (e), (j), and~(q
 use a lambda rather than a `let`; this indicates that variables bound
 by `case` are monomorphically typed (@sec:type-semantics).
 
+#let caseof(x, y) = { $mono("case") #x mono("of") { space #y space }$ }
+
 #figure(
   caption: "Semantics of Case Expressions, Part 1"
 )[
-  X
+  #align(left)[
+  / (a): $caseof(e, italic("alts")) = (mono("\\")v mono("->") caseof(v, italic("alts"))) space$\
+    where $v$ is a new variable
+  / (b): $mono("case") v mono("of") { p_1 italic("match")_1; dots; p_n italic("match")_n}$ \
+    $= mono("case") v mono("of") { p_1 italic("match")_1 ;$ \
+    $#h(2.4cm)mono("_ ->") dots mono("case") v mono("of") {$ \
+    $#h(4.4cm)p_n italic("match")_n;$ \
+    $#h(4.4cm)mono("_ -> error \"No match\"" } dots })$ \
+    where each $italic("match")_i$ has the form
+    $
+      | italic("gs")_(i,1) mono("->") e_(i,1); dots ;italic("gs")_(i,m_i) mono("->") e_(i, m_i) mono("where") { italic("decls") }
+    $
+  / (c): $caseof(v, dots)$
+  / (d): $mono("case") v mono("of") {mono("~") p mono("->") e ; mono("_ -> ") e' }$ \
+    $= (mono("\\")x_1 dots x_n mono("->") e) (mono("case") v mono("of"){p mono("->") x_1}) dots (mono("case") v mono("of") { p mono("->") x_n})$ \
+    where $x_1, dots, x_n$ are all the variables in $p$
+  / (e): $mono("case") v mono("of") { space x@p mono("->") e space ; space  mono("_ ->") e'}$ \
+    $= mono("case") v mono("of") { p mono("->") (mono("\\")x mono("->") e) space v space ; space mono("_ ->") e' }$
+  / (f): $mono("case") v mono("of") { space mono("_ ->") e space ; space mono("_ ->") e' space} = e$
+  ]
 ]<fig:simple-case-expr-1>
 
 #figure(
   caption: "Semantics of Case Expressions, Part 2"
 )[
-  X
+  / (g): X
+  / (h): X
+  / (i): X
+  / (j): X
+  / (k): X
+  / (l): X
+  / (m): X
+  / (n): X
+  / (o): X
+  / (p): X
+  / (q): X
+  / (r): X
 ]<fig:simple-case-expr-2>
 
 #figure(
   caption: "Semantics of Case Expressions, Part 3"
 )[
-  X
+  #align(left)[
+  / (s): $caseof((), () | g_1mono(",") dots mono(",")g_n mono("->") e mono("; _ ->") e')$ \
+    $= mono("case") () mono("of") {$ \
+    $#h(2cm) () | g_1 mono("->") dots mono("case") () mono("of") {$ \
+    $#h(4.5cm) () | g_n mono("->") e;$ \
+    $#h(4.5cm) mono("_ ->") e' space } space dots$ \
+    $#h(2cm) mono("_ ->") e' space }$ \
+    where $y$ is a new variable
+  / (t): $caseof((), () | p mono("<-") e_0 mono("->") e mono("; _ ->") e')$ \
+    $=caseof(e_0, p mono("->") e mono("; _ ->") e')$
+  / (u): $caseof((), () | mono("let") italic("decls") mono("->") e mono("; _ ->") e')$ \
+    $= mono("let") italic("decls") mono("in") e$
+  / (v): $caseof((),() | e_0 mono("->") e mono("; _ ->") e')$ \
+    $= mono("if") e_0 mono("then") e mono("else") e'$
+  ]
 ]<fig:simple-case-expr-3>
