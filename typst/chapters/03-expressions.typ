@@ -386,7 +386,7 @@ Standard operations on lists are given in the Prelude (see @subsec:basic-lists, 
 The constructor "`:`" is reserved solely for list construction; like `[]`, it is considered part of the language syntax, and cannot be hidden or redefined.
 It is a right-associative operator, with precedence level 5 (@sec:fixity-declarations).
 
-== Tuples
+== Tuples <sec:tuple-expression>
 
 #table(
   columns: 4,
@@ -411,7 +411,7 @@ in the Prelude (see @subsec:basic-tuples and @chapter:standard-prelude).
 
 
 
-== Unit Expressions and Parenthesized Expressions
+== Unit Expressions and Parenthesized Expressions <sec:unit-expression>
 
 #table(
   columns: 3,
@@ -893,7 +893,7 @@ without field labels.
 A compile-time error will result if no single constructor
 defines the set of field labels used in an update, such as `x {f2 = 1, f3 = 'x'}`.
 
-== Expression Type-Signatures
+== Expression Type-Signatures <sec:expression-type-sigs>
 
 
 _Expression type-signatures_ have the form $e mono("::") t$, where $e$ is an expression and $t$ is a type (@sec:type-syntax); they

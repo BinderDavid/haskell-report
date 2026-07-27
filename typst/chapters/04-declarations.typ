@@ -1,6 +1,56 @@
 #import "../macros.typ" : *
 In this chapter, we describe the syntax and informal semantics of Haskell _declarations_.
 
+#table(
+  columns: 4,
+  stroke: none,
+  align: (left, center, left, left),
+  // module
+  $italic("module")$, $->$, $terminal("module") nonterminal("modid") [ nonterminal("exports")] terminal("where") nonterminal("body")$,$$,
+  $$, $|$, $nonterminal("body")$, $$,
+  // body
+  $italic("body")$, $->$, $terminal("{") nonterminal("impdecls") terminal(";") nonterminal("topdecls") terminal("}")$, $$,
+  $$, $|$, $terminal("{") nonterminal("impdecls") terminal("}")$, $$,
+  $$, $|$, $terminal("{") nonterminal("topdecls") terminal("}")$, $$,
+  // topdecls
+  $italic("topdecls")$, $->$, $nonterminal("topdecl")_1 terminal(";") dots terminal(";") nonterminal("topdecl")_n$, $(n >= 1)$,
+  // topdecl
+  $italic("topdecl")$, $->$, $terminal("type") nonterminal("simpletype") terminal("=") nonterminal("type")$, $$,
+  $$, $|$, $terminal("data") [nonterminal("context") terminal("=>")] nonterminal("simpletype") [terminal("=") nonterminal("constrs")] [nonterminal("deriving")]$, $$,
+  $$, $|$, $terminal("newtype") [nonterminal("context") terminal("=>")] nonterminal("simpletype") terminal("=") nonterminal("newconstr") [nonterminal("deriving")]$, $$,
+  $$, $|$, $terminal("class") [nonterminal("scontext") terminal("=>")] nonterminal("tycls") nonterminal("tyvar") [terminal("where") nonterminal("cdecls")]$, $$,
+  $$, $|$, $terminal("instance") [nonterminal("scontext") terminal("=>")] nonterminal("qtycls") nonterminal("inst") [terminal("where") nonterminal("idecls")]$, $$,
+  $$, $|$, $terminal("default") terminal("(") nonterminal("type")_1 terminal(",") dots terminal(",") nonterminal("type")_n terminal(")")$, $(n >= 0)$,
+  $$, $|$, $terminal("foreign") nonterminal("fdecl")$, $$,
+  $$, $|$, $nonterminal("decl")$, $$,
+  // decls
+  $italic("decls")$, $->$, $terminal("{") nonterminal("decl")_1 terminal(";") dots terminal(";") nonterminal("decl")_n terminal("}")$, $(n >= 0)$,
+  // decl
+  $italic("decl")$, $->$, $nonterminal("gendecl")$, $$,
+  $$,$|$, $(nonterminal("funlhs") | nonterminal("pat")) nonterminal("rhs")$,$$,
+  // cdecls
+  $italic("cdecls")$, $->$, $terminal("{") nonterminal("cdecl")_1 terminal(";") dots terminal(";") nonterminal("cdecl")_n terminal("}")$, $(n >= 0)$,
+  // cdecl
+  $italic("cdecl")$, $->$, $nonterminal("gendecl")$, $$,
+  $$,$|$, $(nonterminal("funlhs") | nonterminal("var")) nonterminal("rhs")$,$$,
+  // idecls
+  $italic("idecls")$, $->$, $terminal("{") nonterminal("idecl")_1 terminal(";") dots terminal(";") nonterminal("idecl")_n terminal("}")$, $(n >= 0)$,
+  // idecl
+  $italic("idecl")$, $->$, $(nonterminal("funlhs") | nonterminal("var")) nonterminal("rhs")$, $$,
+  $$, $|$, $$, [(empty)],
+  // gendecl
+  $italic("gendecl")$, $->$, $nonterminal("vars") terminal("::") [nonterminal("context") terminal("=>")] nonterminal("type")$, [(type signature)],
+  $$, $|$, $nonterminal("fixity") [nonterminal("integer")] nonterminal("ops")$, [(fixity declaration)],
+  $$, $|$, $$, [(empty declaration)],
+  // ops
+  $italic("ops")$, $->$, $nonterminal("op")_1 terminal(",") dots terminal(",") nonterminal("op")_n$, $(n >= 1)$,
+  // vars
+  $italic("vars")$, $->$, $nonterminal("var")_1 terminal(",") dots terminal(",") nonterminal("var")_n$, $(n >= 1)$,
+  // fixity
+  $italic("fixity")$, $->$, $terminal("infixl") | terminal("infixr") | terminal("infix")$, $$,
+
+)
+
 The declarations in the syntactic category $nonterminal("topdecls")$ are only allowed
 at the top level of a Haskell module (see @chapter:modules), whereas $nonterminal("decls")$ may be used either at the top level or
 in nested scopes (i.e. those within a `let` or `where` construct).
@@ -92,9 +142,225 @@ Kind inference is discussed in @sec:kind-inference.
 
 === Syntax of Types <sec:type-syntax>
 
-=== Syntax of Class Assertions and Contexts
+#table(
+  columns: 4,
+  stroke: none,
+  align: (left, center, left, left),
+  // type
+  $italic("type")$, $->$, $nonterminal("btype") [terminal("->") nonterminal("type")]$, [(function type)],
+  // btype
+  $italic("btype")$, $->$, $[nonterminal("btype")] nonterminal("atype")$, [(type application)],
+  // atype
+  $italic("atype")$, $->$, $nonterminal("gtycon")$, $$,
+  $$,$|$, $nonterminal("tyvar")$, $$,
+  $$,$|$, $terminal("(") nonterminal("type")_1 terminal(",") dots terminal(",") nonterminal("type")_k terminal(")")$, [(tuple type, $k >= 2$)],
+  $$,$|$, $terminal("[") nonterminal("type") terminal("]")$, [(list type)],
+  $$,$|$, $terminal("(") nonterminal("type") terminal(")")$, [(parenthesized constructor)],
+  // gtycon
+  $italic("gtycon")$, $->$, $nonterminal("qtycon")$, $$,
+  $$,$|$,$terminal("()")$, [(unit type)],
+  $$,$|$,$terminal("[]")$, [(list constructor)],
+  $$,$|$,$terminal("(->)")$, [(function constructor)],
+  $$,$|$,$terminal("(,") {terminal(",")} terminal(")")$, [(tupling constructors)],
+)
+
+The syntax for Haskell type expressions is given above.  Just as data values are built using data constructors, type values are built from _type constructors_.
+As with data constructors, the names of type constructors start with uppercase letters.
+Unlike data constructors, infix type constructors are not allowed (other than `(->)`).
+
+The main forms of type expression are as follows:
+
+1. Type variables, written as identifiers beginning with
+   a lowercase letter.  The kind of a variable is determined implicitly
+   by the context in which it appears.
+
+2. Type constructors.  Most type constructors are written as an identifier
+   beginning with an uppercase letter.  For example:
+   - `Char`, `Int`, `Integer`, `Float`, `Double` and `Bool` are
+     type constants with kind $ast$.
+   - `Maybe` and `IO` are unary type
+     constructors, and treated as types with kind $ast -> ast$.
+   - The declarations `data T ...` or `newtype T ...` add the type
+     constructor `T` to the type vocabulary.  The kind of `T` is determined by
+     kind inference.
+   Special syntax is provided for certain built-in type constructors:
+   - The _trivial type_ is written as `()` and
+     has kind $ast$.
+     It denotes the "nullary tuple" type, and has exactly one value,
+     also written `()` (see @sec:unit-expression and @subsec:basic-trivial).
+   - The _function type_ is written as `(->)` and has
+     kind $ast -> ast -> ast$.
+   - The _list type_  is written as `[]` and has kind $ast -> ast$.
+   - The _tuple types_ are written as `(,)`,
+     `(,,)`, and so on.
+     Their kinds are $ast -> ast -> ast$,$ast -> ast -> ast -> ast$,  and
+     so on.
+   Use of the `(->)` and `[]` constants is described in more detail below.
+
+3. Type application.  If $t_1$ is a type of kind
+   $kappa_1 -> kappa_2$ and $t_2$ is a type of kind $kappa_1$,
+   then $t_1 space t_2$ is a type expression of kind $kappa_2$.
+
+4. A _parenthesized type_, having form $(t)$, is identical
+      to the type $t$.
+
+For example, the type expression `IO a` can be understood as the application
+of a constant, `IO`, to the variable `a`.  Since the `IO` type
+constructor has kind 
+$ast -> ast$, it follows that both the variable `a` and the whole
+expression, `IO a`, must have kind $ast$.
+In general, a process of _kind inference_
+(see @sec:kind-inference) is needed to determine appropriate kinds for user-defined datatypes, type
+synonyms, and classes.
+
+Special syntax is provided to allow certain type expressions to be written
+in a more traditional style:
+
+1. A _function type_ has the form $t_1 -> t_2$, which is equivalent to the type
+$(->) t_1 t_2$.  Function arrows associate to the right.
+For example, `Int -> Int -> Float` means `Int -> (Int -> Float)`.
+2. A _tuple type_ has the form $(t_1, dots, t_k)$, where $k >= 2$, which is equivalent to
+   the type $(,dots,) t_1 dots t_k$ where there are
+   $k-1$ commas between the parenthesis.  It denotes the
+   type of $k$-tuples with the first component of type $t_1$, the second
+   component of type $t_2$, and so on (see @sec:tuple-expression
+   and @subsec:basic-tuples).
+3. A _list type_ has the form $[t]$, which is equivalent to the type $[] t$.
+   It denotes the type of lists with elements of type $t$ (see @sec:lists and @subsec:basic-lists).
+
+
+These special syntactic forms always denote the built-in type constructors
+for functions, tuples, and lists, regardless of what is in scope.
+In a similar way, the prefix type constructors `(->)`, `[]`, `()`, `(,)`, 
+and so on, always denote the built-in type constructors; they 
+cannot be qualified, nor mentioned in import or export lists (@chapter:modules).
+(Hence the special production, "gtycon", above.)
+
+Although the list and tuple types have special syntax, their semantics 
+is the same as the equivalent user-defined algebraic data types.
+
+Notice that expressions and types have a consistent syntax.
+If $t_i$ is the type of
+expression or pattern $e_i$, then the expressions `(\ e1 -> e2)`, `[e1]`, and  `(t1 -> t2)`, `[t1]`, and `(t1, t2)`, respectively.
+
+With one exception (that of the distinguished type variable
+in a class declaration (@sec:class-decl)), the
+type variables in a Haskell type expression
+are all assumed to be universally quantified; there is no explicit
+syntax for universal quantification @damas-milner82.
+For example, the type expression
+`a -> a` denotes the type $forall a. a -> a$.
+For clarity, however, we often write quantification explicitly
+when discussing the types of Haskell programs.  When we write an
+explicitly quantified type, the scope of the $forall$ extends as far
+to the right as possible; for example, $forall a. a -> a$ means
+$forall a. (a -> a)$.
+
+=== Syntax of Class Assertions and Contexts <sec:classes-contexts>
+
+#table(
+  columns: 4,
+  stroke: none,
+  align: (left, center, left, left),
+  // context
+  $italic("context")$, $->$, $nonterminal("class")$, $$,
+  $$,$|$,$terminal("(") nonterminal("class")_1 terminal(",") dots terminal(",") nonterminal("class")_n terminal(")")$,$(n >= 0)$,
+  // class
+  $italic("class")$, $->$, $nonterminal("qtycls") nonterminal("tyvar")$, $$,
+  $$,$|$,$nonterminal("qtycls") terminal("(") nonterminal("tyvar") nonterminal("atype")_1 dots nonterminal("atype")_n terminal(")")$,$(n >= 1)$,
+  // qtycls
+  $italic("qtycls")$, $->$, $[nonterminal("modid") terminal(".")] nonterminal("tycls")$,$$,
+  // tycls
+  $italic("tycls")$, $->$, $nonterminal("conid")$,$$,
+  // tyvar
+  $italic("tyvar")$, $->$, $nonterminal("varid")$,$$,
+
+)
+
+A _class assertion_ has form $italic("qtycls") italic("tyvar")$, and
+indicates the membership of the type $italic("tyvar")$ in the class
+$italic("qtycls")$.
+A class identifier begins with an uppercase letter.
+A _context_ consists of zero or more class assertions,
+and has the general form
+$
+  (C_1 u_1, dots, C_n u_n)
+$
+where $C_1, dots, C_n$ are class identifiers, and each of the $u_1, dots, u_n$ is
+either a type variable, or the application of type variable to one or more types.
+The outer parentheses may be omitted when $n=1$.
+In general, we use $italic("cx")$ to denote a context and we write $italic("cx") mono("=>") t$ to
+indicate the type $t$ restricted by the context $italic("cx")$.
+The context $italic("cx")$ must only contain type variables referenced in $t$.
+For convenience,
+we write $italic("cx") mono("=>") t$ even if the context $italic("cx")$ is empty, although in this
+case the concrete syntax contains no `=>`.
 
 === Semantics of Types and Classes
+
+In this section, we provide informal details of the type system.
+(Wadler and Blott @wadler:classes and Jones
+@jones:cclasses discuss type
+and constructor classes, respectively, in more detail.)
+
+The Haskell type system attributes a _type_ to each
+expression in the program.  In general, a type is of the form
+$forall overline(u). italic("cx") => t$,
+where $overline(u)$ is a set of type variables $u_1, dots, u_n$.
+In any such type, any of the universally-quantified type variables $u_i$
+that are free in $italic("cx")$ must also be free in $t$.
+Furthermore, the context $italic("cx")$ must be of the form given above in
+@sec:classes-contexts.  For example, here are some
+valid types:
+```haskell
+  Eq a => a -> a
+  (Eq a, Show a, Eq b) => [a] -> [b] -> String
+  (Eq (f a), Functor f) => (a -> b) -> f a -> f b -> Bool
+```
+In the third type, the constraint `Eq (f a)` cannot be made
+simpler because `f` is universally quantified.
+
+The type of an expression $e$ depends 
+on a _type environment_ that gives types 
+for the free variables in $e$, and a
+_class environment_ that 
+declares which types are instances of which classes (a type becomes
+an instance of a class only via the presence of an
+`instance` declaration or a `deriving` clause).
+
+Types are related by a generalization preorder
+(specified below);
+the most general type, up to the equivalence induced by the generalization preorder,
+that can be assigned to a particular
+expression (in a given environment) is called its _
+principal type_.
+Haskell's extended Hindley-Milner type system can infer the principal
+type of all expressions, including the proper use of overloaded
+class methods (although certain ambiguous overloadings could arise, as
+described in @sec:default-decls).  Therefore, explicit typings (called
+_type signatures_)
+are usually optional (see @sec:expression-type-sigs and @sec:type-signatures).
+
+The type $forall overline(u).italic("cx")_1 => t_1$ _more general than_ the 
+type $forall overline(w). italic("cx")_2 => t_2$ if and only if there is 
+a substitution $S$ whose domain is $overline(u)$ such that:
+
+- $t_2$ is identical to $S(t_1)$.
+- Whenever $italic("cx")_2$ holds in the class environment, $S(italic("cx")_1)$ also holds.
+
+A value of type $forall overline(u).italic("cx") => t$,
+may be instantiated at types $overline(s)$ if and only if
+the context $italic("cx")[overline(s)/overline(u)]$ holds.
+For example, consider the function `double`:
+```haskell
+double x = x + x
+```
+The most general type of `double` is $forall a. mono("Num") a => a -> a$.
+`double` may be applied to values of type `Int` (instantiating $a$ to
+`Int`), since `Num Int` holds, because `Int` is an instance of the class `Num`.
+However, `double` may not normally be applied to values
+of type `Char`, because `Char` is not normally an instance of class `Num`.
+The user may choose to declare such an instance, in which case `double` may indeed be applied to a `Char`.
 
 == User-Defined Datatypes <sec:user-defined-datatypes>
 
