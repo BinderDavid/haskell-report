@@ -296,7 +296,7 @@ For convenience,
 we write $italic("cx") mono("=>") t$ even if the context $italic("cx")$ is empty, although in this
 case the concrete syntax contains no `=>`.
 
-=== Semantics of Types and Classes
+=== Semantics of Types and Classes <sec:type-semantics>
 
 In this section, we provide informal details of the type system.
 (Wadler and Blott @wadler:classes and Jones

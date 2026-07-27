@@ -1110,3 +1110,51 @@ f ~(x,y,z) [a] | (a == y) = 1
 both `a` and `y` will be evaluated by `==` in the guard.
 
 === Formal Semantics of Pattern Matching <subsec:formal-semantics-pattern-matching>
+
+The semantics of all pattern matching constructs other than `case`
+expressions are defined by giving identities that relate those
+constructs to `case` expressions.
+The semantics of `case` expressions themselves are in turn given as a series of identities, in @fig:simple-case-expr-1 -- @fig:simple-case-expr-3. 
+Any implementation should behave so that these identities hold; it is 
+not expected that it will use them directly, since that 
+would generate rather inefficient code.
+
+In @fig:simple-case-expr-1 -- @fig:simple-case-expr-3:
+$e$, $e'$ and $e_i$ are expressions; 
+$g_i$ and $italic("gs")_i$ are guards and sequences of guards respectively;
+$p$ and $p_i$ are patterns; 
+$v$, $x$, and $x_i$ are variables; 
+$K$ and $K'$ are algebraic datatype (`data`) constructors (including
+tuple constructors);  and $N$ is a `newtype` constructor.
+
+Rule~(b) matches a general source-language
+`case` expression, regardless of whether it actually includes
+guards---if no guards are written, then `True` is substituted for the guards $italic("gs")_(i,j)$
+in the $italic("match")_i$ forms.
+Subsequent identities manipulate the resulting `case` expression into simpler and simpler forms.
+
+Rule~(h) in @fig:simple-case-expr-2 involves the
+overloaded operator `==`; it is this rule that defines the
+meaning of pattern matching against overloaded constants.
+
+These identities all preserve the static semantics.  Rules~(d), (e), (j), and~(q)
+use a lambda rather than a `let`; this indicates that variables bound
+by `case` are monomorphically typed (@sec:type-semantics).
+
+#figure(
+  caption: "Semantics of Case Expressions, Part 1"
+)[
+  X
+]<fig:simple-case-expr-1>
+
+#figure(
+  caption: "Semantics of Case Expressions, Part 2"
+)[
+  X
+]<fig:simple-case-expr-2>
+
+#figure(
+  caption: "Semantics of Case Expressions, Part 3"
+)[
+  X
+]<fig:simple-case-expr-3>
