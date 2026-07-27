@@ -1149,17 +1149,29 @@ by `case` are monomorphically typed (@sec:type-semantics).
   #align(left)[
   / (a): $caseof(e, italic("alts")) = (mono("\\")v mono("->") caseof(v, italic("alts"))) space$\
     where $v$ is a new variable
-  / (b): $mono("case") v mono("of") { p_1 italic("match")_1; dots; p_n italic("match")_n}$ \
-    $= mono("case") v mono("of") { p_1 italic("match")_1 ;$ \
+  / (b): $mono("case") v mono("of") {space p_1 space italic("match")_1 mono(";") dots mono(";") p_n space italic("match")_n space }$ \
+    $= mono("case") v mono("of") { space p_1 space italic("match")_1 ;$ \
     $#h(2.4cm)mono("_ ->") dots mono("case") v mono("of") {$ \
-    $#h(4.4cm)p_n italic("match")_n;$ \
+    $#h(4.4cm)p_n space italic("match")_n;$ \
     $#h(4.4cm)mono("_ -> error \"No match\"" } dots })$ \
     where each $italic("match")_i$ has the form
     $
-      | italic("gs")_(i,1) mono("->") e_(i,1); dots ;italic("gs")_(i,m_i) mono("->") e_(i, m_i) mono("where") { italic("decls") }
+      | italic("gs")_(i,1) mono("->") e_(i,1) mono(";") dots mono(";") italic("gs")_(i,m_i) mono("->") e_(i, m_i) mono("where") { italic("decls") }
     $
-  / (c): $caseof(v, dots)$
-  / (d): $mono("case") v mono("of") {mono("~") p mono("->") e ; mono("_ -> ") e' }$ \
+  / (c): $mono("case") v mono("of") { space p | italic("gs")_1 mono("->") e_1 mono(";") dots$ \
+    $#h(2.325cm) | italic("gs")_n mono("->") e_n mono("where") { italic("decls") }$ \
+    $#h(2cm) mono("_ ->") e' space}$ \
+    $= mono("case") e' mono("of") { space y mono("->")$ \
+    $#h(1cm) mono("case") v mono("of") {$ \
+    $#h(2cm) p mono("->") mono("let") { italic("decls")} mono("in")$ \
+    $#h(3cm) mono("case") () mono("of") {$ \
+    $#h(3.5cm) () | italic("gs")_1 mono("->") e_1 mono(";")$\
+    $#h(3.5cm) mono("_ -> ") dots mono("case") () mono("of") {$ \
+    $#h(5cm) () | italic("gs")_n mono("->") e_n mono(";")$ \
+    $#h(5cm) mono("_ ->") y space } space dots space }$ \
+    $#h(2cm) mono("_ ->") y space }}$ \
+    where $y$ is a new variable
+  / (d): $mono("case") v mono("of") {mono("~") p mono("->") e mono("; _ -> ") e' }$ \
     $= (mono("\\")x_1 dots x_n mono("->") e) (mono("case") v mono("of"){p mono("->") x_1}) dots (mono("case") v mono("of") { p mono("->") x_n})$ \
     where $x_1, dots, x_n$ are all the variables in $p$
   / (e): $mono("case") v mono("of") { space x@p mono("->") e space ; space  mono("_ ->") e'}$ \
