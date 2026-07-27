@@ -142,7 +142,7 @@ The `Maybe` type is an instance of classes `Functor`, `Monad`,
 and `MonadPlus`.  The `Ordering` type is used by `compare` in the class `Ord`. The functions `maybe` and `either` are found in
 the Prelude.
 
-== Strict Evaluation
+== Strict Evaluation <sec:strict-eval>
 
 Function application in Haskell is non-strict; that is, a function
 argument is evaluated only when required.  Sometimes it is desirable to
@@ -158,7 +158,6 @@ $
 
 `seq` is usually introduced to improve performance by
 avoiding unneeded laziness.  Strict datatypes (see
-\index{strictness flags}
 Section~\ref{strictness-flags}) are defined in terms of the `$!` operator.
 However, the provision of `seq` has important semantic consequences, because it is available
 _at every type_.

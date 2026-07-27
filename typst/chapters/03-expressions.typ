@@ -727,7 +727,7 @@ to be written in a more traditional way as:
 
 As indicated by the translation of `do`, variables bound by `let` have fully polymorphic types while those defined by `<-` are lambda bound and are thus monomorphic.
 
-== Datatypes with Field Labels
+== Datatypes with Field Labels <sec:field-ops>
 
 A datatype declaration may optionally define field labels
 (see @sec:datatype-decls).

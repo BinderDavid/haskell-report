@@ -660,7 +660,7 @@ necessary to deal with mutual recursion.  The
 precise details of separate compilation are not defined by this
 report. 
 
-== Abstract Datatypes
+== Abstract Datatypes <sec:abstract-types>
 
 The ability to export a datatype without its constructors
 allows the construction of abstract datatypes (ADTs).  For example,

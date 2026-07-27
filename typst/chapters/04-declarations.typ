@@ -364,7 +364,157 @@ The user may choose to declare such an instance, in which case `double` may inde
 
 == User-Defined Datatypes <sec:user-defined-datatypes>
 
+In this section, we describe algebraic datatypes (`data`
+declarations), renamed datatypes (`newtype` declarations), and type
+synonyms (`type` declarations).  These declarations may only appear at
+the top level of a module.
+
 === Algebraic Datatype Declarations <sec:datatype-decls>
+
+#table(
+  columns: 4,
+  align: (left, center, left, left),
+  stroke: none,
+  // topdecl
+  $italic("topdecl")$, $->$, $terminal("data") [nonterminal("context") terminal("=>")] nonterminal("simpletype") [terminal("=") nonterminal("constrs")] [nonterminal("deriving")]$, $$,
+  // simpletype
+  $italic("simpletype")$, $->$, $nonterminal("tycon") nonterminal("tyvar")_1 dots nonterminal("tyvar")_k$, $(k >= 0)$,
+  // constrs
+  $italic("constrs")$, $->$, $nonterminal("constr")_1 terminal("|") dots terminal("|") nonterminal("constr")_n$, $(n >= 1)$,
+  // constr
+  $italic("constr")$, $->$, $nonterminal("con") [terminal("!")] nonterminal("atype")_1 dots [terminal("!")] nonterminal("atype")_k$, [(arity $italic("con") = k$, $k >= 0$)],
+  $$,$|$,$(nonterminal("btype") | terminal("!") nonterminal("atype")) nonterminal("conop") (nonterminal("btype") | terminal("!") nonterminal("atype"))$,[(infix $italic("conop")$)],
+  $$,$|$,$nonterminal("con") terminal("{") nonterminal("fielddecl")_1 terminal(",") dots terminal(",") nonterminal("fielddecl")_n terminal("}")$,$(n >= 0)$,
+  // fielddecl
+  $italic("fielddecl")$, $->$, $nonterminal("vars") terminal("::") (nonterminal("type") | terminal("!") nonterminal("atype"))$, $$,
+  // deriving
+  $italic("deriving")$, $->$, $terminal("deriving") ( nonterminal("dclass") | terminal("(") nonterminal("dclass")_1 terminal(",") dots terminal(",") nonterminal("dclass")_n terminal(")"))$, $(n >= 0)$,
+  // dclass
+  $italic("dclass")$, $->$, $nonterminal("qtycls")$, $$,
+)
+
+The precedence for $italic("constr")$ is the same as that for
+expressions---normal constructor application has higher precedence
+than infix constructor application (thus `a : Foo a` parses as `a : (Foo a)`).
+
+An algebraic datatype declaration has the form:
+$
+  mono("data") italic("cx") mono("=>") T u_1 dots u_k = K_1 t_(11) dots t_(1k_1) | dots | K_n t_(n 1) dots t_(n k_n)
+$
+where $italic("cx")$ is a context.
+This declaration
+introduces a new _type constructor_ $T$ with zero or more constituent _data constructors_ $K_1, dots K_n$.
+In this Report, the unqualified term "constructor" always means "data constructor".
+
+The types of the data constructors are given by:
+$
+  K_i mono("::") forall u_1 dots u_k. italic("cx")_i => t_(i 1) -> dots -> t_(i k_i) -> (T space u_1 dots u_k)
+$
+where $italic("cx")_i$ is the largest subset of $italic("cx")$ that constrains only those type variables free in the types $t_(i 1) dots t_(i k_i)$.
+The type variables $u_1$ through $u_k$ must be distinct and may appear
+in $italic("cx")$ and the $t_(i j)$; it is a static error
+for any other type variable to appear in $italic("cx")$ or on the right-hand-side.
+The new type constant $T$ has a kind of the form
+$kappa_1 -> dots -> kappa_k -> ast$
+where the kinds $kappa_i$ of the argument variables $u_i$ are
+determined by kind inference
+as described in @sec:kind-inference.
+This means that $T$ may be used in type expressions with anywhere
+between $0$ and $k$ arguments.
+
+For example, the declaration
+```haskell
+data Eq a => Set a = NilSet | ConsSet a (Set a)
+```
+introduces a type constructor `Set` of kind $ast -> ast$, and constructors `NilSet` and `ConsSet` with types
+#align(center)[
+  #table(
+    columns: 3,
+    align: (left, center, left),
+    stroke: none,
+    [`NilSet`], [`::`], $forall a. mono("Set") a$,
+    [`ConsSet`], [`::`], $forall a. mono("Eq") a => a -> mono("Set") a -> mono("Set") a$,
+  )
+]
+In the example given, the overloaded
+type for `ConsSet` ensures that `ConsSet` can only be applied to values whose
+type is an instance of the class `Eq`.
+Pattern matching against `ConsSet` also gives rise to an `Eq a` constraint. 
+For example: 
+```haskell
+  f (ConsSet a s) = a
+```
+the function `f` has inferred type `Eq a => Set a -> a`.
+The context in the  `data` declaration has no other effect whatsoever.
+
+The visibility of a datatype's constructors (i.e.~the "abstractness"
+of the datatype) outside of the module in which the datatype is
+defined is controlled by the form of the datatype's name in the export
+list as described in @sec:abstract-types.
+
+The optional `deriving` part of a `data` declaration has to do
+with _derived instances_, and is described in @sec:derived-decls.
+
+
+*Labelled Fields*
+A data constructor of arity $k$ creates an object with $k$ components.
+These components are normally accessed positionally as arguments to the
+constructor in expressions or patterns.  For large datatypes it is
+useful to assign _field labels_ to the components of a data object.
+This allows a specific field to be referenced independently of its
+location within the constructor.
+
+A constructor definition in a `data` declaration may assign labels to the
+fields of the constructor, using the record syntax ($C space { space dots space }$).
+Constructors using field labels may be freely mixed with constructors
+without them. 
+A constructor with associated field labels may still be used as an
+ordinary constructor; features using labels are
+simply a shorthand for operations using an underlying positional
+constructor.  The arguments to the positional constructor occur in the
+same order as the labeled fields.  For example, the declaration
+```haskell
+  data C = F { f1,f2 :: Int, f3 :: Bool }
+```
+defines a type and constructor identical to the one produced by
+```haskell
+  data C = F Int Int Bool
+```
+Operations using field labels are described in @sec:field-ops.
+A `data` declaration may use the same field label in multiple
+constructors as long as the typing of the field is the same in all
+cases after type synonym expansion.  A label cannot be shared by
+more than one type in scope.  Field names share the top level namespace
+with ordinary variables and class methods and must not conflict with
+other top level names in scope.
+
+The pattern `F { }` matches any value built with constructor `F`, 
+_whether or not `F` was declared with record syntax_.
+
+*Strictness Flags*
+Whenever a data constructor is applied, each argument to the
+constructor is evaluated if and only if the corresponding type in the
+algebraic datatype declaration has a strictness flag, denoted by
+an exclamation point, "`!`".
+Lexically, "`!`" is an ordinary varsym not a $nonterminal("reservedop")$; 
+it has special significance only in the context of the argument types of 
+a data declaration.
+
+#translation-box[
+  A declaration of the form
+  $
+    mono("data") italic("cx") => T u_1 dots u_k = dots  | K s_1 dots s_n | dots
+  $
+  where each $s_i$ is either of the form $! t_i$ or $t_i$, replaces
+  every occurrence of $K$ in an expression by
+  $
+    (mono("\\") x_1 dots x_n mono("->") (((K italic("op")_1 x_1) italic("op")_2 x_2) dots) italic("op")_n x_n)
+  $
+  where $italic("op")_i$ is the non-strict apply function `$` if $s_i$ is of the form $t_i$,
+  and $italic("op")_i$ is the strict apply function `$!` (see
+  @sec:strict-eval) if $s_i$ is of the form $! t_i$.
+  Pattern matching on $K$ is not affected by strictness flags.
+]
 
 === Type Synonym Declarations
 
@@ -376,27 +526,218 @@ The user may choose to declare such an instance, in which case `double` may inde
 
 === Instance Declarations <sec:instance-decl>
 
-=== Derived Instances
+=== Derived Instances <sec:derived-decls>
 
 === Ambiguous Types, and Defaults for Overloaded Numeric Operations <sec:default-decls>
 
 == Nested Declarations <sec:nested>
 
+The following declarations may be used in any declaration list,
+including the top level of a module.
+
 === Type Signatures <sec:type-signatures>
 
+#table(
+  columns: 4,
+  align: (left, center, left, left),
+  stroke: none,
+  // gendecl
+  $italic("gendecl")$, $->$, $nonterminal("vars") terminal("::") [nonterminal("context") terminal("=>")] nonterminal("type")$,[],
+  // vars
+  $italic("vars")$, $->$, $nonterminal("var")_1 terminal(",") dots terminal(",") nonterminal("var")_n$, $(n >= 1)$,
+)
+
+A type signature specifies types for variables, possibly with respect
+to a context.  A type signature has the form:
+$
+  X
+$
+which is equivalent to asserting
+$v_i mono("::") italic("cx") mono("=>") t$
+for each $i$ from $1$ to $n$.  Each $v_i$ must have a value binding in
+the same declaration list that contains the type signature; i.e. it is
+invalid to give a type signature for a variable bound in an
+outer scope.
+Moreover, it is invalid to give more than one type signature for one
+variable, even if the signatures are identical.
+
+As mentioned in @sec:type-syntax,
+every type variable appearing in a signature
+is universally quantified over that signature, and hence
+the scope of a type variable is limited to the type
+signature that contains it.  For example, in the following
+declarations
+```haskell
+f :: a -> a
+f x = x :: a                  -- invalid
+```
+the `a`'s in the two type signatures are quite distinct.
+Indeed, these declarations contain a static error, since `x` does not have
+type $forall a.a$.  (The type of `x` is dependent on the type of
+`f`; there is currently no way in Haskell to specify a signature
+for a variable with a dependent type; this is explained in @sec:monomorphism.)
+
+If a given program includes a signature
+for a variable $f$, then each use of $f$ is treated as having the
+declared type.  It is a static error if the same type cannot also be
+inferred for the defining occurrence of $f$.
+
+If a variable $f$ is defined without providing a corresponding type
+signature declaration, then each use of $f$ outside its own declaration
+group (see @sec:dependencyanalysis) is treated as having the
+corresponding inferred, or _principal_ type.
+However, to ensure that type inference is still possible, the defining
+occurrence, and all uses of $f$ within its declaration group must have
+the same monomorphic type (from which the principal type is obtained
+by generalization, as described in @sec:generalization).
+
+For example, if we define
+```haskell
+sqr x  =  x*x
+```
+then the principal type is 
+$mono("sqr") mono("::") forall a. mono("Num") a => a -> a$, 
+which allows
+applications such as `sqr 5` or `sqr 0.1`.  It is also valid to declare
+a more specific type, such as
+```haskell
+sqr :: Int -> Int
+```
+but now applications such as `sqr 0.1` are invalid.  Type signatures such as
+```haskell
+sqr :: (Num a, Num b) => a -> b     -- invalid
+sqr :: a -> a                       -- invalid
+```
+are invalid, as they are more general than the principal type of `sqr`.
+
+Type signatures can also be used to support
+_polymorphic recursion_.
+The following definition is pathological, but illustrates how a type
+signature can be used to specify a type more general than the one that
+would be inferred:
+```
+data T a  =  K (T Int) (T a)
+f         :: T a -> a
+f (K x y) =  if f x == 1 then f y else undefined
+```
+If we remove the signature declaration, the type of `f` will be
+inferred as `T Int -> Int` due to the first recursive call for which
+the argument to `f` is `T Int`.  Polymorphic recursion allows the user
+to supply the more general type signature, `T a -> a`.
+
 === Fixity Declarations <sec:fixity-declarations>
+
+#table(
+  columns: 4,
+  align: (left, center, left, left),
+  stroke: none,
+  // gendecl
+  $italic("gendecl")$, $->$, $nonterminal("fixity") [nonterminal("integer")] nonterminal("ops")$, [],
+  // fixity
+  $italic("fixity")$, $->$, $terminal("infixl") | terminal("infixr") | terminal("infix")$, $$,
+  // ops
+  $italic("ops")$, $->$, $nonterminal("op")_1 terminal(",") dots terminal(",") nonterminal("op")_n$, $(n >= 1)$,
+  // op
+  $italic("op")$,$->$,$nonterminal("varop") | nonterminal("conop")$,[],
+  
+)
+
+A fixity declaration gives the fixity and binding
+precedence of one or more operators.  The $italic("integer")$ in a fixity declaration
+must be in the range $0$ to $9$.
+A fixity declaration may appear anywhere that 
+a type signature appears and, like a type signature, declares a property of
+a particular operator.  Also like a type signature,
+a fixity declaration can only occur in the same sequence of declarations as
+the declaration of the operator itself, and at most one fixity declaration
+may be given for any operator.  (Class methods are a minor exception;
+their fixity declarations can occur either in the class declaration itself
+or at top level.)
+
+There are three kinds of fixity, non-, left- and right-associativity
+(`infix`, `infixl`, and `infixr`, respectively), and ten precedence
+levels, 0 to 9 inclusive (level 0 binds least tightly, and level 9
+binds most tightly).  If the $italic("digit")$ is omitted, level 9 is assumed.
+Any operator lacking a fixity declaration
+is assumed to be `infixl 9` (See @chapter:expressions for more on
+the use of fixities).
+@fig:prelude-fixities lists the fixities and precedences of
+the operators defined in the Prelude.
 
 #figure(
   caption: "Precedences and fixities of prelude operators",
 )[
   #table(
     columns: 4,
-    table.header([Precedence],[Left associateive operators],[Non-associative operators],[Right associative operators])
+    align: (right, left, left, left),
+    table.header([Precedence],[Left associative operators],[Non-associative operators],[Right associative operators]),
+    [9],[`!!`],[],[`.`],
+    [8],[],[],[`^`,`^^`,`**`],
+    [7],[`*`, `/`, `div`, `mod`, `rem`, `quot`],[],[],
+    [6],[`+`,`-`],[],[],
+    [5],[],[],[`:`,`++`],
+    [4],[],[`==`, `/=`, `<`,`<=`, `>`, `>=`, `elem`, `notElem`],[],
+    [3],[],[],[`&&`],
+    [2],[],[],[`||`],
+    [1],[`>>`, `>>=`],[],[],
+    [0],[],[],[`$`, `$!`, `seq`],
   )
 ]<fig:prelude-fixities>
 
+Fixity is a property of a particular entity (constructor or variable), just like
+its type; fixity is not a property of that entity's _name_.
+For example: 
+```haskell
+  module Bar( op ) where
+    infixr 7 `op`
+    op = ...
+  
+  module Foo where
+    import qualified Bar
+    infix 3 `op`
+  
+    a `op` b = (a `Bar.op` b) + 1
+  
+    f x = let
+             p `op` q = (p `Foo.op` q) * 2
+          in ...
+```
+Here, #raw("`Bar.op`") is `infixr 7`, #raw("`Foo.op`") is `infix 3`, and
+the nested definition of `op` in `f`'s right-hand side has the
+default fixity of `infixl 9`.  (It would also be possible
+to give a fixity to the nested definition of #raw("`op`") with a nested
+fixity declaration.)
 
 === Function and Pattern Bindings <subsec:function-and-pattern-bindings>
+
+#table(
+  columns: 4,
+  align: (left, center, left, left),
+  stroke: none,
+  // decl
+  $italic("decl")$, $->$, $(nonterminal("funlhs") | nonterminal("pat")) nonterminal("rhs")$,$$,
+  // funlhs
+  $italic("funlhs")$, $->$, $nonterminal("var") nonterminal("apat") { nonterminal("apat") }$, $$,
+  $$,$|$,$nonterminal("pat") nonterminal("varop") nonterminal("pat")$,$$,
+  $$,$|$,$terminal("(") nonterminal("funlhs") terminal(")") nonterminal("apat") { nonterminal("apat")}$,$$,
+  // rhs
+  $italic("rhs")$, $->$, $terminal("=") nonterminal("exp") [terminal("where") nonterminal("decls")]$, $$,
+  $$,$|$,$nonterminal("gdrhs") [terminal("where") nonterminal("decls")]$,$$,
+  // gdrhs
+  $italic("gdrhs")$, $->$, $nonterminal("guards") terminal("=") nonterminal("exp") [nonterminal("gdrhs")]$, $$,
+  // guards
+  $italic("guards")$, $->$, $terminal("|") nonterminal("guard")_1 terminal(",") dots terminal(",") nonterminal("guard")_n$, $(n >= 1)$,
+  // guard
+  $italic("guard")$, $->$, $nonterminal("pat") terminal("<-") nonterminal("infixexp")$, [(pattern guard)],
+  $$,$|$,$terminal("let") nonterminal("decls")$,[(local declaration)],
+  $$,$|$,$nonterminal("infixexp")$,[(boolean guard)],
+)
+
+We distinguish two cases within this syntax: a _pattern binding_
+occurs when the left hand side is a $nonterminal("pat")$; 
+otherwise, the binding is called a _function
+binding_.  Either binding may appear at the top-level of a module or
+within a `where` or `let` construct.  
 
 ==== Function bindings
 
@@ -406,7 +747,7 @@ The user may choose to declare such an instance, in which case `double` may inde
 
 The static semantics of the function and pattern bindings of a `let` expression or `where` clause are discussed in this section.
 
-=== Dependency Analysis
+=== Dependency Analysis <sec:dependencyanalysis>
 
 In general the static semantics are given by applying the
 normal Hindley-Milner inference
@@ -425,7 +766,7 @@ Hindley-Milner type inference is applied to each declaration group in dependency
 The order of declarations in `where`/`let`
 constructs is irrelevant.
 
-=== Generalization
+=== Generalization <sec:generalization>
 
 The Hindley-Milner type system assigns types to a let-expression in two stages:
 
