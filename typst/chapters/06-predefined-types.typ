@@ -9,7 +9,7 @@ can easily be understood from their definitions as given in @chapter:standard-pr
 Other predefined types such as arrays, complex numbers, and rationals
 are defined in part:libraries[Part]
 
-== Standard Haskell Types
+== Standard Haskell Types <sec:standard-haskell-types>
 
 These types are defined by the Haskell Prelude.  Numeric types are described in @sec:numbers
 When appropriate, the Haskell
@@ -17,7 +17,7 @@ definition of the type is given.  Some definitions may not be
 completely valid on syntactic grounds but they faithfully convey the
 meaning of the underlying type.
 
-=== Booleans
+=== Booleans <subsec:booleans>
 
 ```haskell
 data  Bool  =  False | True deriving
@@ -57,7 +57,7 @@ Section~\ref{lexemes-char}.  For example, `"A string"` abbreviates
 ['A', ' ', 's', 't', 'r', 'i', 'n', 'g']
 ```
 
-=== Lists
+=== Lists <subsec:basic-lists>
 
 ```haskell
 data  [a]  =  [] | a : [a]  deriving (Eq, Ord)
@@ -77,7 +77,8 @@ Sections~\ref{arithmetic-sequences} and \ref{list-comprehensions},
 respectively.
 Lists are an instance of classes `Read`, `Show`, `Eq`, `Ord`, `Monad`, `Functor`, and `MonadPlus`.
 
-=== Tuples
+=== Tuples <subsec:basic-tuples>
+
 Tuples are algebraic datatypes with special syntax, as defined
 in Section~\ref{tuples}.  Each tuple type has a single constructor.
 All tuples are instances of `Eq`, `Ord`, `Bounded`, `Read`,
@@ -100,7 +101,7 @@ and `(,,) Int Bool Int` denote the same type.
 The following functions are defined for pairs (2-tuples):
 `fst`, `snd`, `curry`, and `uncurry`.  Similar functions are not predefined for larger tuples.
 
-=== The Unit Datatype
+=== The Unit Datatype <subsec:basic-trivial>
 
 ```haskell
 data  () = () deriving (Eq, Ord, Bounded, Enum, Read, Show)
@@ -294,7 +295,7 @@ must be given to fully specify an instance.
 
 
 
-=== The Eq Class
+=== The Eq Class <subsec:eq-class>
 
 ```haskell
 class  Eq a  where
@@ -316,7 +317,7 @@ If one is defined, the default method for the other will make use of
 the one that is defined.  If both are defined, neither default method is used.
 
 
-=== The Ord Class
+=== The Ord Class <subsec:ord-class>
 
 ```haskell
 class  (Eq a) => Ord a  where
@@ -428,7 +429,7 @@ empty string.  (Thus `lex ""` = `[("","")]`.)  If there is no legal lexeme at th
 beginning of the input string, `lex` fails (i.e. returns `[]`).
 
 
-=== The Enum Class
+=== The Enum Class <subsec:enum-class>
 ```haskell
 class  Enum a  where
     succ, pred     :: a -> a

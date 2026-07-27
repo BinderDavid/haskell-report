@@ -48,16 +48,16 @@ what it is bound to.
 )
 
 
-Expressions involving infix operators are disambiguated by the operator's fixity (see Section~\ref{fixity}).  Consecutive unparenthesized operators with the same precedence must both be either
+Expressions involving infix operators are disambiguated by the operator's fixity (see @sec:fixity-declarations).  Consecutive unparenthesized operators with the same precedence must both be either
 left or right associative to avoid a syntax error.
 Given an unparenthesized expression "$x med italic("qop")^((a,i)) med y med italic("qop")^((b,j)) med z$"
 (where $italic("qop")^((a,i))$ means an operator with associativity $a$ and
 precedence $i$), parentheses must be added around either $x med italic("qop")^((a,i)) med y$ or $y med italic("qop")^((b,j)) med z$ when $i = j$ unless $a = b = text("l")$ or $a = b = text("r")$.
 
-An example algorithm for resolving expressions involving infix operators is given in @sec:fixity-resolution[Section]
+An example algorithm for resolving expressions involving infix operators is given in @sec:fixity-resolution.
 
 Negation is the only prefix operator in
-Haskell; it has the same precedence as the infix `-` operator defined in the Prelude (see Section~\ref{fixity}, Figure~\ref{prelude-fixities}).
+Haskell; it has the same precedence as the infix `-` operator defined in the Prelude (see @sec:fixity-declarations, @fig:prelude-fixities[Figure]).
 
 The grammar is ambiguous regarding the extent of lambda abstractions, let expressions, and conditionals.
 The ambiguity is resolved by the meta-rule that each of these constructs extends as far to the right as possible.
@@ -117,7 +117,7 @@ The messages passed to the `error` function in these translations are
 only suggestions; implementations may choose to display more or less
 information when an error occurs.
 
-== Variables, Constructors, Operators, and Literals
+== Variables, Constructors, Operators, and Literals <sec:vars-and-lits>
 
 #table(
   columns: 4,
@@ -158,8 +158,8 @@ information when an error occurs.
 
 Haskell provides special syntax to support infix notation.
 An _operator_ is a function that can be applied using infix
-syntax (Section~\ref{operators}), or partially applied using a
-_section_ (Section~\ref{sections}).
+syntax (@sec:operator-applications), or partially applied using a
+_section_ (@sec:sections).
 
 An _operator_ is either an _operator symbol_, such as `+` or `$$`,
 or is an ordinary identifier enclosed in grave accents (backquotes), such
@@ -167,7 +167,7 @@ as #raw("`op`").  For example, instead of writing the prefix application
 `op x y`, one can write the infix application #raw("x `op` y").
 If no fixity declaration is given for `op` then it defaults
 to highest precedence and left associativity
-(see Section~\ref{fixity}).
+(see @sec:fixity-declarations).
 
 Dually, an operator symbol can be converted to an ordinary identifier
 by enclosing it in parentheses.  For example, `(+) x y` is equivalent
@@ -176,7 +176,7 @@ to `x + y`, and `foldr (*) 1 xs` is equivalent to `foldr (\x y -> x*y) xs`.
 Special syntax is used to name some constructors for some of the
 built-in types, as found
 in the production for $italic("gcon")$ and $italic("literal")$.  These are described
-in Section~\ref{basic-types}.
+in @sec:standard-haskell-types.
 
 An integer literal represents the
 application of the function `fromInteger` to the
@@ -185,7 +185,7 @@ Similarly, a floating point literal stands for an application of `fromRational` 
 
 #translation-box([
   The integer literal $i$ is equivalent to $mono("fromInteger") i$,
-  where `fromInteger` is a method in class `Num` (see Section \ref{numeric-literals}).
+  where `fromInteger` is a method in class `Num` (see @sec:numeric-literals).
 
   The floating point literal $f$ is equivalent to $mono("fromRational") (n mono("Ratio.%") d)$, where `fromRational` is a method in class `Fractional` `Ratio.%` constructs a rational from two integers, as defined in
 the `Ratio` library.
@@ -251,7 +251,7 @@ However, unary `-` will always refer to the
 `negate` function defined in the Prelude.  There is no link between the local meaning of the `-` operator and unary negation.
 
 Prefix negation has the same precedence as the infix operator `-` defined in the Prelude (see
-Table~\ref{prelude-fixities}).
+@fig:prelude-fixities).
 Because `e1-e2` parses as an
 infix application of the binary operator `-`, one must write `e1(-e2)` for the alternative parsing.
 Similarly, `(-)` is syntax for `\x y -> x-y`, as with any infix operator, and does not denote
@@ -291,7 +291,7 @@ As another example, the expression
 ```haskell
   (let n = 10 in n +)
 ```
-is invalid because, by the let/lambda meta-rule (Section~\ref{expressions}),
+is invalid because, by the let/lambda meta-rule (@chapter:expressions[Section]),
 the expression
 ```haskell
   (let n = 10 in n + x)
@@ -370,21 +370,21 @@ value of $e_1$ is `True`, $e_3$ if $e_1$ is `False`, and $bot$ otherwise.
 
 _Lists_ are written $[e_1, dots, e_k]$, where $k >= 1$.
 The list constructor is `:`, and the empty list is denoted `[]`.
-Standard operations on lists are given in the Prelude (see Section~\ref{basic-lists}, and
-@chapter:standard-prelude[Chapter] notably Section~\ref{preludelist}).
+Standard operations on lists are given in the Prelude (see @subsec:basic-lists, and
+@chapter:standard-prelude notably @sec:preludelist).
 
 #translation-box([
   The following identity holds:
   $
     [e_1, dots, e_k] = e_1 : (e_2 : ( dots ( e_k : [ thin ])))
   $
-  where `:` and `[]` are constructors for lists, as defined in the Prelude (see Section~\ref{basic-lists}).
+  where `:` and `[]` are constructors for lists, as defined in the Prelude (see @subsec:basic-lists).
   The types of $e_1$ through $e_k$ must all be the same (call it $t$), and the
-  type of the overall expression is `[t]` (see Section~\ref{type-syntax}).
+  type of the overall expression is `[t]` (see @sec:type-syntax).
 ])
 
 The constructor "`:`" is reserved solely for list construction; like `[]`, it is considered part of the language syntax, and cannot be hidden or redefined.
-It is a right-associative operator, with precedence level 5 (Section~\ref{fixity}).
+It is a right-associative operator, with precedence level 5 (@sec:fixity-declarations).
 
 == Tuples
 
@@ -402,11 +402,11 @@ of arbitrary length $k >= 2$.
 The constructor for an $n$-tuple is denoted by $(, dots ,)$, where there are $n-1$ commas.
 Thus `(a,b,c)` and `(,,) a b c` denote the same value.
 Standard operations on tuples are given
-in the Prelude (see Section~\ref{basic-tuples} and @chapter:standard-prelude[Chapter].
+in the Prelude (see @subsec:basic-tuples and @chapter:standard-prelude).
 
 #translation-box([
   $(e_1, dots, e_k)$ for $k >= 2$ is an instance of a $k$-tuple as defined in the Prelude, and requires no translation.
-  If $t_1$ through $t_k$ are the types of $e_1$ through $e_k$, respectively, then the type of the resulting tuple is $(t_1, dots, t_k)$ (see Section~\ref{type-syntax}).
+  If $t_1$ through $t_k$ are the types of $e_1$ through $e_k$, respectively, then the type of the resulting tuple is $(t_1, dots, t_k)$ (see @sec:type-syntax).
 ])
 
 
@@ -423,9 +423,8 @@ in the Prelude (see Section~\ref{basic-tuples} and @chapter:standard-prelude[Cha
 )
 
 The form $(e$) is simply a _parenthesized expression_, and is equivalent to $e$.
-The _unit expression_ `()` has type `()` (see
-Section~\ref{type-syntax}).
-It is the only member of that type apart from $bot$, and can be thought of as the "nullary tuple" (see Section~\ref{basic-trivial}).
+The _unit expression_ `()` has type `()` (see @sec:type-syntax).
+It is the only member of that type apart from $bot$, and can be thought of as the "nullary tuple" (see @subsec:basic-trivial).
 
 #translation-box([
   $(e)$ is equivalent to $e$.
@@ -444,17 +443,22 @@ The _arithmetic sequence_ $[e_1, e_2 .. e_3]$ denotes a list of values of type $
 
 #translation-box([
   Arithmetic sequences satisfy these identities:
-  $
-    X &= Y\
-    X &= Y\
-    X &= Y\
-    X &= Y\
-  $
-  where `enumFrom`, `enumFromThen`, `enumFromTo`, and `enumFromThenTo` are class methods in the class `Enum` as defined in the Prelude (see Figure~\ref{standard-classes}).
+  #align(center)[
+    #table(
+      columns: 3,
+      align: (left, center, left),
+      stroke: none,
+      [`[` $e_1$ `..]`], $=$, [`enumFrom` $e_1$],
+      [`[` $e_1$, $e_2$ `..]`], $=$, [`enumFromThen` $e_1$ $e_2$],
+      [`[` $e_1$ `..` $e_2$ `]`], $=$, [`enumFromTo` $e_1$ $e_2$],
+      [`[` $e_1$, $e_2$ `..` $e_3$ `]`], $=$, [`enumFromThenTo` $e_1$ $e_2$ $e_3$],
+    )
+  ]
+  where `enumFrom`, `enumFromThen`, `enumFromTo`, and `enumFromThenTo` are class methods in the class `Enum` as defined in the Prelude (see @fig:standard-classes).
 ])
 
 The semantics of arithmetic sequences therefore depends entirely on the instance declaration for the type `t`.
-See Section~\ref{enum-class} for more details of which `Prelude` types are in `Enum` and their semantics.
+See @subsec:enum-class for more details of which `Prelude` types are in `Enum` and their semantics.
 
 == List Comprehensions <sec:list-comprehensions>
 
@@ -472,7 +476,7 @@ A _list comprehension_ has the form $[e | q_1, dots, q_n]$, $n >= 1$,
 where the $q_i$ qualifiers are either
 
 - _generators_ of the form $p mono("<-") e$, where $p$ is a
-  pattern (see Section~\ref{pattern-matching}) of type $t$ and $e$ is an
+  pattern (see @sec:pattern-matching) of type $t$ and $e$ is an
   expression of type $[t]$
 - _local bindings_ that provide new definitions for use in
   the generated expression $e$ or subsequent boolean guards and generators
@@ -484,7 +488,7 @@ Such a list comprehension returns the list of elements
 produced by evaluating $e$ in the successive environments
 created by the nested, depth-first evaluation of the generators in the
 qualifier list.  Binding of variables occurs according to the normal
-pattern matching rules (see Section~\ref{pattern-matching}), and if a
+pattern matching rules (see @sec:pattern-matching), and if a
 match fails then that element of the list is simply skipped over.  Thus:
 ```haskell
 [ x |  xs   <- [ [(1,2),(3,4)], [(5,4),(3,2)] ],
@@ -520,7 +524,7 @@ $
 
 As indicated by the translation of list comprehensions, variables
 bound by `let` have fully polymorphic types while those defined by
-`<-` are lambda bound and are thus monomorphic (see Section \ref{monomorphism}).
+`<-` are lambda bound and are thus monomorphic (see @sec:monomorphism).
 
 == Let Expressions
 
@@ -536,7 +540,7 @@ _Let expressions_ have the general form $mono("let") { d_1; dots ; d_n} mono("in
 and introduce a
 nested, lexically-scoped,
 mutually-recursive list of declarations (`let` is often called `letrec`).  The scope of the declarations is the expression $e$ and the right hand side of the declarations.  Declarations are
-described in Chapter~\ref{declarations}.  Pattern bindings are matched
+described in @chapter:declarations.  Pattern bindings are matched
 lazily; an implicit `~` makes these patterns
 irrefutable.
 For example,
@@ -551,7 +555,7 @@ does not cause an execution-time error until `x` or `y` is evaluated.
   $mono("let") { d_1; dots ; d_n} mono("in") e_0$
   are captured by this translation: After removing all type signatures, each declaration $d_i$ is translated into an equation of the form $p_i = e_i$, where $p_i$ and $e_i$ are patterns and expressions
   respectively, using the translation in
-  Section~\ref{function-bindings}.  Once done, these identities
+  @subsec:function-and-pattern-bindings.  Once done, these identities
   hold, which may be used as a translation into the kernel:
   #align(center)[
     #table(
@@ -568,10 +572,10 @@ does not cause an execution-time error until `x` or `y` is evaluated.
   This translation
   does not preserve the static semantics because the use of `case` precludes a fully polymorphic typing of the bound variables.
   The static semantics of the bindings in a `let` expression are described in
-  Section~\ref{pattern-bindings}.
+  @subsec:function-and-pattern-bindings.
 ])
-
-== Case Expressions
+ 
+== Case Expressions <sec:case>
 
 #table(
   columns: 4,
@@ -611,7 +615,7 @@ A _guard_ has one of the following forms:
 
 - _pattern guards_ are of the form $p mono("<-") e$, where
   $p$ is a
-  pattern (see Section~\ref{pattern-matching}) of type $t$ and $e$ is an
+  pattern (see @sec:pattern-matching) of type $t$ and $e$ is an
   expression type $t$#footnote[Note that the syntax of a pattern guard is the same as that of a generator in a list comprehension.
   The contextual difference is that, in a list comprehension, a pattern of type $t$ goes with an expression of type $[t]$.].
   They succeed if the expression $e$ matches the pattern $p$, and introduce the bindings of the pattern to the environment.
@@ -654,8 +658,8 @@ fails and the next guarded expression is tried.
 If none of the guarded expressions for a given alternative succeed,
 then matching continues with the next alternative.  If no alternative
 succeeds, then the result is $bot$.  Pattern matching is described in
-Section~\ref{pattern-matching}, with the formal semantics of case
-expressions in Section~\ref{case-semantics}.
+@sec:pattern-matching, with the formal semantics of case
+expressions in @subsec:formal-semantics-pattern-matching.
 
 _A note about parsing._
 The expression
@@ -726,7 +730,7 @@ As indicated by the translation of `do`, variables bound by `let` have fully pol
 == Datatypes with Field Labels
 
 A datatype declaration may optionally define field labels
-(see Section~\ref{datatype-decls}).
+(see @sec:datatype-decls).
 These field labels can be used to
 construct, select from, and update fields in a manner
 that is independent of the overall structure of the datatype.
@@ -757,8 +761,8 @@ When used as a variable, a field label serves as a function that extracts the fi
 Selectors are top level bindings and so they
 may be shadowed by local variables but cannot conflict with
 other top level bindings of the same name.  This shadowing only
-affects selector functions; in record construction (Section~\ref{record-construction})
-and update (Section~\ref{record-update}), field labels
+affects selector functions; in record construction (@sec:record-construction)
+and update (@sec:record-update), field labels
 cannot be confused with ordinary variables.
 
 #translation-box([
@@ -771,7 +775,7 @@ cannot be confused with ordinary variables.
   component of $C_i$ or $\_$ otherwise, and $e_i$ is $y$ when some field in $C_i$ has a label of $f$ or `undefined` otherwise.
 ])
 
-=== Construction Using Field Labels
+=== Construction Using Field Labels <sec:record-construction>
 
 #table(
   columns: 4,
@@ -793,7 +797,7 @@ Construction using field labels is subject to the following constraints:
 - Fields not mentioned are initialized to $bot$.
 - A compile-time error occurs when any strict fields (fields
   whose declared types are prefixed by `!`) are omitted during
-  construction.  Strict fields are discused in Section~\ref{strictness-flags}.
+  construction.  Strict fields are discused in @sec:datatype-decls.
 
 The expression `F {}`, where `F` is a data constructor, is legal 
 _whether or not `F` was declared with record syntax_ (provided `F` has no strict fields --- see the fourth bullet above); 
@@ -819,7 +823,7 @@ it denotes $F bot_1 dots bot_n$, where $n$ is the arity of `F`.
     the default value $d$.
   ]
 ])
-=== Updates Using Field Labels
+=== Updates Using Field Labels <sec:record-update>
 
 #table(
   columns: 4,
@@ -892,12 +896,12 @@ defines the set of field labels used in an update, such as `x {f2 = 1, f3 = 'x'}
 == Expression Type-Signatures
 
 
-_Expression type-signatures_ have the form $e mono("::") t$, where $e$ is an expression and $t$ is a type (Section~\ref{type-syntax}); they
+_Expression type-signatures_ have the form $e mono("::") t$, where $e$ is an expression and $t$ is a type (@sec:type-syntax); they
 are used to type an expression explicitly
-and may be used to resolve ambiguous typings due to overloading (see
-Section~\ref{default-decls}).  The value of the expression is just that of
+and may be used to resolve ambiguous typings due to overloading (see @sec:default-decls).
+The value of the expression is just that of
 $italic("exp")$.  As with normal type signatures (see
-Section~\ref{type-signatures}), the declared type may be more specific than
+@sec:type-signatures), the declared type may be more specific than
 the principal type derivable from $italic("exp")$, but it is an error to give a type that is more general than, or not comparable to, the principal type.
 
 #translation-box([
@@ -913,7 +917,7 @@ the principal type derivable from $italic("exp")$, but it is an error to give a 
 
 
 
-== Pattern Matching
+== Pattern Matching <sec:pattern-matching>
 
 _Patterns_ appear in lambda abstractions, function definitions, pattern
 bindings, list comprehensions, do expressions, and case expressions.
@@ -1020,7 +1024,7 @@ may _diverge_ (i.e.~return $bot$).  Pattern matching proceeds from left to right
    succeeds if $v mono("==") k$, where `==`
    is overloaded based on the type of the pattern.  The match diverges if this test diverges.
 
-   The interpretation of numeric literals is exactly as described in Section~\ref{vars-and-lits};
+   The interpretation of numeric literals is exactly as described in @sec:vars-and-lits;
    that is, the overloaded function `fromInteger` or `fromRational` is
    applied to an `Integer` or `Rational` literal (resp)
    to convert it to the appropriate type.
@@ -1032,17 +1036,11 @@ may _diverge_ (i.e.~return $bot$).  Pattern matching proceeds from left to right
 Aside from the obvious static type constraints (for
 example, it is a static error to match a character against a
 boolean), the following static class constraints hold: 
-\begin{itemize}
-\item An integer
-literal pattern
-\index{integer literal pattern}
-can only be matched against a value in the class
-\mbox{\tt Num}.
-\item A floating literal pattern
-\index{floating literal pattern}
-can only be matched against a value
-in the class \mbox{\tt Fractional}.
-\end{itemize}
+
+- An integer literal pattern can only be matched against a value in the class `Num`.
+- A floating literal pattern can only be matched against a value
+  in the class `Fractional`.
+
 
 It is sometimes helpful to distinguish two kinds of
 patterns.  Matching an _irrefutable pattern_
@@ -1051,7 +1049,7 @@ Matching a _refutable_ pattern is strict: if the value to be matched
 is $bot$ the match diverges.
 The irrefutable patterns are as follows:
 a variable, a wildcard, $N italic("apat")$ where $N$ is a constructor
-defined by `newtype` and $italic("apat")$ is irrefutable (see Section~\ref{datatype-renaming}), 
+defined by `newtype` and $italic("apat")$ is irrefutable (see @sec:datatype-renamings), 
 $italic("var")mono("@")italic("apat")$ where $italic("apat")$ is irrefutable,
 or of the form $~italic("apat")$ (whether or not $italic("apat")$ is irrefutable).
 All other patterns are _refutable_.
@@ -1094,12 +1092,12 @@ Here are some examples:
     [`(\ ~(D True) -> True)` $bot$], $=>$, [`True`],
    )
 
-   Additional examples may be found in Section~\ref{datatype-renaming}.
+   Additional examples may be found in @sec:datatype-renamings.
 
 Top level patterns in case expressions and the set of top level
 patterns in function or pattern bindings may have zero or more
-associated _guards_.  See
-Section~\ref{case} for the syntax and semantics of guards.
+associated _guards_.
+See @sec:case for the syntax and semantics of guards.
 
 The guard semantics have an influence on the
 strictness characteristics of a function or case expression.  In

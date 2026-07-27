@@ -636,7 +636,7 @@ error            =  primError
 undefined        :: a
 undefined        =  error "Prelude.undefined"
 ```
-== Prelude PreludeList
+== Prelude PreludeList <sec:preludelist>
 
 ```haskell
 -- Standard list functions
@@ -943,7 +943,7 @@ unzip3           :: [(a,b,c)] -> ([a],[b],[c])
 unzip3           =  foldr (\(a,b,c) ~(as,bs,cs) -> (a:as,b:bs,c:cs))
                           ([],[],[])
 ```
-== Prelude PreludeText
+== Prelude PreludeText <sec:preludetext>
 
 ```haskell
 module PreludeText (
@@ -1154,7 +1154,7 @@ instance  (Read a, Read b) => Read (a,b)  where
 -- Other tuples have similar Read and Show instances
 ```
 
-== Prelude PreludeIO
+== Prelude PreludeIO <sec:preludeio>
 
 ```haskell
 module PreludeIO (

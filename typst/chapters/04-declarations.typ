@@ -4,7 +4,7 @@
 
 === Kinds
 
-=== Syntax of Types
+=== Syntax of Types <sec:type-syntax>
 
 === Syntax of Class Assertions and Contexts
 
@@ -12,11 +12,11 @@
 
 == User-Defined Datatypes
 
-=== Algebraic Datatype Declarations
+=== Algebraic Datatype Declarations <sec:datatype-decls>
 
 === Type Synonym Declarations
 
-=== Datatype Renamings
+=== Datatype Renamings <sec:datatype-renamings>
 
 == Type Classes and Overloading <sec:type-classes>
 
@@ -26,15 +26,25 @@
 
 === Derived Instances
 
-=== Ambiguous Types, and Defaults for Overloaded Numeric Operations
+=== Ambiguous Types, and Defaults for Overloaded Numeric Operations <sec:default-decls>
 
 == Nested Declarations
 
-=== Type Signatures
+=== Type Signatures <sec:type-signatures>
 
 === Fixity Declarations <sec:fixity-declarations>
 
-=== Function and Pattern Bindings
+#figure(
+  caption: "Precedences and fixities of prelude operators",
+)[
+  #table(
+    columns: 4,
+    table.header([Precedence],[Left associateive operators],[Non-associative operators],[Right associative operators])
+  )
+]<fig:prelude-fixities>
+
+
+=== Function and Pattern Bindings <subsec:function-and-pattern-bindings>
 
 ==== Function bindings
 
@@ -164,7 +174,7 @@ the derived Show instance will produce a context `Show (a b)`, which
 cannot be reduced and is not simple; thus a static error results.
 
 
-=== Monomorphism
+=== Monomorphism <sec:monomorphism>
 
 Sometimes it is not possible to generalize over all the type variables
 used in the type of the definition.
