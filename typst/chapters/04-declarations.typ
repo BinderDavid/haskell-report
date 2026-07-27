@@ -1,8 +1,94 @@
 #import "../macros.typ" : *
+In this chapter, we describe the syntax and informal semantics of Haskell _declarations_.
+
+The declarations in the syntactic category $nonterminal("topdecls")$ are only allowed
+at the top level of a Haskell module (see @chapter:modules), whereas $nonterminal("decls")$ may be used either at the top level or
+in nested scopes (i.e. those within a `let` or `where` construct).
+
+For exposition, we divide the declarations into
+three groups: user-defined datatypes, consisting of `type`, `newtype`,
+and `data` declarations (@sec:user-defined-datatypes); type classes and
+overloading, consisting of `class`, `instance`, and `default` declarations (@sec:type-classes); and nested declarations,
+consisting of value bindings, type signatures, and fixity declarations
+(@sec:nested).
+
+Haskell has several primitive datatypes that are "hard-wired"
+(such as integers and floating-point numbers), but most "built-in"
+datatypes are defined with normal Haskell code, using normal `type`
+and `data` declarations.
+These "built-in" datatypes are described in detail in @sec:standard-haskell-types.
 
 == Overview of Types and Classes
 
+Haskell uses a traditional
+Hindley-Milner
+polymorphic type system to provide a static type semantics
+@hindley69 @damas-milner82, but the type system has been extended with
+_type classes_ (or just _classes_) that provide 
+a structured way to introduce _overloaded_ functions.
+
+A `class` declaration (@sec:class-decl) introduces a new
+_type class_ and the overloaded operations that must be
+supported by any type that is an instance of that class.  An
+`instance` declaration (@sec:instance-decl) declares that a
+type is an _instance_ of a class and includes
+the definitions of the overloaded operations---called _class methods_---instantiated on the named type.
+
+
+For example, suppose we wish to overload the operations `(+)` and
+`negate` on types `Int` and `Float`.  We introduce a new
+type class called `Num`:
+```haskell
+  class Num a  where          -- simplified class declaration for Num
+    (+)    :: a -> a -> a     -- (Num is defined in the Prelude)
+    negate :: a -> a
+```
+This declaration may be read "a type `a` is an instance of the class
+`Num` if there are class methods `(+)` and `negate`, of the
+given types, defined on it.""
+
+We may then declare `Int` and `Float` to be instances of this class:
+```haskell
+  instance Num Int  where     -- simplified instance of Num Int
+    x + y       =  addInt x y
+    negate x    =  negateInt x
+  
+  instance Num Float  where   -- simplified instance of Num Float
+    x + y       =  addFloat x y
+    negate x    =  negateFloat x
+```
+where `addInt`, `negateInt`, `addFloat`, and `negateFloat` are assumed
+in this case to be primitive functions, but in general could be any
+user-defined function.  The first declaration above may be read
+"`Int` is an instance of the class `Num` as witnessed by these
+definitions (i.e.~class methods) for `(+)` and `negate`."
+
+More examples of type classes can be found in
+the papers by Jones @jones:cclasses or Wadler and Blott
+@wadler:classes. 
+The term "type class" was used to describe the original Haskell 1.0
+type system; "constructor class" was used to describe an extension to
+the original type classes.  There is no longer any reason to use two
+different terms: in this report, "type class" includes both the
+original Haskell type classes and the constructor classes
+introduced by Jones.
+
 === Kinds
+
+To ensure that they are valid, type expressions are classified
+into different _kinds_, which take one of two possible
+forms:
+
+- The symbol $ast$ represents the kind of all nullary type constructors.
+- If $kappa_1$ and $kappa_2$ are kinds, then $kappa_1 -> kappa_2$
+  is the kind of types that take a type of kind $kappa_1$ and return
+  a type of kind $kappa_2$.
+
+Kind inference checks the validity of type expressions 
+in a similar way that type inference checks the validity of value expressions.  
+However, unlike types, kinds are entirely
+implicit and are not a visible part of the language.
+Kind inference is discussed in @sec:kind-inference.
 
 === Syntax of Types <sec:type-syntax>
 
@@ -10,7 +96,7 @@
 
 === Semantics of Types and Classes
 
-== User-Defined Datatypes
+== User-Defined Datatypes <sec:user-defined-datatypes>
 
 === Algebraic Datatype Declarations <sec:datatype-decls>
 
@@ -20,15 +106,15 @@
 
 == Type Classes and Overloading <sec:type-classes>
 
-=== Class Declarations
+=== Class Declarations <sec:class-decl>
 
-=== Instance Declarations
+=== Instance Declarations <sec:instance-decl>
 
 === Derived Instances
 
 === Ambiguous Types, and Defaults for Overloaded Numeric Operations <sec:default-decls>
 
-== Nested Declarations
+== Nested Declarations <sec:nested>
 
 === Type Signatures <sec:type-signatures>
 
@@ -231,7 +317,7 @@ This signature would also cause `x` to have type `Int`.
   / Rule 1.: todo
   / Rule 2.: todo
 ])
-== Kind Inference
+== Kind Inference <sec:kind-inference>
 
 This section describes the rules that are used to perform _kind
 inference_, i.e. to calculate a suitable kind for each type
