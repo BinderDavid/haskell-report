@@ -516,9 +516,133 @@ a data declaration.
   Pattern matching on $K$ is not affected by strictness flags.
 ]
 
-=== Type Synonym Declarations
+=== Type Synonym Declarations <sec:type-synonyms>
+
+#table(
+  columns: 4,
+  align: (left, center, left, left),
+  stroke: none,
+  // topdecl
+  $italic("topdecl")$, $->$, $terminal("type") nonterminal("simpletype") terminal("=") nonterminal("type")$, $$,
+  // simpletype
+  $italic("simpletype")$, $->$, $nonterminal("tycon") nonterminal("tyvar")_1 dots nonterminal("tyvar")_k$, $(k >= 0)$,
+)
+
+A type synonym declaration introduces a new type that
+is equivalent to an old type.  It has the form
+$
+  mono("type") T u_1 dots u_k = t
+$
+which introduces a new type constructor, $T$.  The type $(T u_1 dots u_k)$ is equivalent to the type $t [t_1 mono("/") u_1, dots , t_k mono("/") u_k]$.  The type
+variables $u_1$ through $u_k$ must be distinct and are scoped only
+over $t$; it is a static error for any other type variable to appear
+in $t$.  The kind of the new type constructor $T$ is of the form
+$kappa_1 -> dots -> kappa_k -> kappa$ where
+the kinds $kappa_i$ of the arguments $u_i$ and $kappa$ of the right hand
+side $t$ are determined by kind inference as described in
+@sec:kind-inference.
+For example, the following definition can be used to provide an alternative
+way of writing the list type constructor: 
+```haskell
+type List = []
+```
+Type constructor symbols $T$ introduced by type synonym declarations cannot
+be partially applied; it is a static error to use $T$ without the full number
+of arguments.
+
+Although recursive and mutually recursive datatypes are allowed,
+this is not so for type synonyms, _unless an algebraic datatype
+intervenes_.  For example,
+```haskell
+  type Rec a   =  [Circ a]
+  data Circ a  =  Tag [Rec a]
+```
+is allowed, whereas
+```haskell
+  type Rec a   =  [Circ a]        -- invalid
+  type Circ a  =  [Rec a]         -- invalid
+```
+is not. Similarly, `type Rec a = [Rec a]` is not allowed.
+
+Type synonyms are a convenient, but strictly syntactic, mechanism to make type
+signatures more readable.  A synonym and its definition are completely
+interchangeable, except in the instance type of an `instance` declaration (@sec:instance-decl).
 
 === Datatype Renamings <sec:datatype-renamings>
+
+#table(
+  columns: 4,
+  align: (left, center, left, left),
+  stroke: none,
+  // topdecl
+  $italic("topdecl")$, $->$, $terminal("newtype") [nonterminal("context") terminal("=>")] nonterminal("simpletype") terminal("=") nonterminal("newconstr") [nonterminal("deriving")]$, $$,
+  // newconstr
+  $italic("newconstr")$, $->$, $nonterminal("con") nonterminal("atype")$, $$,
+  $$,$|$,$nonterminal("con") terminal("{") nonterminal("var") terminal("::") nonterminal("type") terminal("}")$,$$,
+  // simpletype
+  $italic("simpletype")$, $->$, $nonterminal("tycon") nonterminal("tyvar")_1 dots nonterminal("tyvar")_k$, $(k >= 0)$,
+)
+
+A declaration of the form
+$
+  mono("newtype") italic("cx") mono("=>") T u_1 dots u_k = N space t
+$
+introduces a new type whose
+representation is the same as an existing type.  The type $(T u_1 dots u_k)$ renames the datatype $t$.
+It differs from a type synonym in
+that it creates a distinct type that must be explicitly coerced to or
+from the original type.  Also, unlike type synonyms, `newtype` may be
+used to define recursive types.
+The constructor $N$ in an expression 
+coerces a value from type `t` to type $(T u_1 dots u_k)$.
+Using $N$ in a pattern coerces a value from type $(T u_1 dots u_k)$
+to type $t$.  These coercions may be implemented without
+execution time overhead; `newtype` does not change the underlying
+representation of an object.
+
+New instances (see @sec:instance-decl) can be defined for a
+type defined by `newtype` but may not be defined for a type synonym.  A type
+created by `newtype` differs from an algebraic datatype in that the
+representation of an
+algebraic datatype has an extra level of indirection.  This difference
+may make access to the representation less efficient.  The difference is
+reflected in different rules for pattern matching (see @sec:pattern-matching).  Unlike algebraic datatypes, the
+newtype constructor $N$ is _unlifted_, so that $N space bot$
+is the same as $bot$.
+
+The following examples clarify the differences between `data` (algebraic
+datatypes), `type` (type synonyms), and `newtype` (renaming types.)
+Given the declarations 
+```haskell
+  data D1 = D1 Int
+  data D2 = D2 !Int
+  type S = Int
+  newtype N = N Int
+  d1 (D1 i) = 42
+  d2 (D2 i) = 42
+  s i = 42
+  n (N i) = 42
+```
+the expressions $(mono("d1") space bot)$, $(mono("d2") space bot)$ and 
+$(mono("d2") (mono("D2") space bot))$ are all
+equivalent to $bot$, whereas $(mono("n") bot)$, $(mono("n") (mono("N") bot))$,
+$(mono("d1") (mono("D1") space bot))$ and $(mono("s") bot)$ are all equivalent to `42`.  In particular, $(mono("N") bot)$ is equivalent to
+$bot$ while $(mono("D1") space bot)$ is not equivalent to $bot$.
+
+The optional deriving part of a `deriving` declaration is treated in
+the same way as the deriving component of a `data` declaration; see
+@sec:derived-decls.
+
+A `newtype` declaration may use field-naming syntax, though of course
+there may only be one field.  Thus:
+```haskell
+  newtype Age = Age { unAge :: Int }
+```
+brings into scope both a constructor and a de-constructor:
+```haskell
+  Age   :: Int -> Age
+  unAge :: Age -> Int
+```
 
 == Type Classes and Overloading <sec:type-classes>
 
