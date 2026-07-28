@@ -19,6 +19,7 @@ The (planned) changes to the report are:
 - (Unicode) Syntax of identifiers
 - Changes to the Num typeclass
 - Changes to Bits typeclass
-- Changes to specificatino of recursive modules (maybe?)
+- Changes to specification of recursive modules (maybe?)
 - "forall" is now a keyword
 - Treatment of whitespace around operators
+- Move section about deriving of `Ix` instances into report
