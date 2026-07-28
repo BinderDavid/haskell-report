@@ -1197,7 +1197,14 @@ by `case` are monomorphically typed (@sec:type-semantics).
     where $N$ is a `newtype` constructor
   / (l): $caseof(bot, N space p mono("->") e mono("; _ ->") e') = caseof(bot, p mono("-> ") e)$ \
     where $N$ is a newtype constructor
-  / (m): X
+  / (m): $caseof(v, K { f_1 = p_1, f_2 = p_2, dots} mono("->") e mono("; _ ->") e')$ \
+    $= mono("case") e' mono("of") {$ \
+    $#h(1cm) y mono("->")$ \
+    $#h(1.5cm)mono("case") v mono("of") {$ \
+    $#h(2cm) K { f_1 = p_1 } mono("->")$ \
+    $#h(2.5cm)mono("case") v mono("of") { K {f_2 = p_2, dots } mono("->") e mono("; _ ->") y} mono(";")$ \
+    $#h(2.5cm)mono("_ ->") y }}$ \
+    where $f_1,f_2,dots$ are fields of constructor $K$; $y$ is a new variable
   / (n): $caseof(v, K { f = p } mono("->") e mono("; _ ->") e')$ \
     $= mono("case") v mono("of") {$ \
     $#h(1cm) K p_1 dots p_n mono("->") e mono("; _ ->") e' }$ \
