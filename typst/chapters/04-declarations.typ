@@ -648,11 +648,55 @@ brings into scope both a constructor and a de-constructor:
 
 === Class Declarations <sec:class-decl>
 
+#table(
+  columns: 4,
+  align: (left, center, left, left),
+  stroke: none,
+  // topdecl
+  $italic("topdecl")$, $->$, $terminal("class") [nonterminal("scontext") terminal("=>")] nonterminal("tycls") nonterminal("tyvar") [terminal("where") nonterminal("cdecls")]$, $$,
+  // scontext
+  $italic("scontext")$, $->$, $nonterminal("simpleclass")$, $$,
+  $$,$|$,$terminal("(") nonterminal("simpleclass")_1 terminal(",") dots terminal(",") nonterminal("simpleclass")_n terminal(")")$,$(n >= 0)$,
+  // simpleclass
+  $italic("simpleclass")$, $->$, $nonterminal("qtycls") nonterminal("tyvar")$, $$,
+  // cdecls
+  $italic("cdecls")$, $->$, $terminal("{") nonterminal("cdecl")_1 terminal(";") dots terminal(";") nonterminal("cdecl")_n terminal("}")$, $(n >= 0)$,
+  // cdecl
+  $italic("cdecl")$, $->$, $nonterminal("gendecl")$, $$,
+  $$,$|$, $(nonterminal("funlhs") | nonterminal("var")) nonterminal("rhs")$,$$,
+)
+
 === Instance Declarations <sec:instance-decl>
+
+#table(
+  columns: 4,
+  align: (left, center, left, left),
+  stroke: none,
+  // topdecl
+  $italic("topdecl")$, $->$, $terminal("instance") [nonterminal("scontext") terminal("=>")] nonterminal("qtycls") nonterminal("inst") [terminal("where") nonterminal("idecls")]$, $$,
+  // inst
+  $italic("inst")$, $->$, $nonterminal("gtycon")$, $$,
+  $$,$|$,$terminal("(")nonterminal("gtycon") nonterminal("tyvar")_1 dots nonterminal("tyvar")_k terminal(")")$,[($k >= 0$, $italic("tyvars")$ distinct)],
+  $$,$|$,$terminal("(") nonterminal("tyvar")_1 terminal(",") dots terminal(",") nonterminal("tyvar")_k terminal(")")$,[($k >= 2$, $italic("tyvars")$ distinct)],
+  $$,$|$,$terminal("[") nonterminal("tyvar") terminal("]")$,$$,
+  $$,$|$,$terminal("(") nonterminal("tyvar")_1 terminal("->") nonterminal("tyvar")_2 terminal(")")$,[($italic("tyvar")_1$ and $italic("tyvar")_2$ distinct)],
+  // idecls
+  $italic("idecls")$, $->$, $terminal("{") nonterminal("idecl")_1 terminal(";") dots terminal(";") nonterminal("idecl")_n terminal("}")$, $(n >= 0)$,
+  // idecl
+  $italic("idecl")$, $->$, $(nonterminal("funlhs") | nonterminal("var")) nonterminal("rhs")$, $$,
+  $$, $|$, $$, [(empty)],
+)
 
 === Derived Instances <sec:derived-decls>
 
 === Ambiguous Types, and Defaults for Overloaded Numeric Operations <sec:default-decls>
+
+#table(
+  columns: 4,
+  align: (left, center, left, left),
+  stroke: none,
+  $italic("topdecl")$, $->$, $terminal("default") terminal("(") nonterminal("type")_1 terminal(",") dots terminal(",") nonterminal("type")_n terminal(")")$, $(n >= 0)$,
+)
 
 == Nested Declarations <sec:nested>
 
