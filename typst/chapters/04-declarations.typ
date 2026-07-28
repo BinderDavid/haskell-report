@@ -770,6 +770,111 @@ given explicitly with no `where` part.
   $$, $|$, $$, [(empty)],
 )
 
+An _instance declaration_ introduces an instance of a class.  Let
+$
+  mono("class") italic("cx") mono("=>") C space u mono("where") { italic("cbody") }
+$
+be a `class` declaration.  The general form of the corresponding
+instance declaration is:
+$
+  mono("instance") italic("cx")' mono("=>") C space (T space u_1 dots u_k) mono("where") { d }
+$
+where $k >= 0$.
+The type $(T u_1 dots u_k)$ must take the form of
+a type constructor $T$ applied to simple type variables $u_1, dots, u_k$;
+furthermore, $T$ must not be a type synonym, 
+and the $u_i$ must all be distinct.
+
+This prohibits instance declarations
+such as:
+```haskell
+  instance C (a,a) where ...
+  instance C (Int,a) where ...
+  instance C [[a]] where ...
+```
+The declarations $d$ may contain bindings only for the class
+methods of $C$.  It is illegal to give a 
+binding for a class method that is not in scope, but the name under
+which it is in scope is immaterial; in particular, it may be a qualified
+name.  (This rule is identical to that used for subordinate names in
+export lists --- @sec:export.)
+For example, this is legal, even though `range` is in scope only
+with the qualified name `Data.Ix.range`.
+```haskell
+  module A where
+    import qualified Data.Ix
+
+    instance Data.Ix.Ix T where
+      range = ...
+```
+The declarations may not contain any type
+signatures or fixity declarations,
+since these have already been given in the `class`
+declaration.  As in the case of default class methods
+(@sec:class-decl), the method declarations must take the form of
+a variable or function definition.
+
+If no binding is given for some class method then the
+corresponding default class method
+in the `class` declaration is used (if
+present); if such a default does
+not exist then the class method of this instance
+is bound to `undefined` and no compile-time error results.
+
+An `instance` declaration that makes the type $T$ to be an instance
+of class $C$ is called a _C-T instance declaration_ and is
+subject to these static restrictions:
+
+- A type may not be declared as an instance of a
+  particular class more than once in the program.
+
+- The class and type must have the same kind; 
+  this can be determined using kind inference as described
+  in @sec:kind-inference.
+- Assume that the type variables in the instance type $(T u_1 dots u_k)$
+  satisfy the constraints in the instance context $italic("cx")'$.
+  Under this assumption, the following two conditions must also be satisfied:
+  1. The constraints expressed by the superclass context $italic("cx")[(T u_1 dots u_k) mono("/")u]$ of $C$ must be satisfied.
+     In other words, $T$ must be an instance
+     of each of $C$'s superclasses and the contexts of all
+     superclass instances must be implied by $italic("cx")'$.
+  2. Any constraints on the type variables in the instance type
+     that are required for the class method declarations in $d$ to be
+     well-typed must also be satisfied.
+  In fact, except in pathological cases 
+  it is possible to infer from the instance declaration the
+  most general instance context $italic("cx")'$ satisfying the above two constraints, 
+  but it is nevertheless mandatory
+  to write an explicit instance context.
+
+The following example illustrates the restrictions imposed by superclass instances:
+```haskell
+  class Foo a => Bar a where ...
+  
+  instance (Eq a, Show a) => Foo [a] where ...
+  
+  instance Num a => Bar [a] where ...
+```
+This example is valid Haskell.  Since `Foo` is a superclass of `Bar`,
+the second instance declaration is only valid if `[a]` is an
+instance of `Foo` under the assumption `Num a`.  
+The first instance declaration does indeed say that `[a]` is an instance
+of `Foo` under this assumption, because `Eq` and `Show` are superclasses
+of `Num`.
+
+If the two instance declarations instead read like this:
+```haskell
+  instance Num a => Foo [a] where ...
+  
+  instance (Eq a, Show a) => Bar [a] where ...
+```
+then the program would be invalid.  The second instance declaration is
+valid only if `[a]` is an instance of `Foo` under the assumptions
+`(Eq a, Show a)`.  But this does not hold, since `[a]` is only an
+instance of `Foo` under the stronger assumption `Num a`.
+
+Further examples of `instance` declarations may be found in @chapter:standard-prelude.
+
 === Derived Instances <sec:derived-decls>
 
 === Ambiguous Types, and Defaults for Overloaded Numeric Operations <sec:default-decls>

@@ -112,7 +112,7 @@ An abbreviated form of module, consisting only
 of the module body, is permitted.  If this is used, the header is assumed to be `module Main(main) where`.
 If the first lexeme in the abbreviated module is not a `{`, then the layout rule applies for the top level of the module.
 
-== Export Lists
+== Export Lists <sec:export>
 
 #table(
   columns: 4,
