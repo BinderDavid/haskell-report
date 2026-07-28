@@ -1146,7 +1146,6 @@ by `case` are monomorphically typed (@sec:type-semantics).
 #figure(
   caption: "Semantics of Case Expressions, Part 1"
 )[
-  #align(left)[
   / (a): $caseof(e, italic("alts")) = (mono("\\")v mono("->") caseof(v, italic("alts"))) space$\
     where $v$ is a new variable
   / (b): $mono("case") v mono("of") {space p_1 space italic("match")_1 mono(";") dots mono(";") p_n space italic("match")_n space }$ \
@@ -1177,30 +1176,47 @@ by `case` are monomorphically typed (@sec:type-semantics).
   / (e): $mono("case") v mono("of") { space x@p mono("->") e space ; space  mono("_ ->") e'}$ \
     $= mono("case") v mono("of") { p mono("->") (mono("\\")x mono("->") e) space v space ; space mono("_ ->") e' }$
   / (f): $mono("case") v mono("of") { space mono("_ ->") e space ; space mono("_ ->") e' space} = e$
-  ]
 ]<fig:simple-case-expr-1>
 
 #figure(
   caption: "Semantics of Case Expressions, Part 2"
 )[
-  / (g): X
-  / (h): X
-  / (i): X
-  / (j): X
-  / (k): X
-  / (l): X
+  / (g): $caseof(v, K p_1 dots p_n mono("->") e mono("_ ->") e')$ \
+    $= mono("case") v mono("of") {$ \
+    $#h(1cm)K space x_1 dots x_n mono("->") mono("case") x_1 mono("of") {$ \
+    $#h(3.5cm) p_1 mono("->") dots mono("case") x_n mono("of") { p_n mono("->") e mono("; _ ->") e' } dots$ \
+    $#h(3.5cm) mono("_ ->") e' }$ \
+    $#h(1cm) mono("_ ->") e' }$ \
+    at least one of $p_1,dots,p_n$ is not a variable; $x_1,dots,x_n$ are new variables
+  / (h): $caseof(v, k mono("->") e mono("; _ ->") e') = mono("if") (v mono("==") k) mono("then") e mono("else") e'$ \
+    where $k$ is a numeric, character, or string literal
+  / (i): $caseof(v, x mono("->") e mono("; _ ->") e') = caseof(v, x mono("->") e)$
+  / (j): $caseof(v, x mono("->") e) = (mono("\\") x mono("->") e) space v$
+  / (k): $caseof(N v, N p mono("->") e mono("; _ ->") e')$ \
+    $= caseof(v, p mono("->") e mono("; _ ->") e')$ \
+    where $N$ is a `newtype` constructor
+  / (l): $caseof(bot, N space p mono("->") e mono("; _ ->") e') = caseof(bot, p mono("-> ") e)$ \
+    where $N$ is a newtype constructor
   / (m): X
-  / (n): X
-  / (o): X
-  / (p): X
-  / (q): X
-  / (r): X
+  / (n): $caseof(v, K { f = p } mono("->") e mono("; _ ->") e')$ \
+    $= mono("case") v mono("of") {$ \
+    $#h(1cm) K p_1 dots p_n mono("->") e mono("; _ ->") e' }$ \
+    where $p_i$ is $p$ if $f$ labels the $i$th component of $K$, `_` otherwise
+  / (o): $caseof(v, K space { space } mono("->") e mono("; _ ->") e')$ \
+    $= mono("case") v mono("of") {$ \
+    $#h(1cm) K mono("_") dots mono("_") mono("->") e mono("; _ ->") e' }$
+  / (p): $caseof((K' space e_1 dots e_m), K space x_1 dots x_n mono("->") e mono("; _ ->") e') = e'$ \
+    where $K$ and $K'$ are distinct `data` constructors of arity $n$ and $m$, respectively
+  / (q): $caseof((K e_1 dots e_n), K x_1 dots x_n mono("->") e mono("; _ ->") e')$ \
+    $= (mono("\\")x_1 dots x_n mono("->") e) e_1 dots e_n$ \
+    where $K$ is a `data` constructor of arity $n$
+  / (r): $caseof(bot, K x_1 dots x_n mono("->") e mono("; _ ->") e') = bot$ \
+    where $K$ is a `data` constructor of arity $n$
 ]<fig:simple-case-expr-2>
 
 #figure(
   caption: "Semantics of Case Expressions, Part 3"
 )[
-  #align(left)[
   / (s): $caseof((), () | g_1mono(",") dots mono(",")g_n mono("->") e mono("; _ ->") e')$ \
     $= mono("case") () mono("of") {$ \
     $#h(2cm) () | g_1 mono("->") dots mono("case") () mono("of") {$ \
@@ -1214,5 +1230,4 @@ by `case` are monomorphically typed (@sec:type-semantics).
     $= mono("let") italic("decls") mono("in") e$
   / (v): $caseof((),() | e_0 mono("->") e mono("; _ ->") e')$ \
     $= mono("if") e_0 mono("then") e mono("else") e'$
-  ]
 ]<fig:simple-case-expr-3>

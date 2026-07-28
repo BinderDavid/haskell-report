@@ -35,6 +35,8 @@
   justify: true,
 )
 
+#show figure: set align(left)
+
 #show title: set align(center)
 
 
