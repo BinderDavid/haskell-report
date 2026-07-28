@@ -2,6 +2,12 @@ Over 16 years have passed since the publication of the Haskell 2010 language rep
 In order to account for this change we saw the need to compile a _revised version_ of the Haskell 2010 language report which does not add any novel language features but brings the report in line with the version of Haskell 2010 implemented by compilers and maintainers of the standard libraries.
 This revised report is the result of that effort.
 
+#heading(level: 2, numbering: none)[Organization of the Revised Report]
+
+In distinction to the previous version of the Haskell 2010 language report, this revision separates out documentation of the standard libraries.
+These standard libraries are now available in the form of a zero-dependency Haskell package which makes the API specification machine readable and allows to generate documentation using standard Haskell tools like Haddock.
+
+
 #heading(level: 2, numbering: none)[Changes to the  Report]
 
 The (planned) changes to the report are:
