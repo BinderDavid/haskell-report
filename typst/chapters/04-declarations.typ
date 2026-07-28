@@ -666,6 +666,89 @@ brings into scope both a constructor and a de-constructor:
   $$,$|$, $(nonterminal("funlhs") | nonterminal("var")) nonterminal("rhs")$,$$,
 )
 
+A _class declaration_ introduces a new class and the operations
+(_class methods_) on it.
+A class declaration has the general form:
+$
+  mono("class") italic("cx") mono("=>") C u mono("where") italic("cdecls")
+$
+This introduces a new class name $C$; the type variable $u$ is
+scoped only over the class method signatures in the class body.
+The context $italic("cx")$ specifies the superclasses of $C$, as
+described below; the only type variable that may be referred to in $italic("cx")$
+is $u$.
+
+The superclass relation must not be cyclic; i.e.~it must form a
+directed acyclic graph.
+
+The $italic("cdecls")$ part of a `class` declaration contains three kinds
+of declarations:
+
+- The class declaration introduces new _class methods_
+  $v_i$, whose scope extends outside the `class` declaration.
+  The class methods of a class declaration are precisely the \mbox{$\it v_i$} for
+  which there is an explicit type signature
+  $
+    v_i mono("::") italic("cx")_i mono("=>") t_i
+  $
+  in $italic("cdecls")$.
+  Class methods share the top level namespace with variable
+  bindings and field names; they must not conflict with other top level
+  bindings in scope. 
+  That is, a class method can 
+  not have the same name as a top level definition, a field name, or
+  another class method.
+
+  The type of the top-level class method $v_i$ is:
+  $
+    v_i mono("::") forall u, overline(w). (C u, italic("cx")_i) mono("=>") t_i
+  $
+  The $t_i$ must mention $u$; it may mention type variables
+  $overline(w)$ other than $u$, in which case the type of $v_i$ is
+  polymorphic in both $u$ and $overline(w)$.
+  The $italic("cx")_i$ may constrain only $overline(w)$; in particular,
+  the $italic("cx")_i$ may not constrain $u$.
+  For example:
+  ```haskell
+  class Foo a where
+    op :: Num b => a -> b -> a
+  ```
+  Here the type of `op` is
+  $forall a, b. (mono("Foo") a, mono("Num") b) => a -> b -> a$.
+- The $italic("cdecls")$ may also contain a _fixity declaration_ for any of the class methods 
+  (but for no other values).
+  However, since class methods declare top-level values, the fixity declaration for a class
+  method may alternatively appear at top level, outside the class declaration.
+- Lastly, the $italic("cdecls")$ may contain a
+  _default class method_
+  for any of the $v_i$.  The default class method for $v_i$ is used if no binding for it
+  is given in a particular `instance` declaration (see
+  @sec:instance-decl).
+  The default method declaration is a normal value definition, except that the
+  left hand side may only be a variable or function definition.  For example:
+  ```haskell
+  class Foo a where
+    op1, op2 :: a -> a
+    (op1, op2) = ...
+  ```
+  is not permitted, because the left hand side of the default declaration is a
+  pattern.
+
+Other than these cases, no other declarations are permitted in $italic("cdecls")$.
+
+A `class` declaration with no `where` part
+may be useful for combining a
+collection of classes into a larger one that inherits all of the
+class methods in the original ones.  For example:
+```haskell
+  class  (Read a, Show a) => Textual a
+```
+In such a case, if a type is an instance of all
+superclasses, it is 
+not _automatically_ an instance of the subclass, even though the
+subclass has no immediate class methods.  The `instance` declaration must be
+given explicitly with no `where` part.
+
 === Instance Declarations <sec:instance-decl>
 
 #table(
