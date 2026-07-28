@@ -877,6 +877,42 @@ Further examples of `instance` declarations may be found in @chapter:standard-pr
 
 === Derived Instances <sec:derived-decls>
 
+As mentioned in @sec:datatype-decls, `data` and `newtype`
+declarations 
+contain an optional `deriving` form.  If the form is included, then
+_derived instance declarations_ are automatically generated for
+the datatype in each of the named classes.
+These instances are subject to the same restrictions as user-defined
+instances.  When deriving a class $C$ for a type $T$, instances for
+all superclasses of $C$ must exist for $T$, either via an explicit
+`instance` declaration or by including the superclass in the
+`deriving` clause.
+
+Derived instances provide convenient commonly-used operations for
+user-defined datatypes.  For example, derived instances for datatypes
+in the class `Eq` define the operations `==` and `/=`, freeing the
+programmer from the need to define them.
+
+The only classes in the Prelude for
+which derived instances are allowed are
+`Eq`, `Ord`, `Enum`, `Bounded`, `Show`,
+and `Read`, all mentioned in @fig:standard-classes.
+The precise details of how the derived instances are generated for each of
+these classes are provided in @chapter:derived-instances, including
+a specification of when such derived instances are possible. 
+Classes defined by the standard libraries may also be derivable.
+
+A static error results if it is not possible to derive an `instance`
+declaration over a class named in a `deriving` form.  For example,
+not all datatypes can properly support class methods in
+`Enum`. It is 
+also a static error to give an explicit `instance` declaration for
+a class that is also derived.
+
+If the `deriving` form is omitted from a `data` or `newtype`
+declaration, then _no_ instance declarations
+are derived for that datatype; that is, omitting a `deriving` form is equivalent to including an empty deriving form: `deriving ()`.
+
 === Ambiguous Types, and Defaults for Overloaded Numeric Operations <sec:default-decls>
 
 #table(
