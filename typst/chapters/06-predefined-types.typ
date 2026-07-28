@@ -836,7 +836,7 @@ which in turn follows Penfield's proposal for
 APL @Penfield1981.  See these references for discussions
 of branch cuts, discontinuities, and implementation.
 
-=== Coercions and Component Extraction
+=== Coercions and Component Extraction <sec:coercions>
 
 The `ceiling`, `floor`, `truncate`, and `round`
 functions each take a real fractional argument and return an integral

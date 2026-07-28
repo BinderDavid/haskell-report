@@ -922,6 +922,83 @@ are derived for that datatype; that is, omitting a `deriving` form is equivalent
   $italic("topdecl")$, $->$, $terminal("default") terminal("(") nonterminal("type")_1 terminal(",") dots terminal(",") nonterminal("type")_n terminal(")")$, $(n >= 0)$,
 )
 
+A problem inherent with Haskell-style overloading is the
+possibility of an _ambiguous type_.
+For example, using the
+`read` and `show` functions defined in @chapter:derived-instances,
+and supposing that just `Int` and `Bool` are members of `Read` and
+`Show`, then the expression
+```haskell
+  let x = read "..." in show x  -- invalid
+```
+is ambiguous, because the types for `show` and `read`,
+$
+  &mono("show :: ") forall a. mono("Show") a => a -> mono("String")\
+  &mono("read :: ") forall a. mono("Read") a => mono("String") -> a
+$
+could be satisfied by instantiating `a` as either `Int`
+in both cases, or `Bool`.  Such expressions
+are considered ill-typed, a static error.
+
+We say that an expression `e` has an _ambiguous type_
+if, in its type $forall overline(u).italic("cx") => t$, 
+there is a type variable $u$ in $overline(u)$ that occurs in $italic("cx")$ 
+but not in $t$.  Such types are invalid.
+
+For example, the earlier expression involving `show` and `read` has
+an ambiguous type since its type is 
+$forall a. mono("Show") a, mono("Read") a => mono("String")$.
+
+Ambiguous types can only be circumvented by
+input from the user.  One way is through the use of _expression
+type-signatures_ as described in @sec:expression-type-sigs.
+For example, for the ambiguous expression given earlier, one could
+write:
+```haskell
+  let x = read "..." in show (x::Bool)
+```
+which disambiguates the type.
+
+Occasionally, an otherwise ambiguous expression needs to be made
+the same type as some variable, rather than being given a fixed
+type with an expression type-signature.  This is the purpose
+of the function `asTypeOf` (@chapter:standard-prelude):
+#raw("x `asTypeOf` y") has the value of $x$, but $x$ and $y$ are
+forced to have the same type.  For example,
+```haskell
+  approxSqrt x = encodeFloat 1 (exponent x `div` 2) `asTypeOf` x
+```
+(See @sec:coercions for a description of `encodeFloat` and `exponent`.)
+
+Ambiguities in the class `Num` are most common, so Haskell
+provides another way to resolve them---with a _default declaration_:
+$
+  mono("default") (t_1 , dots , t_n)
+$
+where $n >= 0$, and each
+$t_i$ must be a type for which $mono("Num") t_i$ holds.
+In situations where an ambiguous type is discovered, an ambiguous type variable, $v$, is defaultable if:
+
+- $v$ appears only in constraints of the form $C space v$, where $C$ is a class, and
+- at least one of these classes is a numeric class,
+  (that is, `Num` or a subclass of `Num`), and 
+- all of these classes are defined in the Prelude or a standard library
+  (@fig:basic-numeric-1 -- @fig:basic-numeric-2
+  show the numeric classes, and
+  @fig:standard-classes shows the classes defined in the Prelude.)
+
+Each defaultable variable is replaced by the first type in the
+default list that is an instance of all the ambiguous variable's classes.
+It is a static error if no such type is found.
+
+Only one default declaration is permitted per module, and its effect
+is limited to that module.  If no default declaration is given in a
+module then it assumed to be:
+```haskell
+  default (Integer, Double)
+```
+The empty default declaration, `default ()`, turns off all defaults in a module.
+
 == Nested Declarations <sec:nested>
 
 The following declarations may be used in any declaration list,
@@ -942,7 +1019,7 @@ including the top level of a module.
 A type signature specifies types for variables, possibly with respect
 to a context.  A type signature has the form:
 $
-  X
+  v_1, dots, v_n mono("::") italic("cx") mono("=>") t
 $
 which is equivalent to asserting
 $v_i mono("::") italic("cx") mono("=>") t$
